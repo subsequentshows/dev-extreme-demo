@@ -17,5 +17,15 @@ export const navigation = [
         path: '/tasks'
       }
     ]
+  }, 
+  {
+    text: 'Master Detail Grid',
+    path: '/master-detail-grid',
+    icon: 'folder'
+  }, 
+  {
+    text: 'Demo Page',
+    path: '/demo-page',
+    icon: 'folder'
   }
   ];

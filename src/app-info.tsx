@@ -1,5 +1,4 @@
 const appInfo = {
-    title: 'Dev Extreme Demo'
+  title: "Quản lý thu phí",
 };
 export default appInfo;
-
