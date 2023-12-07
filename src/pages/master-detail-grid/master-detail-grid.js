@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import 'devextreme/data/odata/store';
 import {
@@ -11,6 +11,9 @@ import {
   Editing,
   Grouping,
   Paging,
+  Pager,
+  CheckBox,
+  SelectBox,
   Lookup,
   Summary,
   RangeRule,
@@ -65,49 +68,6 @@ const shippersData = createStore({
   },
 });
 
-
-// let exportFormats = [];
-// const onExporting = ((e) => {
-//   e.cancel = true;
-
-//   switch (e.format) {
-//     case "xlsx":
-//       const workbook = new Workbook();
-//       const worksheet = workbook.addWorksheet("Companies");
-//       exportFormats = ['xlsx'];
-//       // exportDataGridToExcel({
-//       exportDataGrid({
-//         component: e.component,
-//         worksheet: worksheet,
-//         autoFilterEnabled: true
-//       }).then(() => {
-//         workbook.xlsx.writeBuffer().then((buffer) => {
-//           saveAs(
-//             new Blob([buffer], { type: "application/octet-stream" }),
-//             "Companies.xlsx"
-//           );
-//         });
-//       });
-//       break;
-
-//     case "pdf":
-//       const doc = new jsPDF();
-//       exportFormats = ['pdf'];
-//       // exportDataGridToPDF({
-//       exportDataGrid({
-//         jsPDFDocument: doc,
-//         component: e.component,
-//         indent: 5
-//       }).then(() => {
-//         doc.save("Companies.pdf");
-//       });
-//       break;
-
-//     default:
-//       console.error("Đã xảy ra lỗi khi xuất dữ liệu")
-//   }
-// })
-
 const exportFormats = ['xlsx', 'pdf'];
 
 function onExporting(e) {
@@ -139,6 +99,7 @@ const MasterDetailGrid = () => {
   return (
     <>
       <DataGrid
+        className='responsive-paddings'
         dataSource={dataSource}
         showBorders={true}
         width="100%"
@@ -146,17 +107,16 @@ const MasterDetailGrid = () => {
         remoteOperations={true}
         onExporting={onExporting}
       >
-        {/* <MasterDetail
-          enabled={true}
-          component={DetailGrid}
-        /> */}
-
         <Selection mode="multiple" />
         <FilterRow visible={true} />
         <HeaderFilter visible={true} />
         <GroupPanel visible={false} />
         <Scrolling mode="virtual" />
         <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
+        <Paging
+          enabled={true}
+          defaultPageSize={15}
+          defaultPageIndex={1} />
 
         <Editing
           mode="row"
@@ -211,7 +171,6 @@ const MasterDetailGrid = () => {
 
         </Summary>
         <ColumnFixing enabled={true} />
-        <Paging defaultPageSize={10} />
       </DataGrid>
     </>
   );

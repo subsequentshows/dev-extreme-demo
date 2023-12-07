@@ -4,6 +4,8 @@ import {
   ProfilePage,
   MasterDetailGridPage,
   DemoPagePage,
+  AccessDeniedPage,
+  PhanQuyenPage,
 } from "./pages";
 import { withNavigationWatcher } from "./contexts/navigation";
 
@@ -27,6 +29,14 @@ const routes = [
   {
     path: "/demo-page",
     element: DemoPagePage,
+  },
+  {
+    path: "/access-denied",
+    element: AccessDeniedPage,
+  },
+  {
+    path: "/phan-quyen",
+    element: PhanQuyenPage,
   },
 ];
 

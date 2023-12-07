@@ -27,5 +27,15 @@ export const navigation = [
     text: 'Demo Page',
     path: '/demo-page',
     icon: 'folder'
+  }, 
+  {
+    text: 'Access Denied',
+    path: '/access-denied',
+    icon: 'folder'
+  }, 
+  {
+    text: 'Phan Quyen',
+    path: '/phan-quyen',
+    icon: 'folder'
   }
   ];
