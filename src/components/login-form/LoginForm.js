@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useContext } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import useAuth from '../../hooks/useAuth';
 import AuthContext from '../../contexts/authProvider';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -8,8 +8,7 @@ import localApi from '../../api/api';
 const LOGIN_URL = '/login';
 
 const Login = () => {
-  // const { setAuth } = useAuth();
-  const { setAuth } = useContext(AuthContext);
+  const { setAuth } = useAuth();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -48,6 +47,7 @@ const Login = () => {
           withCredentials: true
         }
       );
+
       console.log(JSON.stringify(response?.data));
       //console.log(JSON.stringify(response));
 
@@ -65,6 +65,10 @@ const Login = () => {
         setErrMsg('Missing Username or Password');
       } else if (err.response?.status === 401) {
         setErrMsg('Unauthorized');
+      } else if (err.response?.status === 200) {
+        setErrMsg('logged in');
+      } else if (err.response?.status === 204) {
+        setErrMsg('hehe not');
       } else {
         setErrMsg('Login Failed');
       }
@@ -92,7 +96,7 @@ const Login = () => {
             autoComplete="off"
             onChange={(e) => setUser(e.target.value)}
             value={user}
-            required
+          // required
           />
 
           <label htmlFor="password">Password:</label>
@@ -101,7 +105,7 @@ const Login = () => {
             id="password"
             onChange={(e) => setPassword(e.target.value)}
             value={password}
-            required
+          // required
           />
           <button>Sign In</button>
         </form>
