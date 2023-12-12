@@ -35,7 +35,14 @@ const Login = () => {
 
     try {
       const response = await localApi.post(LOGIN_URL,
-        JSON.stringify({ username: user, password: password, ma_so_gd: "01", ma_truong: "0001", ma_khoi: "09", ma_phong_gd: "01" }),
+        JSON.stringify({
+          username: user,
+          password: password,
+          ma_so_gd: "01",
+          ma_truong: "0001",
+          ma_khoi: "09",
+          ma_phong_gd: "01"
+        }),
         {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true
@@ -43,8 +50,10 @@ const Login = () => {
       );
       console.log(JSON.stringify(response?.data));
       //console.log(JSON.stringify(response));
+
       const accessToken = response?.data?.accessToken;
       const roles = response?.data?.roles;
+
       setAuth({ user, password, roles, accessToken });
       setUser('');
       setPassword('');
