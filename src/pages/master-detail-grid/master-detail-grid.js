@@ -46,6 +46,8 @@ import * as JSZIP from "jszip";
 import $ from 'jquery';
 import { Modal, Button } from "react-bootstrap-v5"
 
+import readXlsxFile from 'read-excel-file'
+
 const url = 'https://js.devexpress.com/Demos/Mvc/api/DataGridWebApi';
 
 const dataSource = createStore({
@@ -75,8 +77,8 @@ const shippersData = createStore({
   },
 });
 
+// Export files
 const exportFormats = ['xlsx', 'pdf'];
-
 function onExporting(e) {
   if (e.format === 'xlsx') {
     const workbook = new Workbook();
@@ -103,76 +105,194 @@ function onExporting(e) {
 }
 
 // Import
-const ExcelToJSON = function () {
+// const ExcelToJSON = function () {
+//   this.parseExcel = function (file) {
+//     let reader = new FileReader();
 
-  this.parseExcel = function (file) {
-    let reader = new FileReader();
+//     reader.onload = function (e) {
+//       let data = e.target.result;
+//       let workbook = XLSX.read(data, {
+//         type: 'binary'
+//       });
+//       workbook.SheetNames.forEach(function (sheetName) {
+//         // Here is your object
+//         let XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+//         let json_object = JSON.stringify(XL_row_object);
+//         console.log(JSON.parse(json_object));
+//         $('#xlx_json').val(json_object);
+//       })
+//     };
 
-    reader.onload = function (e) {
-      let data = e.target.result;
-      let workbook = XLSX.read(data, {
-        type: 'binary'
-      });
-      workbook.SheetNames.forEach(function (sheetName) {
-        // Here is your object
-        let XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
-        let json_object = JSON.stringify(XL_row_object);
-        console.log(JSON.parse(json_object));
-        $('#xlx_json').val(json_object);
-      })
-    };
+//     reader.onerror = function (ex) {
+//       console.log(ex);
+//     };
 
-    reader.onerror = function (ex) {
-      console.log(ex);
-    };
+//     reader.readAsBinaryString(file);
+//   };
+// };
 
-    reader.readAsBinaryString(file);
-  };
-};
+// function handleFileSelect(evt) {
+//   let files = evt.target.files; // FileList object
+//   let xl2json = new ExcelToJSON();
+//   xl2json.parseExcel(files[0]);
+// }
 
-function handleFileSelect(evt) {
-  let files = evt.target.files; // FileList object
-  let xl2json = new ExcelToJSON();
-  xl2json.parseExcel(files[0]);
-}
+// const input = document.getElementById('input')
+// input.addEventListener('change', () => {
+//   readXlsxFile(input.files[0]).then((rows) => {
+//     // `rows` is an array of rows
+//     // each row being an array of cells.
+//   })
+// })
+
+
 
 const MasterDetailGrid = () => {
   const allowedPageSizes = [50, 100, 150, 200];
-  const [items, setItems] = useState([]);
+  // const [items, setItems] = useState([]);
 
   // Modal
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
 
-  const readExcel = (file) => {
-    const promise = new Promise((resolve, reject) => {
-      const fileReader = new FileReader();
-      fileReader.readAsArrayBuffer(file);
+  // File upload
+  const [file, setFile] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState();
+  const [error, setError] = useState();
+  const [fileContent, setFileContent] = useState('');
 
-      fileReader.onload = (e) => {
-        const bufferArray = e.target.result;
+  // const readExcel = (file) => {
+  //   const promise = new Promise((resolve, reject) => {
+  //     const fileReader = new FileReader();
+  //     fileReader.readAsArrayBuffer(file);
 
-        const wb = XLSX.read(bufferArray, { type: "buffer" });
+  //     fileReader.onload = (e) => {
+  //       const bufferArray = e.target.result;
 
-        const wsname = wb.SheetNames[0];
+  //       const wb = XLSX.read(bufferArray, { type: "buffer" });
 
-        const ws = wb.Sheets[wsname];
+  //       const wsname = wb.SheetNames[0];
 
-        const data = XLSX.utils.sheet_to_json(ws);
+  //       const ws = wb.Sheets[wsname];
 
-        resolve(data);
+  //       const data = XLSX.utils.sheet_to_json(ws);
+
+  //       resolve(data);
+  //     };
+
+  //     fileReader.onerror = (error) => {
+  //       reject(error);
+  //     };
+  //   });
+
+  //   promise.then((d) => {
+  //     setItems(d);
+  //   });
+  // };
+
+  // document.getElementById('file').addEventListener('change', handleFileSelect, false);
+
+  // $("#file").on("change", function (e) {
+  //   e.preventDefault();
+  //   handleFileSelect();
+  // });
+
+  var ExcelToJSON = function () {
+
+    this.parseExcel = function (file) {
+      var reader = new FileReader();
+
+      reader.onload = function (e) {
+        var data = e.target.result;
+        var workbook = XLSX.read(data, {
+          type: 'binary'
+        });
+        workbook.SheetNames.forEach(function (sheetName) {
+          // Here is your object
+          var XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+          var json_object = JSON.stringify(XL_row_object);
+          console.log(JSON.parse(json_object));
+          $('#xlx_json').val(json_object);
+        })
       };
 
-      fileReader.onerror = (error) => {
-        reject(error);
+      reader.onerror = function (ex) {
+        console.log(ex);
       };
-    });
 
-    promise.then((d) => {
-      setItems(d);
-    });
+      reader.readAsBinaryString(file);
+    };
   };
+
+  // Upload
+  const handleFileChange = (e) => {
+    if (e.target.files) {
+      setFile(e.target.files[0]);
+    }
+  };
+
+  const handleUpload = async (e) => {
+    if (file) {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      function getExtension() {
+        return file.name.split('.').pop().toLowerCase();
+      }
+
+      if (getExtension() === "xls" || getExtension() === "xlsx") {
+        try {
+          const result = await fetch("https://localhost:44300/upload", {
+            method: "POST",
+            body: formData,
+            success: function (fileData) {
+              alert(fileData)
+            },
+          });
+
+          // Download file
+          // const data = await result.json();
+          // console.log("Data:" + data);
+
+          // Read the content of the file using FileReader
+          const reader = new FileReader();
+
+          reader.onload = (event) => {
+            // Set the file content to state
+            setFileContent(event.target.result);
+          };
+
+          // Start reading the file as text
+          reader.readAsText(file);
+
+          // Set the file to state if needed for further processing
+          setFile(file);
+          // console.log("setFile is" + file);
+          // console.log(setFile());
+
+          const excelJSON = JSON.stringify(file);
+          console.log(typeof (excelJSON));
+
+          let xl2json = new ExcelToJSON();
+          console.log(typeof (xl2json));
+          let excelArray = xl2json.parseExcel(file);
+          console.log(typeof (file));
+
+          // let excelObject = excelArray.reduce(function (o, val) { o[val] = val; return o; }, {});
+          // console.log(JSON.stringify(excelObject));
+        }
+        catch (error) {
+          console.error("Lỗi: " + error);
+        }
+      } else {
+        console.error("Chỉ cho phép nhập dữ liệu từ file Excel (*.xls, *.xlsx)")
+      }
+    } else {
+      console.error("Bạn chưa lựa chọn file excel!")
+    }
+  };
+  // End of upload
 
   return (
     <>
@@ -180,7 +300,6 @@ const MasterDetailGrid = () => {
         <Button className='qi-button' variant="primary" onClick={handleShow}>
           Nhập từ excel
         </Button>
-
       </div>
 
       <Modal
@@ -233,12 +352,24 @@ const MasterDetailGrid = () => {
 
           <div className='upload-item-wrapper'>
             <div className='upload-item'>
-              <form name='upload-form' className='upload-file' enctype="multipart/form-data">
-                <input id="file" type="file" name="files[]" />
+              {/* <form name='upload-form' className='upload-file' encType="multipart/form-data">
+                <input id="input-file" type="file" />
               </form>
 
-              <textarea id="xlx_json" class="form-control" rows="35" cols="120" ></textarea>
-              {/* <button className='upload' >Tải lên</button> */}
+
+              <textarea id="xlx_json" className="form-control" rows="35" cols="120" ></textarea>
+              <button className='upload' >Tải lên</button> */}
+
+              <form name='upload-form' className='upload-file' >
+                <input id="file" type="file" onChange={handleFileChange} accept=".xls, .xlsx" />
+
+              </form>
+
+              {file && <button className='upload' onClick={handleUpload}>Tải lên</button>}
+
+              <DataGrid
+                dataSource={file}
+              />
             </div>
           </div>
         </Modal.Body>
@@ -259,6 +390,10 @@ const MasterDetailGrid = () => {
           allowDeleting={true}
           allowUpdating={true}
         />
+
+        {/* <Column dataField="STT" caption="STT" width={50} allowFiltering={false} allowExporting={true}>
+          <StringLengthRule max={15} message="" />
+        </Column> */}
 
         <Column dataField="CustomerID" caption="Tên" fixed={true} allowFiltering={true} allowExporting={true}>
           <Lookup dataSource={customersData} valueExpr="Value" displayExpr="Text" />

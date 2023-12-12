@@ -1,104 +1,101 @@
-import React from "react";
+import { useRef, useState, useEffect } from 'react';
+import useAuth from '../../hooks/useAuth';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
-// import { Button } from "baseui/button";
-// import { Input } from "baseui/input";
-// import styled from "styled-components";
-// import {
-//   HeadingXXLarge,
-//   HeadingXLarge,
-//   HeadingLarge,
-//   HeadingMedium,
-//   HeadingSmall,
-//   HeadingXSmall,
-// } from "baseui/typography";
-// import {
-//   Container,
-//   ErrorText,
-//   InnerContainer,
-//   InputWrapper,
-//   StyledInput,
-// } from "../commons";
+import localApi from '../../api/api';
+const LOGIN_URL = '/auth';
 
-import { useSignIn } from "react-auth-kit";
-import { useFormik } from "formik";
-import axios, { AxiosError } from "axios";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+const Login = () => {
+  const { setAuth } = useAuth();
 
-function LoginForm(props) {
-  const [error, setError] = useState("");
-  const signIn = useSignIn();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
 
-  const onSubmit = async (values) => {
-    console.log("Values: ", values);
-    setError("");
+  const userRef = useRef();
+  const errRef = useRef();
+
+  const [user, setUser] = useState('');
+  const [pwd, setPwd] = useState('');
+  const [errMsg, setErrMsg] = useState('');
+
+  useEffect(() => {
+    userRef.current.focus();
+  }, [])
+
+  useEffect(() => {
+    setErrMsg('');
+  }, [user, pwd])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
     try {
-      const response = await axios.post(
-        "http://localhost:9000/api/v1/login",
-        values
+      const response = await localApi.post(LOGIN_URL,
+        JSON.stringify({ user, pwd }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true
+        }
       );
-
-      signIn({
-        token: response.data.token,
-        expiresIn: 3600,
-        tokenType: "Bearer",
-        authState: { email: values.email },
-      });
+      console.log(JSON.stringify(response?.data));
+      //console.log(JSON.stringify(response));
+      const accessToken = response?.data?.accessToken;
+      const roles = response?.data?.roles;
+      setAuth({ user, pwd, roles, accessToken });
+      setUser('');
+      setPwd('');
+      navigate(from, { replace: true });
     } catch (err) {
-      if (err && err instanceof AxiosError)
-        setError(err.response?.data.message);
-      else if (err && err instanceof Error) setError(err.message);
-
-      console.log("Error: ", err);
+      if (!err?.response) {
+        setErrMsg('No Server Response');
+      } else if (err.response?.status === 400) {
+        setErrMsg('Missing Username or Password');
+      } else if (err.response?.status === 401) {
+        setErrMsg('Unauthorized');
+      } else {
+        setErrMsg('Login Failed');
+      }
+      errRef.current.focus();
     }
-  };
-
-  const formik = useFormik({
-    initialValues: {
-      email: "",
-      password: "",
-    },
-    onSubmit,
-  });
+  }
 
   return (
-    <div>
-      <div>
-        <form onSubmit={formik.handleSubmit}>
-          <h2>Welcome Back!</h2>
-          <p>{error}</p>
-          <input>
-            <input
-              name="email"
-              value={formik.values.email}
-              onChange={formik.handleChange}
-              placeholder="Email"
-              clearOnEscape
-              size="large"
-              type="email"
-            />
-          </input>
-          <input>
-            <input
-              name="password"
-              value={formik.values.password}
-              onChange={formik.handleChange}
-              placeholder="Password"
-              clearOnEscape
-              size="large"
-              type="password"
-            />
-          </input>
-          <input>
-            <button size="large" kind="primary" isLoading={formik.isSubmitting}>
-              Login
-            </button>
-          </input>
-        </form>
-      </div>
-    </div>
-  );
+
+    <section>
+      <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
+
+      <form onSubmit={handleSubmit}>
+        <label htmlFor="username">Username:</label>
+        <input
+          type="text"
+          id="username"
+          ref={userRef}
+          autoComplete="off"
+          onChange={(e) => setUser(e.target.value)}
+          value={user}
+          required
+        />
+
+        <label htmlFor="password">Password:</label>
+        <input
+          type="password"
+          id="password"
+          onChange={(e) => setPwd(e.target.value)}
+          value={pwd}
+          required
+        />
+        <button>Sign In</button>
+      </form>
+      <p>
+        Need an Account?<br />
+        <span className="line">
+          <Link to="/register">Sign Up</Link>
+        </span>
+      </p>
+    </section>
+
+  )
 }
 
-export default LoginForm;
+export default Login
