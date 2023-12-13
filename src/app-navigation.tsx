@@ -23,11 +23,11 @@ export const navigation = [
     path: "/master-detail-grid",
     icon: "folder",
   },
-  // {
-  //   text: 'Demo Page',
-  //   path: '/demo-page',
-  //   icon: 'folder'
-  // },
+  {
+    text: "User Page",
+    path: "/user",
+    icon: "folder",
+  },
   {
     text: "Access Denied",
     path: "/access-denied",

@@ -1,9 +1,80 @@
 @import "../../themes/generated/variables.base.scss";
 
-.footer {
-  display: block;
-  color: rgba($base-text-color, alpha($base-text-color) * 0.7);
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  padding-top: 20px;
-  padding-bottom: 24px;
+.copyright-section {
+  background: -o-linear-gradient(192.3deg, #0096DB 0%, #0063C6 41.37%);
+  background: linear-gradient(257.7deg, #0096DB 0%, #0063C6 41.37%);
+  min-height: 80px;
+  text-align: right;
+  padding: 0 15px;
+  position: absolute;
+  overflow: hidden;
+  width: 100%;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-line-pack: center;
+  align-content: center;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-box-pack: end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
+}
+
+.copyright-section .hotline-and-email {
+  margin-left: 5px;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+}
+
+.copyright-section .hotline-and-email p:first-child {
+  margin-right: 5px;
+}
+
+.login-right .rcbInputCell {
+  min-height: 36px;
+  height: 100%;
+}
+
+.copyright-section .copyright-title {
+  color: #FDD835;
+  font-size: 17px;
+  height: 20px;
+  line-height: 20px;
+  text-transform: uppercase;
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+.copyright-section span,
+.copyright-section p {
+  color: white;
+  font-size: 15px;
+  height: 18px;
+  line-height: 18px;
+}
+
+.copyright-section .qi-color {
+  color: #FDD835;
+}
+
+.content-block {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin: 0 !important;
+
+  .footer {
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin: 0 !important;
+  }
 }

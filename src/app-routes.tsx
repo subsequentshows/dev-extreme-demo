@@ -4,6 +4,7 @@ import {
   ProfilePage,
   MasterDetailGridPage,
   DemoPagePage,
+  UserPage,
   AccessDeniedPage,
   PhanQuyenPage,
 } from "./pages";
@@ -27,8 +28,8 @@ const routes = [
     element: MasterDetailGridPage,
   },
   {
-    path: "/demo-page",
-    element: DemoPagePage,
+    path: "/user",
+    element: UserPage,
   },
   {
     path: "/access-denied",

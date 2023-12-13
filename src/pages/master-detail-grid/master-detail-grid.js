@@ -44,9 +44,9 @@ import { jsPDF } from "jspdf";
 import * as XLSX from "xlsx";
 import * as JSZIP from "jszip";
 import $ from 'jquery';
-import { Modal, Button } from "react-bootstrap-v5"
+import { Modal, Button } from "react-bootstrap-v5";
 
-import readXlsxFile from 'read-excel-file'
+import readXlsxFile from 'read-excel-file';
 
 const url = 'https://js.devexpress.com/Demos/Mvc/api/DataGridWebApi';
 
