@@ -10,3 +10,9 @@ export const localApi = axios.create({
   headers: { 'Content-Type': 'application/json' },
   withCredentials: true
 });
+
+export const privateLocalApi = axios.create({
+  baseURL: BASE_URL,
+  headers: { 'Content-Type': 'application/json' },
+  withCredentials: true
+});

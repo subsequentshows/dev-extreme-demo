@@ -296,6 +296,9 @@ const MasterDetailGrid = () => {
 
   return (
     <>
+
+      <h2>Datagrid demo</h2>
+
       <div className='item-function-btn'>
         <Button className='qi-button' variant="primary" onClick={handleShow}>
           Nhập từ excel

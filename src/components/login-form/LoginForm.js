@@ -1,19 +1,25 @@
 import { useRef, useState, useEffect, useContext } from 'react';
 import "./LoginForm.scss";
 import AuthContext from "../../contexts/authProvider";
-import { Link, useNavigate, Routes, Route, BrowserRouter } from "react-router-dom";
+import { Link, useNavigate, useLocation, Routes, Route, Navigate, BrowserRouter } from "react-router-dom";
 import Home from "../../pages/home/home";
 import { localApi } from '../../api/api';
 
 const LOGIN_URL = '/login';
 const Login = () => {
   const { setAuth } = useContext(AuthContext);
+
   const userRef = useRef();
   const errRef = useRef();
+
+  const navigate = useNavigate();
+  const prevLocation = useLocation();
+  const from = prevLocation.state?.from?.pathname || "/home";
 
   const [user, setUser] = useState('');
   const [password, setPwd] = useState('');
   const [errMsg, setErrMsg] = useState('');
+
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
@@ -39,16 +45,20 @@ const Login = () => {
         }),
         {
           headers: { 'Content-Type': 'application/json' },
-          // withCredentials: true
+          withCredentials: true
         }
       );
       console.log(JSON.stringify(response?.data));
       //console.log(JSON.stringify(response));
+
       const accessToken = response?.data?.accessToken;
       const roles = response?.data?.roles;
+
       setAuth({ user, password, roles, accessToken });
       setUser('');
       setPwd('');
+
+      navigate(from, { replace: true });
       setSuccess(true);
     } catch (err) {
       if (!err?.response) {
@@ -69,7 +79,10 @@ const Login = () => {
       {success ? (
         <section>
           <p>You are logged in!</p>
-
+          <p>
+            to user page
+            <a href='/#/users' />
+          </p>
         </section>
       ) : (
         <section>
@@ -96,11 +109,15 @@ const Login = () => {
                 value={password}
                 required
               />
+
+              <div class="signin-btn">
+                {/* <button ID="btSignin" runat="server" CssClass="btn btn-default btn-qi" Text="Đăng nhập" ClientIDMode="Static" OnClick="btSignin_Click"></button> */}
+                <input type="submit" name="btSignin" value="Đăng nhập" id="btSignin" class="btn btn-default btn-qi" wfd-id="id18">
+                </input>
+              </div>
             </div>
 
-            <div class="container-fluid">
-
-
+            {/* <div class="container-fluid">
               <div class="height-100">
                 <div class="login-section">
                   <div class="login-left">
@@ -155,7 +172,6 @@ const Login = () => {
                       </select>
                     </div>
 
-                    {/* <%--rcbCapHoc--%> */}
                     <div class="margin_top_line rcbCapHoc-wrapper">
                       <select>
                         <option value="someOption">Mần non</option>
@@ -166,7 +182,6 @@ const Login = () => {
                       </select>
                     </div>
 
-                    {/* <%--rcbPhongGD--%> */}
                     <div class="margin_top_line rcbPhongGD-wrapper">
                       <select>
                         <option value="someOption">Chọn phòng</option>
@@ -174,7 +189,6 @@ const Login = () => {
                       </select>
                     </div>
 
-                    {/* <%--rcbTruong--%> */}
                     <div class="margin_top_line required rcbTruong-wrapper">
                       <select>
                         <option value="someOption">Chọn trường</option>
@@ -199,7 +213,6 @@ const Login = () => {
                       <label>Ghi nhớ tài khoản</label>
                     </div>
 
-                    {/* <%--signInBtn--%> */}
                     <div class="signin-btn">
                       <button ID="btSignin" runat="server" CssClass="btn btn-default btn-qi" Text="Đăng nhập" ClientIDMode="Static" OnClick="btSignin_Click"></button>
                       <input type="submit" name="btSignin" value="Đăng nhập" id="btSignin" class="btn btn-default btn-qi" wfd-id="id18">
@@ -220,7 +233,7 @@ const Login = () => {
                   <p>Email: <span class="qi-color">CAU_HINH.EMAIL </span></p>
                 </div>
               </div>
-            </div>
+            </div> */}
 
           </form>
         </section>

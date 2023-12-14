@@ -47,7 +47,7 @@ export default function Header({
         </Template>
       </Toolbar>
 
-      <div className="header">
+      {/* <div className="header">
         <div className="logo-and-title">
           <div className="company-logo">
             <a href="/">
@@ -60,7 +60,7 @@ export default function Header({
             <p className="phan-mem-title">Hệ thống quản lý thu phí</p>
           </div>
         </div>
-      </div>
+      </div> */}
     </header>
   );
 }

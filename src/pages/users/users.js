@@ -1,14 +1,16 @@
+import React from 'react';
 import { useState, useEffect } from "react";
-// import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import usePrivateLocalApi from "../../hooks/usePrivateLocalApi";
 import localApi from "../../api/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import useRefreshToken from "../../hooks/useRefreshToken";
+import "./users.scss"
 
 const Users = () => {
   const [users, setUsers] = useState();
-  // const axiosPrivate = useAxiosPrivate();
+  const privateLocalApi = usePrivateLocalApi();
   const navigate = useNavigate();
-  const location = useLocation();
+  const prevLocation = useLocation();
   const refreshToken = useRefreshToken();
 
   useEffect(() => {
@@ -19,7 +21,7 @@ const Users = () => {
 
     const getUsers = async () => {
       try {
-        const response = await localApi.get('/api/NguoiDung/Get?ma_nam_hoc=2022&Id=1', {
+        const response = await privateLocalApi.get('/api/NguoiDung/Get?ma_nam_hoc=2022&Id=1', {
           signal: controller.signal
         });
         console.log(response.data);
@@ -28,7 +30,9 @@ const Users = () => {
         isMounted && setUsers(response.data);
       } catch (err) {
         console.error(err);
-        navigate('/login', { state: { from: location }, replace: true });
+
+        // After kicked form expired login, take user back to their previous link location
+        navigate('/login', { state: { from: prevLocation }, replace: true });
       }
     }
     getUsers();
@@ -42,7 +46,7 @@ const Users = () => {
 
   return (
     <article>
-      <h2>Users List</h2>
+      <h2 className={'content-block'}>Users List</h2>
       {users?.length
         ? (
           <ul>
@@ -53,6 +57,6 @@ const Users = () => {
       <button onClick={() => refreshToken()}>refreshToken</button>
     </article>
   );
-};
+}
 
 export default Users;
