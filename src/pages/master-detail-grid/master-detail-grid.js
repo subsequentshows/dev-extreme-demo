@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import "./master-detail-grid.scss"
-import "./modal.scss"
+
+import "./modal.scss";
 import 'devextreme/data/odata/store';
 import {
   Column,
@@ -11,8 +11,6 @@ import {
   Editing,
   Grouping,
   Paging,
-  // PagingPanel,
-  Popup,
   Pager,
   CheckBox,
   SelectBox,
@@ -28,6 +26,7 @@ import {
   Export,
   Selection
 } from 'devextreme-react/data-grid';
+import "./master-detail-grid.scss";
 
 import { createStore } from 'devextreme-aspnet-data-nojquery';
 
@@ -144,8 +143,6 @@ function onExporting(e) {
 //     // each row being an array of cells.
 //   })
 // })
-
-
 
 const MasterDetailGrid = () => {
   const allowedPageSizes = [50, 100, 150, 200];
@@ -296,10 +293,7 @@ const MasterDetailGrid = () => {
 
   return (
     <>
-
-      <h2>Datagrid demo</h2>
-
-      <div className='item-function-btn'>
+      <div className='item-function-btn import-excel'>
         <Button className='qi-button' variant="primary" onClick={handleShow}>
           Nhập từ excel
         </Button>
@@ -387,18 +381,17 @@ const MasterDetailGrid = () => {
         remoteOperations={true}
         onExporting={onExporting}
       >
-        <Editing
-          mode="row"
-          allowAdding={true}
-          allowDeleting={true}
-          allowUpdating={true}
-        />
+        <h2>Datagrid demo</h2>
 
-        {/* <Column dataField="STT" caption="STT" width={50} allowFiltering={false} allowExporting={true}>
-          <StringLengthRule max={15} message="" />
-        </Column> */}
+        <Column caption="STT" fixed={true} width={90} allowSorting={false} allowReordering={false} allowSearch={false} allowFiltering={false} allowExporting={true}
+          cellRender={(data) => {
+            return <span>{data.rowIndex + 1}</span>;
+          }}
+        >
+          <StringLengthRule max={3} message="" />
+        </Column>
 
-        <Column dataField="CustomerID" caption="Tên" fixed={true} allowFiltering={true} allowExporting={true}>
+        <Column dataField="CustomerID" caption="Tên" allowFiltering={false} allowExporting={true}>
           <Lookup dataSource={customersData} valueExpr="Value" displayExpr="Text" />
           <StringLengthRule max={5} message="The field Customer must be a string with a maximum length of 5." />
         </Column>
@@ -420,13 +413,11 @@ const MasterDetailGrid = () => {
           <StringLengthRule max={15} message="The field ShipLocation must be a string with a maximum length of 15." />
         </Column>
 
-        <Column
-          dataField="ShipVia"
-          caption="Tên nhà vận chuyển "
-          dataType="number"
-        >
+        <Column dataField="ShipVia" caption="Tên nhà vận chuyển" dataType="number">
           <Lookup dataSource={shippersData} valueExpr="Value" displayExpr="Text" />
         </Column>
+
+
 
         <Summary>
           <TotalItem column="Freight" summaryType="sum">
@@ -441,11 +432,19 @@ const MasterDetailGrid = () => {
           </GroupItem>
         </Summary>
 
+        <Editing
+          fixed={true}
+          mode="column"
+          allowAdding={true}
+          allowDeleting={false}
+          allowUpdating={true}
+        />
+
         <Grouping autoExpandAll={false} />
         <ColumnFixing enabled={true} />
         <Selection mode="multiple" />
-        <FilterRow visible={true} />
-        <HeaderFilter enabled={true} visible={true} />
+        <FilterRow visible={false} />
+        <HeaderFilter enabled={false} visible={false} />
         <GroupPanel visible={false} />
         <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
         <Paging enabled={true} defaultPageSize={50} defaultPageIndex={1} />

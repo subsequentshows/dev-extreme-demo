@@ -111,3 +111,29 @@
 .dx-datagrid {
   padding: 15px;
 }
+
+.dx-row .dx-header-row,
+.dx-datagrid-headers .dx-datagrid-nowrap {
+  background-color: #0071a6 !important;
+}
+
+.dx-datagrid-headers,
+.dx-header-row {
+  background-color: #0071a6 !important;
+  color: #fff;
+
+  td:hover {
+    div {
+      color: #fff;
+    }
+  }
+}
+
+.dx-datagrid-header-panel {
+  border-bottom: 1px solid #e0e0e0 !important;
+  padding: 0 16px;
+  background-color: #fff;
+  margin-bottom: 15px;
+
+
+}

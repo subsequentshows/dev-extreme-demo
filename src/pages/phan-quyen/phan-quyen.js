@@ -19,28 +19,6 @@ import { Modal, Button } from "react-bootstrap-v5";
 import readXlsxFile from 'read-excel-file';
 
 const PhanQuyen = () => {
-  // function handleChange(e) {
-  //   this.file = e.target.files[0]
-  // }
-
-  // function handleImport() {
-  //   const wb = new Excel.Workbook();
-  //   const reader = new FileReader()
-
-  //   reader.readAsArrayBuffer(this.file)
-  //   reader.onload = () => {
-  //     const buffer = reader.result;
-  //     wb.xlsx.load(buffer).then(workbook => {
-  //       console.log(workbook, 'workbook instance')
-  //       workbook.eachSheet((sheet, id) => {
-  //         sheet.eachRow((row, rowIndex) => {
-  //           console.log(row.values, rowIndex)
-  //         })
-  //       })
-  //     })
-  //   }
-  // }
-
   return (
     <>
       <h2 className={'content-block'}>Phan Quyen</h2>
