@@ -6,6 +6,7 @@ import {
   AccessDeniedPage,
   PhanQuyenPage,
   UsersPage,
+  DemoDataGridPage,
 } from "./pages";
 import { withNavigationWatcher } from "./contexts/navigation";
 
@@ -37,6 +38,10 @@ const routes = [
   {
     path: "/users",
     element: UsersPage,
+  },
+  {
+    path: "/demo-data-grid",
+    element: DemoDataGridPage,
   },
 ];
 

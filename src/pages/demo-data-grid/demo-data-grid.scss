@@ -1,0 +1,31 @@
+.dx-toolbar-items-container {
+  .dx-toolbar-item {
+
+
+
+    .dx-button-has-text {
+      border-radius: 4px !important;
+      background-color: #0071a6;
+      margin-left: 5px;
+
+      &:first-child {
+        margin-left: 0;
+      }
+
+      .dx-button-content {
+        padding: 0 7px;
+      }
+
+      .dx-icon {
+        color: #fff;
+        margin-right: 5px;
+      }
+
+      .dx-button-text {
+        display: block;
+        color: #fff;
+
+      }
+    }
+  }
+}

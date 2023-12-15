@@ -20,3 +20,11 @@ code {
 .dx-datagrid-headers .dx-datagrid-nowrap {
   background-color: #0071a6;
 }
+
+.dx-scrollview-content {
+  background-color: #fff;
+
+  .dx-datagrid {
+    padding: 0;
+  }
+}

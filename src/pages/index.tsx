@@ -6,3 +6,4 @@ export { default as DemoPagePage } from "./demo-page/demo-page";
 export { default as AccessDeniedPage } from "./access-denied/access-denied";
 export { default as PhanQuyenPage } from "./phan-quyen/phan-quyen";
 export { default as UsersPage } from "./users/users";
+export { default as DemoDataGridPage } from "./demo-data-grid/demo-data-grid";

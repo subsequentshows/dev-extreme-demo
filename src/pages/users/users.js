@@ -32,7 +32,7 @@ const Users = () => {
         console.error(err);
 
         // After kicked form expired login, take user back to their previous link location
-        navigate('/login', { state: { from: prevLocation }, replace: true });
+        // navigate('/login', { state: { from: prevLocation }, replace: true });
       }
     }
     getUsers();

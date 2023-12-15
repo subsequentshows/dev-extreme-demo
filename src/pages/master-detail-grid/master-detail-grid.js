@@ -14,6 +14,7 @@ import {
   Pager,
   CheckBox,
   SelectBox,
+  SearchPanel,
   Lookup,
   Summary,
   RangeRule,
@@ -145,6 +146,8 @@ function onExporting(e) {
 // })
 
 const MasterDetailGrid = () => {
+  const [data, setData] = useState([]);
+
   const allowedPageSizes = [50, 100, 150, 200];
   // const [items, setItems] = useState([]);
 
@@ -158,6 +161,10 @@ const MasterDetailGrid = () => {
   const [uploadedFile, setUploadedFile] = useState();
   const [error, setError] = useState();
   const [fileContent, setFileContent] = useState('');
+
+  // Delete
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [editedItems, setEditedItems] = useState({});
 
   // const readExcel = (file) => {
   //   const promise = new Promise((resolve, reject) => {
@@ -391,33 +398,31 @@ const MasterDetailGrid = () => {
           <StringLengthRule max={3} message="" />
         </Column>
 
-        <Column dataField="CustomerID" caption="Tên" allowFiltering={false} allowExporting={true}>
+        <Column dataField="CustomerID" caption="Tên" allowFiltering={false} allowExporting={true} allowSearch={true}>
           <Lookup dataSource={customersData} valueExpr="Value" displayExpr="Text" />
           <StringLengthRule max={5} message="The field Customer must be a string with a maximum length of 5." />
         </Column>
 
-        <Column dataField="OrderDate" caption="Ngày đặt hàng" dataType="date" width={150}>
+        <Column dataField="OrderDate" caption="Ngày đặt hàng" dataType="date" width={150} allowSearch={false}>
           <RequiredRule message="The OrderDate field is required." />
         </Column>
 
-        <Column dataField="Freight" caption="Tổng tiền" width={130} allowFiltering={true} allowExporting={true}>
+        <Column dataField="Freight" caption="Tổng tiền" width={130} allowFiltering={true} allowExporting={true} allowSearch={false}>
           <HeaderFilter groupInterval={100} />
           <RangeRule min={0} message="The field Freight must be between 0 and 2000." />
         </Column>
 
-        <Column dataField="ShipCountry" caption="Địa chỉ đặt hàng" width={200} allowFiltering={true} allowExporting={true}>
+        <Column dataField="ShipCountry" caption="Địa chỉ đặt hàng" width={200} allowFiltering={true} allowExporting={true} allowSearch={true}>
           <StringLengthRule max={15} message="The field ShipCountry must be a string with a maximum length of 15." />
         </Column>
 
-        <Column dataField="ShipLocation" caption="Địa chỉ giao hàng " allowFiltering={true} >
+        <Column dataField="ShipLocation" caption="Địa chỉ giao hàng " allowFiltering={true} allowSearch={false} >
           <StringLengthRule max={15} message="The field ShipLocation must be a string with a maximum length of 15." />
         </Column>
 
-        <Column dataField="ShipVia" caption="Tên nhà vận chuyển" dataType="number">
+        <Column dataField="ShipVia" caption="Tên nhà vận chuyển" dataType="number" allowSearch={true} allowReordering={false} >
           <Lookup dataSource={shippersData} valueExpr="Value" displayExpr="Text" />
         </Column>
-
-
 
         <Summary>
           <TotalItem column="Freight" summaryType="sum">
@@ -443,6 +448,13 @@ const MasterDetailGrid = () => {
         <Grouping autoExpandAll={false} />
         <ColumnFixing enabled={true} />
         <Selection mode="multiple" />
+        <SearchPanel
+          visible={true}
+          width={240}
+          highlightSearchText={true}
+          searchVisibleColumnsOnly={true}
+          placeholder="Tìm kiếm"
+        />
         <FilterRow visible={false} />
         <HeaderFilter enabled={false} visible={false} />
         <GroupPanel visible={false} />

@@ -36,6 +36,11 @@ export const navigation = [
   {
     text: "Users Page",
     path: "/users",
-    icon: "folder",
+    icon: "globe",
+  },
+  {
+    text: "Demo Data Grid",
+    path: "/demo-data-grid",
+    icon: "globe",
   },
 ];
