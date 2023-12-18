@@ -424,6 +424,7 @@ const MasterDetailGrid = () => {
         height={600}
         remoteOperations={true}
         onExporting={onExporting}
+        selectedRowKeys={selectedItemKeys}
         onSelectionChanged={onSelectionChanged}
       >
         <Editing
@@ -466,7 +467,7 @@ const MasterDetailGrid = () => {
         </Column> */}
 
         <Column dataField="ShipVia" caption="Tên nhà vận chuyển" dataType="number" allowSearch={true} allowReordering={false} >
-          <Lookup dataSource={shippersData} valueExpr="Value" displayExpr="Text" />
+          {/* <Lookup dataSource={shippersData} valueExpr="Value" displayExpr="Text" /> */}
         </Column>
 
         <Summary>
@@ -482,7 +483,7 @@ const MasterDetailGrid = () => {
           </GroupItem>
         </Summary>
 
-        <Popup title="Employee Info" showTitle={true} width={700} height={525} />
+        {/* <Popup title="Employee Info" showTitle={true} width={700} height={525} />
 
         <Form>
           <Item itemType="group" colCount={2} colSpan={2}>
@@ -490,12 +491,22 @@ const MasterDetailGrid = () => {
             <Item dataField="OrderDate" dataType="date" />
             <Item dataField="Freight" />
             <Item dataField="ShipCountry" />
-            {/* <Item dataField="ShipLocation" /> */}
             <Item dataField="ShipVia" />
           </Item>
-        </Form>
+        </Form> */}
 
-        {/* </Editing> */}
+        <Toolbar>
+          <Item location="after" name="addRowButton" showText="always" />
+          <Item location="after" showText="always">
+            <Button
+              onClick={deleteRecords}
+              confirmDelete="true"
+              icon="trash"
+              disabled={!selectedItemKeys.length}
+              text="Delete Selected Records"
+            />
+          </Item>
+        </Toolbar>
 
         <Grouping autoExpandAll={false} />
         <ColumnFixing enabled={true} />
