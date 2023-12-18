@@ -28,3 +28,22 @@ code {
     padding: 0;
   }
 }
+
+.toolbar-label {
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.dx-datagrid-header-panel {
+  padding: 0;
+}
+
+.dx-dropdownbutton.dx-dropdownbutton-has-arrow .dx-button-has-icon.dx-buttongroup-last-item .dx-button-content {
+  background-color: #0071a6;
+  padding: 7px;
+
+  & i {
+    color: #fff;
+  }
+}

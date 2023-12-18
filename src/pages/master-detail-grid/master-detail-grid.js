@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 
 import "./modal.scss";
 import 'devextreme/data/odata/store';
@@ -11,10 +11,14 @@ import {
   Editing,
   Grouping,
   Paging,
+  Popup,
+  Form,
   Pager,
   CheckBox,
   SelectBox,
   SearchPanel,
+  Toolbar,
+  Item,
   Lookup,
   Summary,
   RangeRule,
@@ -27,9 +31,12 @@ import {
   Export,
   Selection
 } from 'devextreme-react/data-grid';
+import notify from 'devextreme/ui/notify';
 import "./master-detail-grid.scss";
 
 import { createStore } from 'devextreme-aspnet-data-nojquery';
+import DataSource from 'devextreme/data/data_source';
+import ArrayStore from 'devextreme/data/array_store';
 
 // Export to excel library
 import { exportDataGrid as exportDataGridToExcel } from 'devextreme/excel_exporter';
@@ -166,6 +173,8 @@ const MasterDetailGrid = () => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [editedItems, setEditedItems] = useState({});
 
+  const dataGridRef = useRef(null);
+
   // const readExcel = (file) => {
   //   const promise = new Promise((resolve, reject) => {
   //     const fileReader = new FileReader();
@@ -298,6 +307,53 @@ const MasterDetailGrid = () => {
   };
   // End of upload
 
+  const [selectedItemKeys, setSelectedItemKeys] = useState([]);
+
+  const deleteRecords = useCallback(() => {
+    selectedItemKeys.forEach((key) => {
+      dataSource.remove(key);
+    });
+    setSelectedItemKeys([]);
+    refreshDataGrid();
+  }, [selectedItemKeys]);
+
+  // const onSelectionChanged = useCallback((data: DataGridTypes.SelectionChangedEvent) => {
+  const onSelectionChanged = useCallback((data) => {
+    setSelectedItemKeys(data.selectedRowKeys);
+  }, []);
+
+  const refreshButtonOptions = {
+    icon: 'refresh',
+    onClick: () => {
+      notify('Refresh button has been clicked!');
+    },
+  };
+
+  const saveButtonOptions = {
+    text: 'Save',
+    onClick: () => {
+      notify('Save option has been clicked!');
+    },
+  };
+
+  const deleteButtonOptions = {
+    text: 'Delete records',
+    onClick: () => {
+      notify('Delete option has been clicked!');
+    },
+  };
+
+  const refreshDataGrid = useCallback(() => {
+    dataGridRef.current.instance.refresh();
+  }, []);
+
+  const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
+  const notesEditorOptions = { height: 100 };
+
+  const onContentReady = (e) => {
+    e.component.columnOption("command:edit", "visibleIndex", -1);
+  }
+
   return (
     <>
       <div className='item-function-btn import-excel'>
@@ -381,87 +437,106 @@ const MasterDetailGrid = () => {
 
       <DataGrid
         className='responsive-paddings'
+        allowColumnReordering={false}
+        onload={onContentReady}
+        ref={dataGridRef}
         dataSource={dataSource}
         showBorders={true}
         width="100%"
         height={600}
         remoteOperations={true}
         onExporting={onExporting}
+        onSelectionChanged={onSelectionChanged}
       >
-        <h2>Datagrid demo</h2>
-
-        <Column caption="STT" fixed={true} width={90} allowSorting={false} allowReordering={false} allowSearch={false} allowFiltering={false} allowExporting={true}
-          cellRender={(data) => {
-            return <span>{data.rowIndex + 1}</span>;
-          }}
-        >
-          <StringLengthRule max={3} message="" />
-        </Column>
-
-        <Column dataField="CustomerID" caption="Tên" allowFiltering={false} allowExporting={true} allowSearch={true}>
-          <Lookup dataSource={customersData} valueExpr="Value" displayExpr="Text" />
-          <StringLengthRule max={5} message="The field Customer must be a string with a maximum length of 5." />
-        </Column>
-
-        <Column dataField="OrderDate" caption="Ngày đặt hàng" dataType="date" width={150} allowSearch={false}>
-          <RequiredRule message="The OrderDate field is required." />
-        </Column>
-
-        <Column dataField="Freight" caption="Tổng tiền" width={130} allowFiltering={true} allowExporting={true} allowSearch={false}>
-          <HeaderFilter groupInterval={100} />
-          <RangeRule min={0} message="The field Freight must be between 0 and 2000." />
-        </Column>
-
-        <Column dataField="ShipCountry" caption="Địa chỉ đặt hàng" width={200} allowFiltering={true} allowExporting={true} allowSearch={true}>
-          <StringLengthRule max={15} message="The field ShipCountry must be a string with a maximum length of 15." />
-        </Column>
-
-        <Column dataField="ShipLocation" caption="Địa chỉ giao hàng " allowFiltering={true} allowSearch={false} >
-          <StringLengthRule max={15} message="The field ShipLocation must be a string with a maximum length of 15." />
-        </Column>
-
-        <Column dataField="ShipVia" caption="Tên nhà vận chuyển" dataType="number" allowSearch={true} allowReordering={false} >
-          <Lookup dataSource={shippersData} valueExpr="Value" displayExpr="Text" />
-        </Column>
-
-        <Summary>
-          <TotalItem column="Freight" summaryType="sum">
-            <ValueFormat type="decimal" precision={2} />
-          </TotalItem>
-
-          <GroupItem column="Freight" summaryType="sum">
-            <ValueFormat type="decimal" precision={2} />
-          </GroupItem>
-
-          <GroupItem summaryType="count" >
-          </GroupItem>
-        </Summary>
-
         <Editing
-          fixed={true}
-          mode="column"
+          mode="popup"
+          allowUpdating={true}
           allowAdding={true}
           allowDeleting={false}
-          allowUpdating={true}
-        />
+          confirmDelete={true}
+          fixed={true}
+          fixedPosition="left"
+        >
 
-        <Grouping autoExpandAll={false} />
-        <ColumnFixing enabled={true} />
+          <Column caption="STT" fixed={true} width={90} allowSorting={false} allowReordering={false} allowSearch={false} allowFiltering={false} allowExporting={true}
+            cellRender={(data) => {
+              return <span>{data.rowIndex + 1}</span>;
+            }}
+          >
+            <StringLengthRule max={3} message="" />
+          </Column>
+
+          <Column dataField="CustomerID" caption="Tên" fixed={true} fixedPosition="left" width={200} allowFiltering={false} allowExporting={true} allowSearch={true} allowReordering={false}>
+            {/* <Lookup dataSource={customersData} valueExpr="Value" displayExpr="Text" /> */}
+            <StringLengthRule min={1} message="The field Customer must be a string with a maximum length of 5." />
+          </Column>
+
+          <Column dataField="OrderDate" caption="Ngày đặt hàng" dataType="date" width={150} allowSearch={false} allowReordering={false}>
+            <RequiredRule message="The OrderDate field is required." />
+          </Column>
+
+          <Column dataField="Freight" caption="Tổng tiền" width={130} allowFiltering={true} allowExporting={true} allowSearch={false} allowReordering={false}>
+            <HeaderFilter groupInterval={100} />
+            <RangeRule min={0} message="The field Freight must be between 0 and 2000." />
+          </Column>
+
+          <Column dataField="ShipCountry" caption="Địa chỉ đặt hàng" width={200} allowFiltering={true} allowExporting={true} allowSearch={true} allowReordering={false}>
+            <StringLengthRule max={15} message="The field ShipCountry must be a string with a maximum length of 15." />
+          </Column>
+
+          {/* <Column dataField="ShipLocation" caption="Địa chỉ giao hàng " allowFiltering={true} allowSearch={false} >
+          <StringLengthRule max={15} message="The field ShipLocation must be a string with a maximum length of 15." />
+          <Lookup dataSource={customersData} valueExpr="Value" displayExpr="Text" />
+        </Column> */}
+
+          <Column dataField="ShipVia" visible={true} caption="Tên nhà vận chuyển" dataType="number" allowSearch={true} allowReordering={false} >
+            <Lookup dataSource={shippersData} valueExpr="Value" displayExpr="Text" />
+          </Column>
+
+          <Summary>
+            <TotalItem column="Freight" summaryType="sum">
+              <ValueFormat type="decimal" precision={2} />
+            </TotalItem>
+
+            <GroupItem column="Freight" summaryType="sum">
+              <ValueFormat type="decimal" precision={2} />
+            </GroupItem>
+
+            <GroupItem summaryType="count" >
+            </GroupItem>
+          </Summary>
+
+
+          <Popup title="Employee Info" showTitle={true} width={700} height={525} />
+
+          <Form>
+            <Item itemType="group" colCount={2} colSpan={2}>
+              <Item dataField="CustomerID" />
+              <Item dataField="OrderDate" dataType="date" />
+              <Item dataField="Freight" />
+              <Item dataField="ShipCountry" />
+              {/* <Item dataField="ShipLocation" /> */}
+              <Item dataField="ShipVia" />
+            </Item>
+          </Form>
+        </Editing>
+
+        {/* <Toolbar>
+          <Item location="after">
+            <Button
+              onClick={deleteRecords}
+              icon="trash"
+              disabled={!selectedItemKeys.length}
+              text="Delete Selected Records" />
+          </Item>
+        </Toolbar> */}
+
         <Selection mode="multiple" />
-        <SearchPanel
-          visible={true}
-          width={240}
-          highlightSearchText={true}
-          searchVisibleColumnsOnly={true}
-          placeholder="Tìm kiếm"
-        />
-        <FilterRow visible={false} />
-        <HeaderFilter enabled={false} visible={false} />
-        <GroupPanel visible={false} />
+        <ColumnFixing enabled={true} />
         <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
         <Paging enabled={true} defaultPageSize={50} defaultPageIndex={1} />
+        <SearchPanel location="left" visible={true} width={240} highlightSearchText={true} searchVisibleColumnsOnly={true} placeholder="Tìm kiếm" />
       </DataGrid >
-
     </>
   );
 }

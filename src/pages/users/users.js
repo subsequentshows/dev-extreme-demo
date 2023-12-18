@@ -1,7 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from "react";
 import usePrivateLocalApi from "../../hooks/usePrivateLocalApi";
-import localApi from "../../api/api";
 import { useNavigate, useLocation } from "react-router-dom";
 import useRefreshToken from "../../hooks/useRefreshToken";
 import "./users.scss"
