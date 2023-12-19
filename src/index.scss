@@ -78,8 +78,11 @@ code {
 
 .dx-texteditor.dx-editor-filled.dx-state-readonly {
   background-color: lightgray;
+  cursor: pointer;
+  border-bottom: transparent;
 
   &:hover {
     background-color: lightgray;
+    cursor: pointer;
   }
 }

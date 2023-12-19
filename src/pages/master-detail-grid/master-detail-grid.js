@@ -426,7 +426,7 @@ const MasterDetailGrid = () => {
         allowColumnReordering={false}
         ref={dataGridRef}
         width="100%"
-        height={700}
+        height="100%"
         dataSource={dataSource}
         onExporting={onExporting}
         showBorders={true}
