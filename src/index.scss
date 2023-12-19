@@ -63,3 +63,23 @@ code {
 #gridDeleteSelected .dx-button-text {
   line-height: 0;
 }
+
+.dx-toolbar-item-content .dx-button-text {
+  text-transform: none;
+}
+
+.dx-texteditor.dx-state-focused::before {
+  border-bottom: transparent;
+}
+
+.dx-texteditor.dx-editor-filled.dx-state-hover::after {
+  border-bottom: 1px solid rgba(0, 0, 0, .42);
+}
+
+.dx-texteditor.dx-editor-filled.dx-state-readonly {
+  background-color: lightgray;
+
+  &:hover {
+    background-color: lightgray;
+  }
+}
