@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 
 import "./modal.scss";
 import 'devextreme/data/odata/store';
@@ -57,6 +57,7 @@ import $ from 'jquery';
 import { Modal } from "react-bootstrap-v5";
 
 import readXlsxFile from 'read-excel-file';
+import { formatDate } from 'devextreme/localization';
 
 const url = 'https://js.devexpress.com/Demos/Mvc/api/DataGridWebApi';
 
@@ -376,54 +377,16 @@ const MasterDetailGrid = () => {
     e.component.columnOption("command:edit", "visibleIndex", -1);
   }
 
-  // Popup confirm
-  const showInfo = useCallback((employee) => {
-    setCurrentEmployee(employee);
-    setPositionOf(`#image${employee.ID}`);
-    setPopupVisible(true);
-  }, [setCurrentEmployee, setPositionOf, setPopupVisible]);
-
-  const hideInfo = React.useCallback(() => {
-    setCurrentEmployee({});
-    setPopupVisible(false);
-  }, [setCurrentEmployee, setPopupVisible]);
-
-  const sendEmail = React.useCallback(() => {
-    const message = `Email is sent to`;
-    notify(
-      {
-        message,
-        position: {
-          my: 'center top',
-          at: 'center top',
-        },
-      },
-      'success',
-      3000,
-    );
-  }, [currentEmployee]);
-
-  const getEmailButtonOptions = React.useCallback(() => ({
-    icon: 'email',
-    stylingMode: 'contained',
-    text: 'Send',
-    onClick: sendEmail,
-  }), [sendEmail]);
-
-  const getCloseButtonOptions = React.useCallback(() => ({
-    text: 'Close',
-    stylingMode: 'outlined',
-    type: 'normal',
-    onClick: hideInfo,
-  }), [hideInfo]);
+  const customizeColumnDate = (itemInfo) => `${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
+  const customizeDate = (itemInfo) => `First: ${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
 
   return (
     <>
-
       <DataGrid
         id="gridContainer"
         className='responsive-paddings master-detail-grid'
         allowColumnReordering={false}
+        focusedRowEnabled={true}
         ref={dataGridRef}
         width="100%"
         height="100%"
@@ -437,30 +400,36 @@ const MasterDetailGrid = () => {
       >
         <Editing mode="popup" location="center" locateInMenu="auto" allowAdding={true} allowDeleting={false} allowUpdating={true} />
 
-        <Column dataField="STT" fixed={false} width={80} allowEditing={false} allowSorting={false} allowReordering={false} allowSearch={false} allowFiltering={false} allowExporting={true}
+        <Column dataField="STT" fixed={true} fixedPosition="left" alignment='center' width={80} allowEditing={false} allowSorting={false} allowReordering={false} allowSearch={false} allowFiltering={false} allowExporting={true}
           cellRender={(data) => {
             return <span>{data.rowIndex + 1}</span>;
           }}>
           <StringLengthRule max={3} message="" />
         </Column>
-        <Column type="buttons" width={80}> <Button name="edit" /> </Column>
-        <Column dataField="OrderID" width={100} allowEditing={false}>
+        <Column type="buttons" width={80} fixed={true} fixedPosition="left" > <Button name="edit" /> </Column>
+        <Column dataField="OrderID" alignment='left' width={100} allowEditing={false} fixed={true} fixedPosition="left">
           <StringLengthRule max={5} message="The field OrderID must be a string with a maximum length of 5." />
         </Column>
-        <Column dataField="ShipName" dataType="string" width={200} allowSearch={true} allowReordering={false}>
+        <Column dataField="ShipName" fixed={true} fixedPosition="left" alignment='left' dataType="string" width={200} allowSearch={true} allowReordering={false}>
           <StringLengthRule max={15} message="The field ShipCountry must be a string with a maximum length of 15." />
         </Column>
         <Column dataField="Freight" dataType="number" width={150}></Column>
-        <Column dataField="ShipCountry" width={200}></Column>
-        <Column dataField="ShipCity" width={150}></Column>
-        <Column dataField="ShipAddress" width={150}></Column>
-        <Column dataField="OrderDate" dataType="date" width={110}>
+        <Column dataField="ShipCountry" alignment='left' width={180}></Column>
+        <Column dataField="ShipCity" alignment='left' width={100} ></Column>
+        <Column dataField="ShipAddress" alignment='left' width={150}></Column>
+        <Column dataField="OrderDate" alignment='left' dataType="date" width={110} customizeText={customizeColumnDate} >
           <RequiredRule message="The OrderDate field is required." />
         </Column>
-        {/* <Column dataField="" width={200}></Column> */}
 
         <Summary>
-          <TotalItem column="Freight" summaryType="sum">
+          <TotalItem
+            name="SelectedRowsSummary"
+            column="Freight"
+            summaryType="sum"
+            valueFormat="currency" //valueFormat="#0.00" 
+            showInColumn="Freight"
+            alignment="right"
+            displayFormat="Tổng: {0}">
             <ValueFormat type="decimal" precision={2} />
           </TotalItem>
 
@@ -479,24 +448,14 @@ const MasterDetailGrid = () => {
 
           <Item location="after" name="addRowButton" />
           <Item location="after" name='refresh'>
-            <Button
-              icon='refresh'
-              widget="dxButton"
-              onClick={refreshDataGrid}
-              text="Refresh"
-            />
+            <Button icon='refresh' widget="dxButton" onClick={refreshDataGrid} text="Refresh" />
           </Item>
           <Item location="after" showText="always" name='mutiple-delete'>
-            <Button
-              onClick={deleteRecords}
-              confirmDelete="true"
-              icon="trash"
-              disabled={!selectedItemKeys.length}
-              text="Xóa mục đã chọn"
-            />
+            <Button onClick={deleteRecords} confirmDelete="true" icon="trash" disabled={!selectedItemKeys.length} text="Xóa mục đã chọn" />
           </Item>
           <Item location='after' name='exportButton' />
           <Item location='after' name='searchPanel' />
+
         </Toolbar>
 
         <Grouping autoExpandAll={false} />
