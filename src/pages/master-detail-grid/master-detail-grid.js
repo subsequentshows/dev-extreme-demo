@@ -324,8 +324,8 @@ const MasterDetailGrid = () => {
 
   function refreshDataGrid2() {
     let refreshmMessage = `reload`;
-    dataGridRef.current.instance.refresh()
 
+    dataGridRef.current.instance.refresh()
       .then(function () {
         notify(
           {
@@ -336,12 +336,11 @@ const MasterDetailGrid = () => {
               at: 'right bottom',
             },
           },
-          'success',
+          'success' + refreshmMessage,
           3000,
         );
       })
       .catch(function (error) {
-
         notify(
           {
             error,
