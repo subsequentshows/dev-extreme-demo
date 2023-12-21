@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import './phan-quyen.scss';
 import DataGrid, { Column, Editing, Paging, Form, Selection, Lookup, LoadPanel, Toolbar, Item, DataGridTypes }
   from 'devextreme-react/data-grid';
 import {
-  Popup
+  Popup, Position, ToolbarItem
 } from 'devextreme-react/popup';
 import { Button } from 'devextreme-react/button';
+import notify from 'devextreme/ui/notify';
 
 // Export to excel library
 import { exportDataGrid as exportDataGridToExcel } from 'devextreme/excel_exporter';
@@ -57,11 +58,44 @@ const renderContent = () => {
 }
 
 const PhanQuyen = () => {
-  const [isPopupVisible, setPopupVisibility] = useState(true);
+  const [isPopupVisible, setPopupVisibility] = useState(false);
+  const [positionOf, setPositionOf] = React.useState('');
 
-  const togglePopup = () => {
+  const togglePopup = useCallback(() => {
+    // const message = `Email is sent to ${currentEmployee.FirstName} ${currentEmployee.LastName}`;
     setPopupVisibility(!isPopupVisible);
-  };
+  }, [isPopupVisible]);
+
+  const sendEmail = React.useCallback(() => {
+    // const message = `Email is sent to ${currentEmployee.FirstName} ${currentEmployee.LastName}`;
+    const message = `Email is sent to`;
+    notify(
+      {
+        message,
+        position: {
+          my: 'center top',
+          at: 'center top',
+        },
+      },
+      'success',
+      3000,
+    );
+  }, []);
+  // }, [currentEmployee]);
+
+  const getEmailButtonOptions = useCallback(() => ({
+    icon: 'email',
+    stylingMode: 'contained',
+    text: 'Send',
+    onClick: sendEmail,
+  }), [sendEmail]);
+
+  const getCloseButtonOptions = useCallback(() => ({
+    text: 'Close',
+    stylingMode: 'outlined',
+    type: 'normal',
+    onClick: togglePopup,
+  }), [togglePopup]);
 
   return (
     <>
@@ -72,9 +106,31 @@ const PhanQuyen = () => {
             id="popup"
             contentRender={renderContent}
             visible={isPopupVisible}
-            hideOnOutsideClick={false}
+            hideOnOutsideClick={true}
             onHiding={togglePopup}
-          />
+            dragEnabled={false}
+            showCloseButton={true}
+            showTitle={true}
+            title="Nhập từ excel"
+            container=".dx-viewport"
+            width={1000}
+            height={400}
+          >
+            <Position at="center" my="center" of={positionOf} collision="fit" />
+
+            <ToolbarItem
+              widget="dxButton"
+              toolbar="bottom"
+              location="before"
+              options={getEmailButtonOptions()}
+            />
+            <ToolbarItem
+              widget="dxButton"
+              toolbar="top"
+              location="after"
+              options={getCloseButtonOptions()}
+            />
+          </Popup>
 
           <Button
             text="Open popup"

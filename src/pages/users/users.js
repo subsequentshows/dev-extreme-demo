@@ -49,7 +49,7 @@ const Users = () => {
       {users?.length
         ? (
           <ul>
-            {users.map((user, i) => <li key={i}>{user?.username}</li>)}
+            {/* {users.map((user, i) => <li key={i}>{user?.username}</li>)} */}
           </ul>
         ) : <p>No users to display</p>
       }

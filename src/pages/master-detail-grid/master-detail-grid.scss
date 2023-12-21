@@ -157,3 +157,17 @@
     max-height: 700px;
   }
 }
+
+.warning-icon {
+  background-color: transparent;
+  text-align: center;
+}
+
+.dx-popup-content {
+  padding: 15px;
+  height: unset !important;
+
+  p {
+    text-align: center;
+  }
+}

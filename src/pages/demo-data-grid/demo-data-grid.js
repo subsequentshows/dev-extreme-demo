@@ -100,7 +100,7 @@ const renderContent = () => {
           ))}
         </div>
       </div> */}
-      <p>huuubui</p>
+      <p>hêhe</p>
     </>
   )
 }
@@ -220,7 +220,7 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
 
   const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
 
-  const [isPopupVisible, setPopupVisibility] = useState(true);
+  const [isPopupVisible, setPopupVisibility] = useState(false);
 
   const togglePopup = () => {
     setPopupVisibility(!isPopupVisible);
@@ -279,21 +279,27 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
               />
             </Toolbar>
 
-            <Popup
-              id="popup"
-              showTitle={true}
-              title="Nhập từ excel"
-              contentRender={renderContent}
-              visible={isPopupVisible}
-              hideOnOutsideClick={true}
-              onHiding={togglePopup}
-              width={1000}
-              height={500}
-              position="center"
-              dragEnabled={false}
-              resizeEnabled={false}
-            />
+
+
+
           </DataGrid>
+
+          <Popup
+            id="popup"
+            showTitle={true}
+            title="Nhập từ excel"
+            contentRender={renderContent}
+            visible={isPopupVisible}
+            hideOnOutsideClick={true}
+            showCloseButton={true}
+            onHiding={togglePopup}
+            width={1000}
+            height={500}
+            position="center"
+            dragEnabled={false}
+            resizeEnabled={false}
+          />
+
         </div>
       </div>
     </React.Fragment>
