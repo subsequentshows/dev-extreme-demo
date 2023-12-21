@@ -22,7 +22,7 @@ import { Modal } from "react-bootstrap-v5";
 import readXlsxFile from 'read-excel-file';
 
 const URL = 'https://js.devexpress.com/Demos/Mvc/api/DataGridBatchUpdateWebApi';
-
+const uploadUrl = ""
 const ordersStore = createStore({
   key: 'OrderID',
   loadUrl: `${URL}/Orders`,
@@ -30,6 +30,7 @@ const ordersStore = createStore({
     ajaxOptions.xhrFields = { withCredentials: true };
   },
 });
+
 
 async function sendBatchRequest(url, changes) {
   const result = await fetch(url, {
@@ -56,56 +57,14 @@ async function processBatchRequest(url, changes, component) {
 
 // let uploadedFileValue = $("#fileUploaderContainer").dxFileUploader("option", "value");
 
-const renderContent = () => {
-  // const [multiple, setMultiple] = useState(false);
-  // const [uploadMode, setUploadMode] = useState < FileUploaderTypes.Properties['uploadMode'] > ('instantly');
-  // const [accept, setAccept] = useState('*');
-  // const [selectedFiles, setSelectedFiles] = useState([]);
-
-  // // Upload
-  // const onSelectedFilesChanged = useCallback((e) => {
-  //   setSelectedFiles(e.value);
-  // }, [setSelectedFiles]);
-
-  // const onAcceptChanged = useCallback((e) => {
-  //   setAccept(e.value);
-  // }, [setAccept]);
-
-  // const onUploadModeChanged = useCallback((e) => {
-  //   setUploadMode(e.value);
-  // }, [setUploadMode]);
-
-  return (
-    <>
-      {/* <FileUploader
-        multiple={multiple}
-        accept={accept}
-        uploadMode={uploadMode}
-        uploadUrl="https://js.devexpress.com/Demos/NetCore/FileUploader/Upload"
-        onValueChanged={onSelectedFilesChanged}
-      />
-
-      <div
-        className="content"
-        style={{ display: selectedFiles.length > 0 ? 'block' : 'none' }}>
-        <div>
-          <h4>Selected Files</h4>
-          {selectedFiles.map((file, i) => (
-            <div className="selected-item" key={i}>
-              <span>{`Name: ${file.name}`}<br /></span>
-              <span>{`Size ${file.size}`}<br /></span>
-              <span>{`Type ${file.type}`}<br /></span>
-              <span>{`Last Modified Date: ${file.lastModifiedDate}`}</span>
-            </div>
-          ))}
-        </div>
-      </div> */}
-      <p>hêhe</p>
-    </>
-  )
-}
+const fileExtensions = ['.jpg', '.jpeg', '.gif', '.png'];
 
 const DemoDataGrid = ({ onSelected, onDelete }) => {
+  const [multiple, setMultiple] = useState(false);
+  const [uploadMode, setUploadMode] = useState('instantly');
+  const [accept, setAccept] = useState('*');
+  const [selectedFiles, setSelectedFiles] = useState([]);
+
   // var ExcelToJSON = function () {
 
   //   this.parseExcel = function (file) {
@@ -202,22 +161,6 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
     }
   }, []);
 
-  const [selectedItemKeys, setSelectedItemKeys] = useState([]);
-
-  const onSelectionChanged = useCallback((data) => {
-    setSelectedItemKeys(data.selectedRowKeys);
-  }, []);
-
-  const dataGridRef = useRef(null);
-  const refreshDataGrid = useCallback(() => {
-    dataGridRef.current.instance.refresh();
-  }, []);
-
-  const settingsButtonOptions = {
-    icon: 'preferences',
-    text: 'Settings',
-  }
-
   const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
 
   const [isPopupVisible, setPopupVisibility] = useState(false);
@@ -225,6 +168,22 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
   const togglePopup = () => {
     setPopupVisibility(!isPopupVisible);
   };
+
+  const onSelectedFilesChanged = React.useCallback((e) => {
+    setSelectedFiles(e.value);
+  }, [setSelectedFiles]);
+
+  const onAcceptChanged = React.useCallback((e) => {
+    setAccept(e.value);
+  }, [setAccept]);
+
+  const onUploadModeChanged = React.useCallback((e) => {
+    setUploadMode(e.value);
+  }, [setUploadMode]);
+
+  const onMultipleChanged = React.useCallback((e) => {
+    setMultiple(e.value);
+  }, [setMultiple]);
 
   return (
     <React.Fragment>
@@ -235,13 +194,13 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
 
           <DataGrid
             id="gridContainer"
-            ref={dataGridRef}
+            // ref={dataGridRef}
             dataSource={ordersStore}
             showBorders={true}
             remoteOperations={true}
             repaintChangesOnly={true}
             onSaving={onSaving}
-            onSelectionChanged={onSelectionChanged}
+          // onSelectionChanged={onSelectionChanged}
           >
 
             <Column dataField="STT" width={60} allowEditing={false}></Column>
@@ -288,7 +247,6 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
             id="popup"
             showTitle={true}
             title="Nhập từ excel"
-            contentRender={renderContent}
             visible={isPopupVisible}
             hideOnOutsideClick={true}
             showCloseButton={true}
@@ -298,7 +256,37 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
             position="center"
             dragEnabled={false}
             resizeEnabled={false}
-          />
+          >
+
+            {/* <FileUploader
+              multiple={multiple}
+              accept={accept}
+              uploadMode={uploadMode}
+              uploadUrl="https://js.devexpress.com/Demos/NetCore/FileUploader/Upload"
+              onValueChanged={onSelectedFilesChanged}
+            /> */}
+
+            <FileUploader
+              multiple={false}
+              accept={accept}
+              uploadMode="useButtons"
+              uploadUrl={uploadUrl}
+              allowedFileExtensions={fileExtensions} />
+
+            <div className="content" style={{ display: selectedFiles.length > 0 ? 'block' : 'none' }}>
+              <div>
+                <h4>Selected Files</h4>
+                {selectedFiles.map((file, i) => (
+                  <div className="selected-item" key={i}>
+                    <span>{`Name: ${file.name}`}<br /></span>
+                    <span>{`Size ${file.size}`}<br /></span>
+                    <span>{`Type ${file.type}`}<br /></span>
+                    <span>{`Last Modified Date: ${file.lastModifiedDate}`}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Popup>
 
         </div>
       </div>

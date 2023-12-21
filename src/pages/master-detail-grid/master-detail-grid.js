@@ -503,7 +503,7 @@ const MasterDetailGrid = () => {
           <Button name="edit" />
         </Column>
 
-        <Column caption="ID đặt hàng"
+        <Column caption="ID"
           dataField="OrderID"
           alignment='left'
           width={100}
@@ -513,7 +513,7 @@ const MasterDetailGrid = () => {
           <StringLengthRule max={5} message="The field OrderID must be a string with a maximum length of 5." />
         </Column>
 
-        <Column caption="Địa điểm đặt hàng"
+        <Column caption="Họ tên"
           dataField="ShipName"
 
           fixed={true}
@@ -526,10 +526,10 @@ const MasterDetailGrid = () => {
           <StringLengthRule max={15} message="The field ShipName must be a string with a maximum length of 15." />
         </Column>
 
-        <Column dataField="Freight" dataType="number" width={150}></Column>
-        <Column dataField="ShipCountry" alignment='left' width={180}></Column>
-        <Column dataField="ShipCity" alignment='left' width={100} ></Column>
-        <Column dataField="ShipAddress" alignment='left' width={150}></Column>
+        <Column caption="Tổng tiền" dataField="Freight" dataType="number" width={120}></Column>
+        <Column caption="TP đặt hàng" dataField="ShipCountry" alignment='left' width={120}></Column>
+        <Column caption="TP giao hàng" dataField="ShipCity" alignment='left' width={150} ></Column>
+        <Column caption="Địa chỉ giao hàng" dataField="ShipAddress" alignment='left' width={150}></Column>
 
         <Column caption="Ngày đặt hàng"
           dataField="OrderDate"
@@ -570,18 +570,29 @@ const MasterDetailGrid = () => {
           </Item>
 
           <Item location="after" showText="always" name='mutiple-delete' widget="dxButton">
-            {/* <Button onClick={deleteRecords} confirmDelete="true" icon="trash" disabled={!selectedItemKeys.length} text="Xóa mục đã chọn" /> */}
-            <Button onClick={togglePopup} widget="dxButton" icon="trash" disabled={!selectedItemKeys.length} text="Xóa mục đã chọn" />
+            <Button
+              onClick={togglePopup}
+              widget="dxButton"
+              icon="trash"
+              disabled={!selectedItemKeys.length}
+              text="Xóa mục đã chọn"
+            />
           </Item>
 
           <Item location='after' name='exportButton' />
-          <Item location='after' name='searchPanel' />
+          {/* <Item location='after' name='searchPanel' /> */}
         </Toolbar>
 
         <Grouping autoExpandAll={false} />
         <ColumnFixing enabled={false} />
         <Selection mode="multiple" />
-        <SearchPanel location="left" visible={true} width={240} highlightSearchText={true} searchVisibleColumnsOnly={true} placeholder="Tìm kiếm" />
+        <SearchPanel
+          visible={true}
+          width={240}
+          highlightSearchText={true}
+          searchVisibleColumnsOnly={true}
+          placeholder="Tìm kiếm"
+        />
         <FilterRow visible={false} />
         <HeaderFilter enabled={false} visible={false} />
         <GroupPanel visible={false} />
