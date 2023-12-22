@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import "./master-detail-grid.scss"
-import "./modal.scss"
+import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
+
+import "./modal.scss";
 import 'devextreme/data/odata/store';
 import {
   Column,
@@ -11,11 +11,11 @@ import {
   Editing,
   Grouping,
   Paging,
-  // PagingPanel,
-  Popup,
+  Form,
   Pager,
   CheckBox,
   SelectBox,
+  SearchPanel,
   Lookup,
   Summary,
   RangeRule,
@@ -26,9 +26,20 @@ import {
   ValueFormat,
   ColumnFixing,
   Export,
-  Selection
+  Selection,
+  Toolbar,
+  Item,
 } from 'devextreme-react/data-grid';
+import {
+  Popup, Position, ToolbarItem
+} from 'devextreme-react/popup';
+import { Button } from "devextreme-react/button";
+import "./master-detail-grid.scss";
+import notify from 'devextreme/ui/notify';
+import WarningIcon from "../../asset/image/confirm.png";
 
+import DataSource from 'devextreme/data/data_source';
+import ArrayStore from 'devextreme/data/array_store';
 import { createStore } from 'devextreme-aspnet-data-nojquery';
 
 // Export to excel library
@@ -44,9 +55,10 @@ import { jsPDF } from "jspdf";
 import * as XLSX from "xlsx";
 import * as JSZIP from "jszip";
 import $ from 'jquery';
-import { Modal, Button } from "react-bootstrap-v5";
+import { Modal } from "react-bootstrap-v5";
 
 import readXlsxFile from 'read-excel-file';
+import { formatDate } from 'devextreme/localization';
 
 const url = 'https://js.devexpress.com/Demos/Mvc/api/DataGridWebApi';
 
@@ -56,6 +68,7 @@ const dataSource = createStore({
   insertUrl: `${url}/InsertOrder`,
   updateUrl: `${url}/UpdateOrder`,
   deleteUrl: `${url}/DeleteOrder`,
+
   onBeforeSend: (method, ajaxOptions) => {
     ajaxOptions.xhrFields = { withCredentials: true };
   },
@@ -145,22 +158,40 @@ function onExporting(e) {
 //   })
 // })
 
-
+const renderContent = () => {
+  return (
+    <>
+      <div className='warning-icon'>
+        <img src={WarningIcon} alt='icon-canh-bao' />
+      </div>
+      <p>Bạn có chắc chắn là muốn thực hiện thao tác này!</p>
+    </>
+  )
+}
 
 const MasterDetailGrid = () => {
+  const [data, setData] = useState([]);
+
   const allowedPageSizes = [50, 100, 150, 200];
   // const [items, setItems] = useState([]);
-
-  // Modal
-  const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
 
   // File upload
   const [file, setFile] = useState(null);
   const [uploadedFile, setUploadedFile] = useState();
   const [error, setError] = useState();
   const [fileContent, setFileContent] = useState('');
+
+  // Delete
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [editedItems, setEditedItems] = useState({});
+
+  // Popup confirm
+  const [isPopupVisible, setPopupVisibility] = useState(false);
+
+  const customizeColumnDate = (itemInfo) => `${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
+  const customizeDate = (itemInfo) => `First: ${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
+  const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
+  $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
 
   // const readExcel = (file) => {
   //   const promise = new Promise((resolve, reject) => {
@@ -294,139 +325,231 @@ const MasterDetailGrid = () => {
   };
   // End of upload
 
+  const dataGridRef = useRef(null);
+  const [selectedItemKeys, setSelectedItemKeys] = useState([]);
+
+  const togglePopup = useCallback(() => {
+    setPopupVisibility(!isPopupVisible);
+  }, [isPopupVisible]);
+
+  const refreshDataGrid = useCallback(() => {
+    dataGridRef.current.instance.refresh();
+  }, []);
+
+  function refreshDataGrid2() {
+    let refreshmMessage = `reload`;
+
+    dataGridRef.current.instance.refresh()
+      .then(function () {
+        notify(
+          {
+            refreshmMessage,
+            error,
+            position: {
+              my: 'right bottom',
+              at: 'right bottom',
+            },
+          },
+          'success' + refreshmMessage,
+          3000,
+        );
+      })
+      .catch(function (error) {
+        notify(
+          {
+            error,
+            position: {
+              my: 'center top',
+              at: 'center top',
+            },
+          },
+          'error',
+          3000,
+        );
+      });
+  }
+
+  const deleteRecords = useCallback(() => {
+    try {
+      selectedItemKeys.forEach((key) => {
+        dataSource.remove(key);
+      });
+      togglePopup();
+      refreshDataGrid();
+
+      let selectedAndDeletedItems = selectedItemKeys.length;
+      const customText = `Xóa thành công `;
+      const customText2 = ` mục`;
+      const message = customText + selectedAndDeletedItems + customText2;
+
+      notify(
+        {
+          message,
+          position: {
+            my: 'after bottom',
+            at: 'after bottom',
+          },
+        },
+        'success',
+        3000,
+      );
+    }
+    catch (error) {
+      notify(
+        {
+          error,
+          position: {
+            my: 'after botom',
+            at: 'after botom',
+          },
+        },
+        `error` + { error },
+        5000,
+      )
+    }
+    finally {
+      setSelectedItemKeys([]);
+      // refreshDataGrid();
+    }
+  }, [selectedItemKeys, togglePopup, refreshDataGrid]);
+
+  const onSelectionChanged = useCallback((data) => {
+    setSelectedItemKeys(data.selectedRowKeys);
+  }, []);
+
+  const sendEmail = React.useCallback(() => {
+    // const message = `Email is sent to ${currentEmployee.FirstName} ${currentEmployee.LastName}`;
+    const message = `Email is sent to`;
+    notify(
+      {
+        message,
+        position: {
+          my: 'center top',
+          at: 'center top',
+        },
+      },
+      'success',
+      3000,
+    );
+  }, []);
+
+  const getDeleteButtonOptions = useCallback(() => ({
+    text: 'Đồng ý',
+    stylingMode: 'contained',
+    onClick: deleteRecords,
+  }), [deleteRecords]);
+
+  const getCloseButtonOptions = useCallback(() => ({
+    text: 'Đóng',
+    stylingMode: 'outlined',
+    type: 'normal',
+    onClick: togglePopup,
+  }), [togglePopup]);
+
   return (
     <>
-      <div className='item-function-btn'>
-        <Button className='qi-button' variant="primary" onClick={handleShow}>
-          Nhập từ excel
-        </Button>
-      </div>
-
-      <Modal
-        show={show}
-        onHide={handleClose}
-        backdrop="static"
-        keyboard={false}
-        size="lg"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title className='modal-title-wrapper'>
-            <img className='modal-logo' src='' alt='' />
-            <p className='modal-title'>Quản lý thu phí</p>
-          </Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          <div className='item-header'>
-            <div className='item-title'>
-              <img className='icon' src='' alt='' />
-              <p>Nhập từ excel</p>
-            </div>
-
-            <div className='item-function'>
-              <div className='item-function-btn'>
-                <Button className='qi-button'>
-                  Tải file mẫu
-                </Button>
-              </div>
-
-              <div className='item-function-btn'>
-                <Button className='qi-button'>
-                  Ghi
-                </Button>
-              </div>
-
-              <div className='item-function-btn'>
-                <Button className='qi-button' variant="secondary" onClick={handleClose}>
-                  Đóng
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className='item-filter'>
-
-          </div>
-
-          <div className='upload-item-wrapper'>
-            <div className='upload-item'>
-              {/* <form name='upload-form' className='upload-file' encType="multipart/form-data">
-                <input id="input-file" type="file" />
-              </form>
-
-
-              <textarea id="xlx_json" className="form-control" rows="35" cols="120" ></textarea>
-              <button className='upload' >Tải lên</button> */}
-
-              <form name='upload-form' className='upload-file' >
-                <input id="file" type="file" onChange={handleFileChange} accept=".xls, .xlsx" />
-
-              </form>
-
-              {file && <button className='upload' onClick={handleUpload}>Tải lên</button>}
-
-              <DataGrid
-                dataSource={file}
-              />
-            </div>
-          </div>
-        </Modal.Body>
-      </Modal>
-
       <DataGrid
-        className='responsive-paddings'
-        dataSource={dataSource}
-        showBorders={true}
+        id="gridContainer"
+        className='responsive-paddings master-detail-grid'
+        allowColumnReordering={false}
+        focusedRowEnabled={true}
+        ref={dataGridRef}
         width="100%"
-        height={600}
-        remoteOperations={true}
+        height="100%"
+        dataSource={dataSource}
         onExporting={onExporting}
+        showBorders={true}
+        remoteOperations={true}
+        repaintChangesOnly={true}
+        selectedRowKeys={selectedItemKeys}
+        onSelectionChanged={onSelectionChanged}
       >
+
+
         <Editing
-          mode="row"
+          mode="popup"
+          location="center"
+          locateInMenu="auto"
           allowAdding={true}
-          allowDeleting={true}
+          allowDeleting={false}
           allowUpdating={true}
         />
 
-        {/* <Column dataField="STT" caption="STT" width={50} allowFiltering={false} allowExporting={true}>
-          <StringLengthRule max={15} message="" />
-        </Column> */}
+        <Column caption="STT"
+          dataField="STT"
 
-        <Column dataField="CustomerID" caption="Tên" fixed={true} allowFiltering={true} allowExporting={true}>
-          <Lookup dataSource={customersData} valueExpr="Value" displayExpr="Text" />
-          <StringLengthRule max={5} message="The field Customer must be a string with a maximum length of 5." />
+          fixed={true}
+          fixedPosition="left"
+          alignment='center'
+          width={80}
+          allowEditing={false}
+          allowSorting={false}
+          allowReordering={false}
+          allowSearch={false}
+          allowFiltering={false}
+          allowExporting={true}
+          cellRender={(data) => {
+            return <span>{data.rowIndex + 1}</span>;
+          }}>
+          <StringLengthRule max={3} message="" />
         </Column>
 
-        <Column dataField="OrderDate" caption="Ngày đặt hàng" dataType="date" width={150}>
+        <Column caption="Sửa"
+          type="buttons"
+          width={80}
+          fixed={true}
+          fixedPosition="left"
+        >
+          <Button name="edit" />
+        </Column>
+
+        <Column caption="ID"
+          dataField="OrderID"
+          alignment='left'
+          width={100}
+          allowEditing={false}
+          fixed={true}
+          fixedPosition="left">
+          <StringLengthRule max={5} message="The field OrderID must be a string with a maximum length of 5." />
+        </Column>
+
+        <Column caption="Họ tên"
+          dataField="ShipName"
+
+          fixed={true}
+          fixedPosition="left"
+          alignment='left'
+          dataType="string"
+          width={200}
+          allowSearch={true}
+          allowReordering={false}>
+          <StringLengthRule max={15} message="The field ShipName must be a string with a maximum length of 15." />
+        </Column>
+
+        <Column caption="Tổng tiền" dataField="Freight" dataType="number" width={120}></Column>
+        <Column caption="TP đặt hàng" dataField="ShipCountry" alignment='left' width={120}></Column>
+        <Column caption="TP giao hàng" dataField="ShipCity" alignment='left' width={150} ></Column>
+        <Column caption="Địa chỉ giao hàng" dataField="ShipAddress" alignment='left' width={150}></Column>
+
+        <Column caption="Ngày đặt hàng"
+          dataField="OrderDate"
+
+          alignment='left'
+          dataType="date"
+          width={110}
+          customizeText={customizeColumnDate} >
           <RequiredRule message="The OrderDate field is required." />
         </Column>
 
-        <Column dataField="Freight" caption="Tổng tiền" width={130} allowFiltering={true} allowExporting={true}>
-          <HeaderFilter groupInterval={100} />
-          <RangeRule min={0} message="The field Freight must be between 0 and 2000." />
-        </Column>
-
-        <Column dataField="ShipCountry" caption="Địa chỉ đặt hàng" width={200} allowFiltering={true} allowExporting={true}>
-          <StringLengthRule max={15} message="The field ShipCountry must be a string with a maximum length of 15." />
-        </Column>
-
-        <Column dataField="ShipLocation" caption="Địa chỉ giao hàng " allowFiltering={true} >
-          <StringLengthRule max={15} message="The field ShipLocation must be a string with a maximum length of 15." />
-        </Column>
-
-        <Column
-          dataField="ShipVia"
-          caption="Tên nhà vận chuyển "
-          dataType="number"
-        >
-          <Lookup dataSource={shippersData} valueExpr="Value" displayExpr="Text" />
-        </Column>
-
         <Summary>
-          <TotalItem column="Freight" summaryType="sum">
+          <TotalItem
+            name="SelectedRowsSummary"
+            column="Freight"
+            summaryType="sum"
+            valueFormat="currency" //valueFormat="#0.00"
+            showInColumn="Freight"
+            alignment="right"
+            displayFormat="Tổng: {0}">
             <ValueFormat type="decimal" precision={2} />
           </TotalItem>
 
@@ -438,16 +561,72 @@ const MasterDetailGrid = () => {
           </GroupItem>
         </Summary>
 
+        <Toolbar>
+          <Item location="left" locateInMenu="never" render={renderLabel} />
+
+          <Item location="after" name="addRowButton" />
+          <Item location="after" name='refresh' ShowTextMode="always">
+            <Button icon='refresh' widget="dxButton" onClick={refreshDataGrid} text="Tải lại" />
+          </Item>
+
+          <Item location="after" showText="always" name='mutiple-delete' widget="dxButton">
+            <Button
+              onClick={togglePopup}
+              widget="dxButton"
+              icon="trash"
+              disabled={!selectedItemKeys.length}
+              text="Xóa mục đã chọn"
+            />
+          </Item>
+
+          <Item location='after' name='exportButton' />
+          {/* <Item location='after' name='searchPanel' /> */}
+        </Toolbar>
+
         <Grouping autoExpandAll={false} />
-        <ColumnFixing enabled={true} />
+        <ColumnFixing enabled={false} />
         <Selection mode="multiple" />
-        <FilterRow visible={true} />
-        <HeaderFilter enabled={true} visible={true} />
+        <SearchPanel
+          visible={true}
+          width={240}
+          highlightSearchText={true}
+          searchVisibleColumnsOnly={true}
+          placeholder="Tìm kiếm"
+        />
+        <FilterRow visible={false} />
+        <HeaderFilter enabled={false} visible={false} />
         <GroupPanel visible={false} />
         <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
         <Paging enabled={true} defaultPageSize={50} defaultPageIndex={1} />
-      </DataGrid >
+      </DataGrid>
 
+      <Popup
+        id="popup"
+        contentRender={renderContent}
+        visible={isPopupVisible}
+        hideOnOutsideClick={true}
+        onHiding={togglePopup}
+        dragEnabled={false}
+        showCloseButton={true}
+        showTitle={true}
+        title="Thông báo"
+        container=".dx-viewport"
+        width={500}
+        height={300}
+      >
+        <ToolbarItem
+          widget="dxButton"
+          toolbar="bottom"
+          location="center"
+          options={getDeleteButtonOptions()}
+        />
+        <ToolbarItem
+          widget="dxButton"
+          toolbar="bottom"
+          location="center"
+          options={getCloseButtonOptions()}
+        />
+      </Popup>
     </>
   );
 }

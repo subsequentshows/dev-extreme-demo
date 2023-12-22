@@ -24,11 +24,6 @@ export const navigation = [
     icon: "folder",
   },
   {
-    text: "User Page",
-    path: "/user",
-    icon: "folder",
-  },
-  {
     text: "Access Denied",
     path: "/access-denied",
     icon: "folder",
@@ -37,5 +32,15 @@ export const navigation = [
     text: "Phan Quyen",
     path: "/phan-quyen",
     icon: "folder",
+  },
+  {
+    text: "Users Page",
+    path: "/users",
+    icon: "globe",
+  },
+  {
+    text: "Demo Data Grid",
+    path: "/demo-data-grid",
+    icon: "globe",
   },
 ];

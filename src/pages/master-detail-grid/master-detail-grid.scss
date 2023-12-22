@@ -111,3 +111,63 @@
 .dx-datagrid {
   padding: 15px;
 }
+
+.dx-row .dx-header-row,
+.dx-datagrid-headers .dx-datagrid-nowrap {
+  background-color: #0071a6 !important;
+}
+
+.dx-datagrid-headers,
+.dx-header-row {
+  background-color: #0071a6 !important;
+  color: #fff;
+
+  td:hover {
+    div {
+      color: #fff;
+    }
+  }
+}
+
+.dx-datagrid-header-panel {
+  border-bottom: 1px solid #e0e0e0 !important;
+  padding: 0 16px;
+  background-color: #fff;
+  margin-bottom: 15px;
+
+
+}
+
+// .dx-dropdownbutton.dx-dropdownbutton-has-arrow .dx-button-has-icon.dx-buttongroup-last-item .dx-button-content {
+//   background-color: #0071a6;
+//   padding: 7px;
+
+//   & i {
+//     color: #fff;
+//   }
+// }
+
+.master-detail-grid {
+  max-width: 100% !important;
+  min-height: 200px;
+  max-height: 500px;
+
+  @media (min-height: 800px) {
+    min-height: 200px;
+    max-height: 700px;
+  }
+}
+
+.warning-icon {
+  background-color: transparent;
+  text-align: center;
+}
+
+.dx-popup-content {
+  padding: 15px;
+  height: unset !important;
+
+  p {
+    text-align: center;
+  }
+}

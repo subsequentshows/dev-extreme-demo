@@ -20,7 +20,8 @@ import {
   GridCompoment,
   ColumnDirective,
   Inject,
-  Page
+  Page,
+  Button
 } from 'devextreme-react/data-grid';
 
 // import { EditingState } from 'devexpress/dx-react-grid';
@@ -45,7 +46,17 @@ const DemoPage = () => {
         height={600}
         remoteOperations={true}
       >
+        <Editing
+          mode="row"
+          useIcons={true}
+          allowUpdating={true}
+          allowDeleting={false}
+        />
+        <Column type="buttons" width={110}>
+          <Button name="edit" />
+          <Button name="delete" />
 
+        </Column>
       </DataGrid>
     </>
   );

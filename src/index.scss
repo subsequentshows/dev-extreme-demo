@@ -1,0 +1,143 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.dx-pager {
+  padding: 13px 16px 0;
+}
+
+.dx-row .dx-header-row,
+.dx-datagrid-headers .dx-datagrid-nowrap {
+  background-color: #0071a6;
+}
+
+.dx-scrollview-content {
+  background-color: #fff;
+
+  .dx-datagrid {
+    padding: 0;
+  }
+}
+
+.toolbar-label {
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.dx-datagrid-header-panel {
+  padding: 0;
+}
+
+.dx-dropdownbutton.dx-dropdownbutton-has-arrow .dx-button-has-icon.dx-buttongroup-last-item .dx-button-content {
+  background-color: #0071a6;
+  padding: 7px;
+
+  & i {
+    color: #fff;
+  }
+}
+
+#data-grid-demo {
+  min-height: 700px;
+}
+
+#gridDeleteSelected {
+  position: absolute;
+  z-index: 1;
+  right: 0;
+  margin: 1px;
+  top: 0;
+}
+
+#gridDeleteSelected .dx-button-text {
+  line-height: 0;
+}
+
+.dx-toolbar-item-content .dx-button-text {
+  text-transform: none;
+}
+
+.dx-texteditor.dx-state-focused::before {
+  border-bottom: transparent;
+}
+
+.dx-texteditor.dx-editor-filled.dx-state-hover::after {
+  border-bottom: 1px solid rgba(0, 0, 0, .42);
+}
+
+.dx-texteditor.dx-editor-filled.dx-state-readonly {
+  background-color: lightgray;
+  cursor: pointer;
+  border-bottom: transparent;
+
+  &:hover {
+    background-color: lightgray;
+    cursor: pointer;
+  }
+}
+
+.dx-datagrid-action.dx-cell-focus-disabled {
+  &:hover {
+
+    .dx-datagrid-text-content {
+      color: #fff !important;
+    }
+  }
+}
+
+.dx-datagrid-headers .dx-datagrid-table .dx-row>td .dx-sort-indicator,
+.dx-datagrid-headers .dx-datagrid-table .dx-row>td .dx-sort {
+  color: #fff !important;
+}
+
+.dx-datagrid-rowsview .dx-row-focused.dx-data-row>td:not(.dx-focused):not(.dx-cell-modified):not(.dx-datagrid-invalid) {
+  background-color: #d0ecff;
+  border-top: 1px solid #d0ecff;
+  border-bottom: 1px solid #d0ecff;
+  color: rgba(0, 0, 0, .87);
+}
+
+.dx-datagrid-rowsview .dx-row-focused.dx-data-row .dx-command-edit .dx-link {
+  background-color: #d0ecff;
+  color: #0071a6;
+}
+
+.dx-datagrid .dx-link {
+  color: #0071a6;
+}
+
+.dx-datagrid-rowsview .dx-row-focused.dx-data-row .dx-command-edit .dx-link {
+  background-color: #d0ecff;
+  color: #0071a6;
+
+  &:focus {
+    color: #0071a6;
+    background-color: #d0ecff;
+  }
+}
+
+
+
+.dx-pager .dx-pages .dx-page {
+  color: rgba(0, 0, 0, .87);
+  border: 0.3px solid #ccc;
+  border-radius: 0;
+  margin: 0;
+}
+
+// .dx-selection,
+.dx-pager .dx-pages .dx-selection {
+  background-color: #0071a6;
+  color: #fff;
+}

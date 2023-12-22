@@ -1,5 +1,6 @@
 import React from 'react';
 import './access-denied.scss';
+import $ from 'jquery';
 
 const AccessDenied = () => (
   <>

@@ -1,5 +1,22 @@
 @import "../../themes/generated/variables.base.scss";
 
+$color_1: #FDD835;
+$color_2: white;
+
+.with-footer {
+  >.dx-scrollable-wrapper {
+    >.dx-scrollable-container {
+      >.dx-scrollable-content {
+        >.dx-scrollview-content {
+          min-height: 100vh;
+          padding-bottom: 100px;
+          position: relative;
+        }
+      }
+    }
+  }
+}
+
 .copyright-section {
   background: -o-linear-gradient(192.3deg, #0096DB 0%, #0063C6 41.37%);
   background: linear-gradient(257.7deg, #0096DB 0%, #0063C6 41.37%);
@@ -23,45 +40,56 @@
   -webkit-box-pack: end;
   -ms-flex-pack: end;
   justify-content: flex-end;
+
+  .hotline-and-email {
+    margin-left: 5px;
+    display: -webkit-inline-box;
+    display: -ms-inline-flexbox;
+    display: inline-flex;
+
+    p {
+      &:first-child {
+        margin-right: 5px;
+      }
+    }
+  }
+
+  .copyright-title {
+    color: $color_1;
+    font-size: 17px;
+    height: 20px;
+    line-height: 20px;
+    text-transform: uppercase;
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  span {
+    color: $color_2;
+    font-size: 15px;
+    height: 18px;
+    line-height: 18px;
+  }
+
+  p {
+    color: $color_2;
+    font-size: 15px;
+    height: 18px;
+    line-height: 18px;
+  }
+
+  .qi-color {
+    color: $color_1;
+  }
 }
 
-.copyright-section .hotline-and-email {
-  margin-left: 5px;
-  display: -webkit-inline-box;
-  display: -ms-inline-flexbox;
-  display: inline-flex;
+.login-right {
+  .rcbInputCell {
+    min-height: 36px;
+    height: 100%;
+  }
 }
 
-.copyright-section .hotline-and-email p:first-child {
-  margin-right: 5px;
-}
-
-.login-right .rcbInputCell {
-  min-height: 36px;
-  height: 100%;
-}
-
-.copyright-section .copyright-title {
-  color: #FDD835;
-  font-size: 17px;
-  height: 20px;
-  line-height: 20px;
-  text-transform: uppercase;
-  width: 100%;
-  margin-bottom: 5px;
-}
-
-.copyright-section span,
-.copyright-section p {
-  color: white;
-  font-size: 15px;
-  height: 18px;
-  line-height: 18px;
-}
-
-.copyright-section .qi-color {
-  color: #FDD835;
-}
 
 .content-block {
   margin-left: 0;
