@@ -508,36 +508,49 @@ const MasterDetailGrid = () => {
           alignment='left'
           width={100}
           allowEditing={false}
+          allowFiltering={false}
           fixed={true}
-          fixedPosition="left">
+          fixedPosition="left"
+          selectedFilterOperation="contains"
+        >
           <StringLengthRule max={5} message="The field OrderID must be a string with a maximum length of 5." />
         </Column>
 
         <Column caption="Họ tên"
           dataField="ShipName"
-
+          allowHeaderFiltering={true}
           fixed={true}
           fixedPosition="left"
           alignment='left'
           dataType="string"
           width={200}
           allowSearch={true}
-          allowReordering={false}>
+          allowReordering={false}
+          selectedFilterOperation="contains"
+        >
           <StringLengthRule max={15} message="The field ShipName must be a string with a maximum length of 15." />
         </Column>
 
-        <Column caption="Tổng tiền" dataField="Freight" dataType="number" width={120}></Column>
-        <Column caption="TP đặt hàng" dataField="ShipCountry" alignment='left' width={120}></Column>
-        <Column caption="TP giao hàng" dataField="ShipCity" alignment='left' width={150} ></Column>
-        <Column caption="Địa chỉ giao hàng" dataField="ShipAddress" alignment='left' width={150}></Column>
+        <Column caption="Tổng tiền"
+          allowHeaderFiltering={false}
+          filterType='numberic'
+          selectedFilterOperation="contains"
+          allowFiltering={false}
+          dataField="Freight" dataType="number" width={120}>
+        </Column>
+
+        <Column caption="TP đặt hàng" dataField="ShipCountry" alignment='left' selectedFilterOperation="contains" width={120}></Column>
+        <Column caption="TP giao hàng" dataField="ShipCity" alignment='left' selectedFilterOperation="contains" width={150} ></Column>
+        <Column caption="Địa chỉ giao hàng" dataField="ShipAddress" alignment='left' selectedFilterOperation="contains" width={150}></Column>
 
         <Column caption="Ngày đặt hàng"
           dataField="OrderDate"
-
           alignment='left'
           dataType="date"
           width={110}
-          customizeText={customizeColumnDate} >
+          customizeText={customizeColumnDate}
+          selectedFilterOperation="contains"
+        >
           <RequiredRule message="The OrderDate field is required." />
         </Column>
 
@@ -593,11 +606,11 @@ const MasterDetailGrid = () => {
           searchVisibleColumnsOnly={true}
           placeholder="Tìm kiếm"
         />
-        <FilterRow visible={false} />
+        <FilterRow visible={true} allowFiltering={true} />
         <HeaderFilter enabled={false} visible={false} />
         <GroupPanel visible={false} />
         <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
-        <Paging enabled={true} defaultPageSize={50} defaultPageIndex={1} />
+        <Paging enabled={true} defaultPageSize={50} defaultPageIndex={0} />
       </DataGrid>
 
       <Popup

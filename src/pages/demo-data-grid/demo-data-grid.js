@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useEffect, useState } from 'react';
-import DataGrid, { Column, Editing, Paging, Form, Selection, Lookup, LoadPanel, Toolbar, Item, DataGridTypes }
+import DataGrid, { Column, Editing, Paging, Form, Selection, Lookup, LoadPanel, Toolbar, Item, DataGridTypes, FilterRow }
   from 'devextreme-react/data-grid';
 import {
   Popup
@@ -7,8 +7,9 @@ import {
 import { Button } from 'devextreme-react/button';
 import { createStore } from 'devextreme-aspnet-data-nojquery';
 import FileUploader, { FileUploaderTypes } from 'devextreme-react/file-uploader';
-import 'whatwg-fetch';
+import TextBox from 'devextreme-react/text-box';
 import notify from 'devextreme/ui/notify';
+import 'whatwg-fetch';
 import './demo-data-grid.scss';
 
 import { jsPDF } from "jspdf";
@@ -22,7 +23,10 @@ import { Modal } from "react-bootstrap-v5";
 import readXlsxFile from 'read-excel-file';
 
 const URL = 'https://js.devexpress.com/Demos/Mvc/api/DataGridBatchUpdateWebApi';
-const uploadUrl = ""
+
+// const uploadUrl = "https://localhost:44300/upload";
+const uploadUrl = "https://js.devexpress.com/Demos/NetCore/FileUploader/Upload";
+
 const ordersStore = createStore({
   key: 'OrderID',
   loadUrl: `${URL}/Orders`,
@@ -30,7 +34,6 @@ const ordersStore = createStore({
     ajaxOptions.xhrFields = { withCredentials: true };
   },
 });
-
 
 async function sendBatchRequest(url, changes) {
   const result = await fetch(url, {
@@ -57,12 +60,11 @@ async function processBatchRequest(url, changes, component) {
 
 // let uploadedFileValue = $("#fileUploaderContainer").dxFileUploader("option", "value");
 
-const fileExtensions = ['.jpg', '.jpeg', '.gif', '.png'];
+const fileExtensions = ['.xls', '.xlsx'];
 
 const DemoDataGrid = ({ onSelected, onDelete }) => {
   const [multiple, setMultiple] = useState(false);
   const [uploadMode, setUploadMode] = useState('instantly');
-  const [accept, setAccept] = useState('*');
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   // var ExcelToJSON = function () {
@@ -153,7 +155,7 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
   //   }
   // };
 
-  const onSaving = React.useCallback((e) => {
+  const onSaving = useCallback((e) => {
     e.cancel = true;
 
     if (e.changes.length) {
@@ -169,21 +171,21 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
     setPopupVisibility(!isPopupVisible);
   };
 
-  const onSelectedFilesChanged = React.useCallback((e) => {
+  const onSelectedFilesChanged = useCallback((e) => {
     setSelectedFiles(e.value);
   }, [setSelectedFiles]);
 
-  const onAcceptChanged = React.useCallback((e) => {
-    setAccept(e.value);
-  }, [setAccept]);
-
-  const onUploadModeChanged = React.useCallback((e) => {
+  const onUploadModeChanged = useCallback((e) => {
     setUploadMode(e.value);
   }, [setUploadMode]);
 
-  const onMultipleChanged = React.useCallback((e) => {
-    setMultiple(e.value);
-  }, [setMultiple]);
+
+  const formElement = useRef(null);
+
+  const onClick = useCallback(() => {
+    notify('Uncomment the line to enable sending a form to the server.');
+    formElement.current.submit();
+  }, []);
 
   return (
     <React.Fragment>
@@ -212,15 +214,15 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
             <Column dataField="OrderDate" dataType="date"></Column>
             <Column dataField="Freight"></Column>
 
-            {/* <Editing
-              mode="batch"
+            <Editing
+              mode="row"
               location="center"
               locateInMenu="auto"
               allowAdding={true}
               allowDeleting={true}
               allowUpdating={true}
-            /> */}
-            <Selection mode="multiple" />
+            />
+
             <Toolbar>
               <Item
                 location="left"
@@ -237,10 +239,6 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
                 name="columnChooserButton"
               />
             </Toolbar>
-
-
-
-
           </DataGrid>
 
           <Popup
@@ -248,7 +246,7 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
             showTitle={true}
             title="Nhập từ excel"
             visible={isPopupVisible}
-            hideOnOutsideClick={true}
+            hideOnOutsideClick={false}
             showCloseButton={true}
             onHiding={togglePopup}
             width={1000}
@@ -256,6 +254,7 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
             position="center"
             dragEnabled={false}
             resizeEnabled={false}
+            maxFileSize={2000000}
           >
 
             {/* <FileUploader
@@ -265,29 +264,47 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
               uploadUrl="https://js.devexpress.com/Demos/NetCore/FileUploader/Upload"
               onValueChanged={onSelectedFilesChanged}
             /> */}
+            <div>
+              <FileUploader
+                multiple={false}
+                // uploadMode="useButtons"
+                uploadMode={uploadMode}
+                uploadUrl={uploadUrl}
+                allowedFileExtensions={fileExtensions}
+                onValueChanged={onSelectedFilesChanged}
+              />
+              <span className="note">{'Allowed file extensions: '}
+                <span>.xls, .xlsx</span>
+              </span>
 
-            <FileUploader
-              multiple={false}
-              accept={accept}
-              uploadMode="useButtons"
-              uploadUrl={uploadUrl}
-              allowedFileExtensions={fileExtensions} />
-
-            <div className="content" style={{ display: selectedFiles.length > 0 ? 'block' : 'none' }}>
-              <div>
-                <h4>Selected Files</h4>
-                {selectedFiles.map((file, i) => (
-                  <div className="selected-item" key={i}>
-                    <span>{`Name: ${file.name}`}<br /></span>
-                    <span>{`Size ${file.size}`}<br /></span>
-                    <span>{`Type ${file.type}`}<br /></span>
-                    <span>{`Last Modified Date: ${file.lastModifiedDate}`}</span>
-                  </div>
-                ))}
+              <div className="content" style={{ display: selectedFiles.length > 0 ? 'block' : 'none' }}>
+                <div>
+                  <h4>Selected Files</h4>
+                  {selectedFiles.map((file, i) => (
+                    <div className="selected-item" key={i}>
+                      <span>{`Name: ${file.name}`}<br /></span>
+                      <span>{`Size ${file.size}`}<br /></span>
+                      <span>{`Type ${file.type}`}<br /></span>
+                      <span>{`Last Modified Date: ${file.lastModifiedDate}`}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
+            </div>
+
+            <div>
+              <form id="form" ref={formElement} method="post" action="" encType="multipart/form-data">
+                <div className="fileuploader-container">
+                  <FileUploader selectButtonText="Select photo" labelText="" uploadMode="useForm" />
+
+                </div>
+                <Button className="button" text="Update profile" type="success" onClick={onClick} />
+              </form>
             </div>
           </Popup>
 
+          <Selection mode="multiple" />
+          <FilterRow visible={true} />
         </div>
       </div>
     </React.Fragment>
