@@ -171,6 +171,8 @@ const renderContent = () => {
 
 const MasterDetailGrid = () => {
   const [data, setData] = useState([]);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(50);
 
   const allowedPageSizes = [50, 100, 150, 200];
   // const [items, setItems] = useState([]);
@@ -182,8 +184,8 @@ const MasterDetailGrid = () => {
   const [fileContent, setFileContent] = useState('');
 
   // Delete
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [editedItems, setEditedItems] = useState({});
+  const dataGridRef = useRef(null);
+  const [selectedItemKeys, setSelectedItemKeys] = useState([]);
 
   // Popup confirm
   const [isPopupVisible, setPopupVisibility] = useState(false);
@@ -325,9 +327,6 @@ const MasterDetailGrid = () => {
   };
   // End of upload
 
-  const dataGridRef = useRef(null);
-  const [selectedItemKeys, setSelectedItemKeys] = useState([]);
-
   const togglePopup = useCallback(() => {
     setPopupVisibility(!isPopupVisible);
   }, [isPopupVisible]);
@@ -336,46 +335,12 @@ const MasterDetailGrid = () => {
     dataGridRef.current.instance.refresh();
   }, []);
 
-  function refreshDataGrid2() {
-    let refreshmMessage = `reload`;
-
-    dataGridRef.current.instance.refresh()
-      .then(function () {
-        notify(
-          {
-            refreshmMessage,
-            error,
-            position: {
-              my: 'right bottom',
-              at: 'right bottom',
-            },
-          },
-          'success' + refreshmMessage,
-          3000,
-        );
-      })
-      .catch(function (error) {
-        notify(
-          {
-            error,
-            position: {
-              my: 'center top',
-              at: 'center top',
-            },
-          },
-          'error',
-          3000,
-        );
-      });
-  }
-
   const deleteRecords = useCallback(() => {
     try {
       selectedItemKeys.forEach((key) => {
         dataSource.remove(key);
       });
       togglePopup();
-      refreshDataGrid();
 
       let selectedAndDeletedItems = selectedItemKeys.length;
       const customText = `Xóa thành công `;
@@ -409,28 +374,12 @@ const MasterDetailGrid = () => {
     }
     finally {
       setSelectedItemKeys([]);
-      // refreshDataGrid();
+      refreshDataGrid();
     }
   }, [selectedItemKeys, togglePopup, refreshDataGrid]);
 
   const onSelectionChanged = useCallback((data) => {
     setSelectedItemKeys(data.selectedRowKeys);
-  }, []);
-
-  const sendEmail = React.useCallback(() => {
-    // const message = `Email is sent to ${currentEmployee.FirstName} ${currentEmployee.LastName}`;
-    const message = `Email is sent to`;
-    notify(
-      {
-        message,
-        position: {
-          my: 'center top',
-          at: 'center top',
-        },
-      },
-      'success',
-      3000,
-    );
   }, []);
 
   const getDeleteButtonOptions = useCallback(() => ({
@@ -445,6 +394,18 @@ const MasterDetailGrid = () => {
     type: 'normal',
     onClick: togglePopup,
   }), [togglePopup]);
+
+
+  const onPageChanged = (e) => {
+    setCurrentPageIndex(e.component.pageIndex());
+  };
+
+  const rowIndexes = (data) => {
+    const pageIndex = data.component.pageIndex();
+    const pageSize = data.component.pageSize();
+    const rowIndex = pageIndex * pageSize + data.rowIndex + 1;
+    return <span> {rowIndex} </span>;
+  }
 
   return (
     <>
@@ -463,9 +424,8 @@ const MasterDetailGrid = () => {
         repaintChangesOnly={true}
         selectedRowKeys={selectedItemKeys}
         onSelectionChanged={onSelectionChanged}
+        onPageChanged={onPageChanged}
       >
-
-
         <Editing
           mode="popup"
           location="center"
@@ -475,9 +435,9 @@ const MasterDetailGrid = () => {
           allowUpdating={true}
         />
 
-        <Column caption="STT"
+        <Column
+          caption="STT"
           dataField="STT"
-
           fixed={true}
           fixedPosition="left"
           alignment='center'
@@ -488,9 +448,8 @@ const MasterDetailGrid = () => {
           allowSearch={false}
           allowFiltering={false}
           allowExporting={true}
-          cellRender={(data) => {
-            return <span>{data.rowIndex + 1}</span>;
-          }}>
+          cellRender={rowIndexes}
+        >
           <StringLengthRule max={3} message="" />
         </Column>
 
@@ -512,6 +471,7 @@ const MasterDetailGrid = () => {
           fixed={true}
           fixedPosition="left"
           selectedFilterOperation="contains"
+          filterOperations={['contains']}
         >
           <StringLengthRule max={5} message="The field OrderID must be a string with a maximum length of 5." />
         </Column>
@@ -527,6 +487,7 @@ const MasterDetailGrid = () => {
           allowSearch={true}
           allowReordering={false}
           selectedFilterOperation="contains"
+          filterOperations={['contains']}
         >
           <StringLengthRule max={15} message="The field ShipName must be a string with a maximum length of 15." />
         </Column>
@@ -536,22 +497,31 @@ const MasterDetailGrid = () => {
           filterType='numberic'
           selectedFilterOperation="contains"
           allowFiltering={false}
-          dataField="Freight" dataType="number" width={120}>
+          dataField="Freight" dataType="number" width={150}
+          filterOperations={['contains']}>
         </Column>
 
-        <Column caption="TP đặt hàng" dataField="ShipCountry" alignment='left' selectedFilterOperation="contains" width={120}></Column>
-        <Column caption="TP giao hàng" dataField="ShipCity" alignment='left' selectedFilterOperation="contains" width={150} ></Column>
-        <Column caption="Địa chỉ giao hàng" dataField="ShipAddress" alignment='left' selectedFilterOperation="contains" width={150}></Column>
+        <Column caption="TP đặt hàng" dataField="ShipCountry" alignment='left' selectedFilterOperation="contains" width={120} filterOperations={['contains']}></Column>
+        <Column caption="TP giao hàng" dataField="ShipCity" alignment='left' selectedFilterOperation="contains" width={150} filterOperations={['contains']}></Column>
+        <Column caption="Địa chỉ giao hàng" dataField="ShipAddress" alignment='left' selectedFilterOperation="contains" width={150} filterOperations={['contains']}></Column>
 
         <Column caption="Ngày đặt hàng"
           dataField="OrderDate"
           alignment='left'
           dataType="date"
-          width={110}
+          width={150}
           customizeText={customizeColumnDate}
           selectedFilterOperation="contains"
+          filterOperations={['contains']}
         >
           <RequiredRule message="The OrderDate field is required." />
+        </Column>
+
+        <Column caption=""
+          visible={true}
+          allowEditing={false}
+          allowExporting={false}
+        >
         </Column>
 
         <Summary>
@@ -576,12 +546,7 @@ const MasterDetailGrid = () => {
 
         <Toolbar>
           <Item location="left" locateInMenu="never" render={renderLabel} />
-
           <Item location="after" name="addRowButton" />
-          <Item location="after" name='refresh' ShowTextMode="always">
-            <Button icon='refresh' widget="dxButton" onClick={refreshDataGrid} text="Tải lại" />
-          </Item>
-
           <Item location="after" showText="always" name='mutiple-delete' widget="dxButton">
             <Button
               onClick={togglePopup}
@@ -593,7 +558,6 @@ const MasterDetailGrid = () => {
           </Item>
 
           <Item location='after' name='exportButton' />
-          {/* <Item location='after' name='searchPanel' /> */}
         </Toolbar>
 
         <Grouping autoExpandAll={false} />
@@ -606,7 +570,7 @@ const MasterDetailGrid = () => {
           searchVisibleColumnsOnly={true}
           placeholder="Tìm kiếm"
         />
-        <FilterRow visible={true} allowFiltering={true} />
+        <FilterRow visible={true} allowFiltering={true} showResetValues={false} />
         <HeaderFilter enabled={false} visible={false} />
         <GroupPanel visible={false} />
         <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />

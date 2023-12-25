@@ -8,3 +8,4 @@ export { default as PhanQuyenPage } from "./phan-quyen/phan-quyen";
 export { default as UsersPage } from "./users/users";
 export { default as DemoDataGridPage } from "./demo-data-grid/demo-data-grid";
 export { default as RowEditPage } from "./Row-Edit/Row-Edit";
+export { default as ErrorPagePage } from './error-page/error-page';

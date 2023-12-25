@@ -26,13 +26,13 @@ const URL = 'https://js.devexpress.com/Demos/Mvc/api/DataGridBatchUpdateWebApi';
 // const uploadUrl = "https://localhost:44300/upload";
 const uploadUrl = "https://js.devexpress.com/Demos/NetCore/FileUploader/Upload";
 
-// const ordersStore = createStore({
-//   key: 'OrderID',
-//   loadUrl: `${URL}/Orders`,
-//   onBeforeSend: (method, ajaxOptions) => {
-//     ajaxOptions.xhrFields = { withCredentials: true };
-//   },
-// });
+const ordersStore = createStore({
+  key: 'OrderID',
+  loadUrl: `${URL}/Orders`,
+  onBeforeSend: (method, ajaxOptions) => {
+    ajaxOptions.xhrFields = { withCredentials: true };
+  },
+});
 
 function handleErrors(response) {
   if (!response.ok) {
@@ -112,10 +112,11 @@ async function processBatchRequest(url, changes, component) {
 
 const fileExtensions = ['.xls', '.xlsx'];
 
-const DemoDataGrid = ({ onSelected, onDelete }) => {
+const DemoDataGrid = () => {
   const [multiple, setMultiple] = useState(false);
   const [uploadMode, setUploadMode] = useState('instantly');
   const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploadedData, setUploadedData] = useState(null);
 
   const [selectTextOnEditStart, setSelectTextOnEditStart] = useState(true);
   const [startEditAction, setStartEditAction] = useState('click');
@@ -213,6 +214,25 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
   //   }
   // };
 
+  const handleFileUpload = async (file) => {
+    try {
+      const data = await readXlsxFile(file);
+      setUploadedData(data);
+      // notify('File uploaded successfully!');
+    } catch (error) {
+      console.error('Error reading file:', error);
+      notify('Error reading file. Please check the file format.');
+    }
+  };
+
+  const onSelectedFilesChanged = useCallback((e) => {
+    setSelectedFiles(e.value);
+    if (e.value.length > 0) {
+      // Handle file upload when a file is selected
+      handleFileUpload(e.value[0]);
+    }
+  }, [setSelectedFiles]);
+
   const onSaving = useCallback((e) => {
     e.cancel = true;
 
@@ -229,9 +249,9 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
     setPopupVisibility(!isPopupVisible);
   }, [isPopupVisible]);
 
-  const onSelectedFilesChanged = useCallback((e) => {
-    setSelectedFiles(e.value);
-  }, [setSelectedFiles]);
+  // const onSelectedFilesChanged = useCallback((e) => {
+  //   setSelectedFiles(e.value);
+  // }, [setSelectedFiles]);
 
   const onUploadModeChanged = useCallback((e) => {
     setUploadMode(e.value);
@@ -270,119 +290,104 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
       <h2 className={'content-block'}>Demo Data Grid</h2>
 
       <div className={'content-block'}>
-        <div onSelect={onSelected} onClick={onDelete} className={'dx-card responsive-paddings'}>
 
-          <DataGrid
-            id="gridContainer"
-            dataSource={dataSource}
-            showBorders={true}
-            remoteOperations={true}
-            repaintChangesOnly={true}
-            onSaving={onSaving}
-            // onSelectionChanged={onSelectionChanged}
-            allowColumnReordering={false}
-            focusedRowEnabled={true}
-            ref={dataGridRef}
-            width="100%"
-            height="100%"
-            selectedRowKeys={selectedItemKeys}
-          >
-            <Editing
-              mode="batch"
-              location="center"
-              locateInMenu="auto"
-              allowAdding={true}
-              allowUpdating={true}
-              allowDeleting={false}
-              confirmDelete={false}
-              selectTextOnEditStart={selectTextOnEditStart}
-              startEditAction={startEditAction}
+        <DataGrid
+          id="gridContainer"
+          dataSource={ordersStore}
+          showBorders={true}
+          remoteOperations={true}
+          repaintChangesOnly={true}
+          onSaving={onSaving}
+          // onSelectionChanged={onSelectionChanged}
+          allowColumnReordering={false}
+          focusedRowEnabled={true}
+          ref={dataGridRef}
+          width="100%"
+          height="100%"
+          selectedRowKeys={selectedItemKeys}
+        >
+          <Editing
+            mode="batch"
+            location="center"
+            locateInMenu="auto"
+            allowAdding={true}
+            allowUpdating={true}
+            allowDeleting={false}
+            confirmDelete={false}
+            selectTextOnEditStart={selectTextOnEditStart}
+            startEditAction={startEditAction}
+          />
+
+          <Column dataField="STT" width={60} allowEditing={false}></Column>
+          <Column dataField="OrderID" width={100} allowEditing={false}></Column>
+          <Column dataField="ShipName" ></Column>
+          <Column dataField="ShipCountry"></Column>
+          <Column dataField="ShipCity"></Column>
+          <Column dataField="ShipAddress"></Column>
+          <Column dataField="OrderDate" dataType="date"></Column>
+          <Column dataField="Freight"></Column>
+
+          <Toolbar>
+            <Item location="left" locateInMenu="never" render={renderLabel} />
+
+            <Item location="after" name="addRowButton" />
+            <Item location='after' name='saveButton' options={buttonOptions} />
+
+            <Item location="after" widget="dxButton" >
+              <Button text="Nhập từ excel" onClick={togglePopup} />
+            </Item>
+
+            <Item locateInMenu="auto" widget="dxButton">
+              <Button text="Ghi" options={saveButtonOptions} />
+            </Item>
+
+            <Item location='after' name='exportButton' />
+          </Toolbar>
+        </DataGrid>
+
+        <Popup
+          id="popup"
+          showTitle={true}
+          title="Nhập từ excel"
+          visible={isPopupVisible}
+          hideOnOutsideClick={false}
+          showCloseButton={true}
+          onHiding={togglePopup}
+          width={1000}
+          height={500}
+          position="center"
+          dragEnabled={false}
+          resizeEnabled={false}
+          maxFileSize={2000000}
+        >
+          <div>
+            <FileUploader
+              multiple={false}
+              // uploadMode="useButtons"
+              uploadMode={uploadMode}
+              uploadUrl={uploadUrl}
+              allowedFileExtensions={fileExtensions}
+              onValueChanged={onSelectedFilesChanged}
             />
+            <span className="note">{' : '}
+              <span>.xls, .xlsx</span>
+            </span>
+          </div>
 
-            <Column dataField="STT" width={60} allowEditing={false}></Column>
-            <Column dataField="OrderID" width={100} allowEditing={false}></Column>
-            <Column dataField="ShipName" ></Column>
-            <Column dataField="ShipCountry"></Column>
-            <Column dataField="ShipCity"></Column>
-            <Column dataField="ShipAddress"></Column>
-            <Column dataField="OrderDate" dataType="date"></Column>
-            <Column dataField="Freight"></Column>
+          <div className=''>
+            <form id="form" ref={formElement} method="post" action="" encType="multipart/form-data">
+              <DataGrid
+                className='uploaded-data'
+                dataSource={uploadedData}
+              ></DataGrid>
 
-            <Toolbar>
-              <Item location="left" locateInMenu="never" render={renderLabel} />
+              <Button className="submit-button" text="Thêm" type="success" onClick={onClick} />
+            </form>
+          </div>
+        </Popup>
 
-              <Item location="after" name="addRowButton" />
-              <Item location='after' name='saveButton' options={buttonOptions} />
-
-              <Item location="after" widget="dxButton" >
-                <Button text="Nhập từ excel" onClick={togglePopup} />
-              </Item>
-
-              <Item locateInMenu="auto" widget="dxButton">
-                <Button text="Ghi" options={saveButtonOptions} />
-              </Item>
-
-              <Item location='after' name='exportButton' />
-            </Toolbar>
-          </DataGrid>
-
-          <Popup
-            id="popup"
-            showTitle={true}
-            title="Nhập từ excel"
-            visible={isPopupVisible}
-            hideOnOutsideClick={false}
-            showCloseButton={true}
-            onHiding={togglePopup}
-            width={1000}
-            height={500}
-            position="center"
-            dragEnabled={false}
-            resizeEnabled={false}
-            maxFileSize={2000000}
-          >
-            <div>
-              <FileUploader
-                multiple={false}
-                // uploadMode="useButtons"
-                uploadMode={uploadMode}
-                uploadUrl={uploadUrl}
-                allowedFileExtensions={fileExtensions}
-                onValueChanged={onSelectedFilesChanged}
-              />
-              <span className="note">{'Allowed file extensions: '}
-                <span>.xls, .xlsx</span>
-              </span>
-
-              <div className="content" style={{ display: selectedFiles.length > 0 ? 'block' : 'none' }}>
-                <div>
-                  <h4>Selected Files</h4>
-                  {selectedFiles.map((file, i) => (
-                    <div className="selected-item" key={i}>
-                      <span>{`Name: ${file.name}`}<br /></span>
-                      <span>{`Size ${file.size}`}<br /></span>
-                      <span>{`Type ${file.type}`}<br /></span>
-                      <span>{`Last Modified Date: ${file.lastModifiedDate}`}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className=''>
-              <form id="form" ref={formElement} method="post" action="" encType="multipart/form-data">
-                <div className="fileuploader-container">
-                  <FileUploader selectButtonText="Select photo" labelText="" uploadMode="useForm" />
-                </div>
-
-                <Button className="button" text="Update profile" type="success" onClick={onClick} />
-              </form>
-            </div>
-          </Popup>
-
-          <Selection mode="multiple" />
-          <FilterRow visible={true} />
-        </div>
+        <Selection mode="multiple" />
+        <FilterRow visible={true} />
       </div>
     </React.Fragment>
   );

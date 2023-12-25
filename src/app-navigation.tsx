@@ -48,4 +48,9 @@ export const navigation = [
     path: "/row-edit",
     icon: "folder",
   },
+  {
+    text: "Error Page",
+    path: "/error-page",
+    icon: "folder",
+  },
 ];
