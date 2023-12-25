@@ -1,9 +1,7 @@
 import React, { useRef, useCallback, useEffect, useState } from 'react';
 import DataGrid, { Column, Editing, Paging, Form, Selection, Lookup, LoadPanel, Toolbar, Item, DataGridTypes, FilterRow }
   from 'devextreme-react/data-grid';
-import {
-  Popup
-} from 'devextreme-react/popup';
+import { Popup, Position, ToolbarItem } from 'devextreme-react/popup';
 import { Button } from 'devextreme-react/button';
 import { createStore } from 'devextreme-aspnet-data-nojquery';
 import FileUploader, { FileUploaderTypes } from 'devextreme-react/file-uploader';
@@ -11,6 +9,7 @@ import TextBox from 'devextreme-react/text-box';
 import notify from 'devextreme/ui/notify';
 import 'whatwg-fetch';
 import './demo-data-grid.scss';
+import CustomStore from 'devextreme/data/custom_store';
 
 import { jsPDF } from "jspdf";
 // Default export is a4 paper, portrait, using millimeters for units
@@ -27,12 +26,63 @@ const URL = 'https://js.devexpress.com/Demos/Mvc/api/DataGridBatchUpdateWebApi';
 // const uploadUrl = "https://localhost:44300/upload";
 const uploadUrl = "https://js.devexpress.com/Demos/NetCore/FileUploader/Upload";
 
-const ordersStore = createStore({
-  key: 'OrderID',
-  loadUrl: `${URL}/Orders`,
-  onBeforeSend: (method, ajaxOptions) => {
-    ajaxOptions.xhrFields = { withCredentials: true };
+// const ordersStore = createStore({
+//   key: 'OrderID',
+//   loadUrl: `${URL}/Orders`,
+//   onBeforeSend: (method, ajaxOptions) => {
+//     ajaxOptions.xhrFields = { withCredentials: true };
+//   },
+// });
+
+function handleErrors(response) {
+  if (!response.ok) {
+    throw Error(response.statusText);
+  }
+  return response;
+}
+
+const dataSource = new CustomStore({
+  key: 'ID',
+  load: (loadOptions) => {
+    return fetch('https://localhost:44300/api/DanhMuc/GetDMPhuongXa', {
+      // method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(handleErrors)
+      .then(response => response.json())
+      .catch(() => { throw 'Network error' });
   },
+  // insert: (values) => {
+  //   return fetch('https://mydomain.com/MyDataService', {
+  //     method: 'POST',
+  //     body: JSON.stringify(values),
+  //     headers: {
+  //       'Content-Type': 'application/json'
+  //     }
+  //   })
+  //     .then(handleErrors)
+  //     .catch(() => { throw 'Network error' });
+  // },
+  // remove: (key) => {
+  //   return fetch(`https://mydomain.com/MyDataService/${encodeURIComponent(key)}`, {
+  //     method: 'DELETE'
+  //   })
+  //     .then(handleErrors)
+  //     .catch(() => { throw 'Network error' });
+  // },
+  // update: (key, values) => {
+  //   return fetch(`https://mydomain.com/MyDataService/${encodeURIComponent(key)}`, {
+  //     method: 'PUT',
+  //     body: JSON.stringify(values),
+  //     headers: {
+  //       'Content-Type': 'application/json'
+  //     }
+  //   })
+  //     .then(handleErrors)
+  //     .catch(() => { throw 'Network error' });
+  // }
 });
 
 async function sendBatchRequest(url, changes) {
@@ -66,6 +116,14 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
   const [multiple, setMultiple] = useState(false);
   const [uploadMode, setUploadMode] = useState('instantly');
   const [selectedFiles, setSelectedFiles] = useState([]);
+
+  const [selectTextOnEditStart, setSelectTextOnEditStart] = useState(true);
+  const [startEditAction, setStartEditAction] = useState('click');
+
+  const dataGridRef = useRef(null);
+  const [selectedItemKeys, setSelectedItemKeys] = useState([]);
+
+  $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
 
   // var ExcelToJSON = function () {
 
@@ -167,9 +225,9 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
 
   const [isPopupVisible, setPopupVisibility] = useState(false);
 
-  const togglePopup = () => {
+  const togglePopup = useCallback(() => {
     setPopupVisibility(!isPopupVisible);
-  };
+  }, [isPopupVisible]);
 
   const onSelectedFilesChanged = useCallback((e) => {
     setSelectedFiles(e.value);
@@ -187,6 +245,26 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
     formElement.current.submit();
   }, []);
 
+  // Edit
+  const onSelectTextOnEditStartChanged = useCallback((args) => {
+    setSelectTextOnEditStart(args.value);
+  }, []);
+
+  const onStartEditActionChanged = useCallback((args) => {
+    setStartEditAction(args.value);
+  }, []);
+
+  const saveButtonOptions = {
+    text: 'Save',
+    onClick: () => {
+      notify('Save option has been clicked!');
+    },
+  };
+
+  const buttonOptions = {
+    text: 'Ghi'
+  };
+
   return (
     <React.Fragment>
       <h2 className={'content-block'}>Demo Data Grid</h2>
@@ -196,48 +274,55 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
 
           <DataGrid
             id="gridContainer"
-            // ref={dataGridRef}
-            dataSource={ordersStore}
+            dataSource={dataSource}
             showBorders={true}
             remoteOperations={true}
             repaintChangesOnly={true}
             onSaving={onSaving}
-          // onSelectionChanged={onSelectionChanged}
+            // onSelectionChanged={onSelectionChanged}
+            allowColumnReordering={false}
+            focusedRowEnabled={true}
+            ref={dataGridRef}
+            width="100%"
+            height="100%"
+            selectedRowKeys={selectedItemKeys}
           >
+            <Editing
+              mode="batch"
+              location="center"
+              locateInMenu="auto"
+              allowAdding={true}
+              allowUpdating={true}
+              allowDeleting={false}
+              confirmDelete={false}
+              selectTextOnEditStart={selectTextOnEditStart}
+              startEditAction={startEditAction}
+            />
 
             <Column dataField="STT" width={60} allowEditing={false}></Column>
             <Column dataField="OrderID" width={100} allowEditing={false}></Column>
-            <Column dataField="ShipName"></Column>
+            <Column dataField="ShipName" ></Column>
             <Column dataField="ShipCountry"></Column>
             <Column dataField="ShipCity"></Column>
             <Column dataField="ShipAddress"></Column>
             <Column dataField="OrderDate" dataType="date"></Column>
             <Column dataField="Freight"></Column>
 
-            <Editing
-              mode="row"
-              location="center"
-              locateInMenu="auto"
-              allowAdding={true}
-              allowDeleting={true}
-              allowUpdating={true}
-            />
-
             <Toolbar>
-              <Item
-                location="left"
-                locateInMenu="never"
-                render={renderLabel}
-              />
+              <Item location="left" locateInMenu="never" render={renderLabel} />
+
+              <Item location="after" name="addRowButton" />
+              <Item location='after' name='saveButton' options={buttonOptions} />
 
               <Item location="after" widget="dxButton" >
                 <Button text="Nhập từ excel" onClick={togglePopup} />
               </Item>
 
-              <Item
-                location="after"
-                name="columnChooserButton"
-              />
+              <Item locateInMenu="auto" widget="dxButton">
+                <Button text="Ghi" options={saveButtonOptions} />
+              </Item>
+
+              <Item location='after' name='exportButton' />
             </Toolbar>
           </DataGrid>
 
@@ -256,14 +341,6 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
             resizeEnabled={false}
             maxFileSize={2000000}
           >
-
-            {/* <FileUploader
-              multiple={multiple}
-              accept={accept}
-              uploadMode={uploadMode}
-              uploadUrl="https://js.devexpress.com/Demos/NetCore/FileUploader/Upload"
-              onValueChanged={onSelectedFilesChanged}
-            /> */}
             <div>
               <FileUploader
                 multiple={false}
@@ -292,12 +369,12 @@ const DemoDataGrid = ({ onSelected, onDelete }) => {
               </div>
             </div>
 
-            <div>
+            <div className=''>
               <form id="form" ref={formElement} method="post" action="" encType="multipart/form-data">
                 <div className="fileuploader-container">
                   <FileUploader selectButtonText="Select photo" labelText="" uploadMode="useForm" />
-
                 </div>
+
                 <Button className="button" text="Update profile" type="success" onClick={onClick} />
               </form>
             </div>

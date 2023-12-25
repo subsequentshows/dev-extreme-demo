@@ -43,4 +43,9 @@ export const navigation = [
     path: "/demo-data-grid",
     icon: "globe",
   },
+  {
+    text: "Row Edit",
+    path: "/row-edit",
+    icon: "folder",
+  },
 ];

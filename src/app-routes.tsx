@@ -7,6 +7,7 @@ import {
   PhanQuyenPage,
   UsersPage,
   DemoDataGridPage,
+  RowEditPage,
 } from "./pages";
 import { withNavigationWatcher } from "./contexts/navigation";
 
@@ -42,6 +43,10 @@ const routes = [
   {
     path: "/demo-data-grid",
     element: DemoDataGridPage,
+  },
+  {
+    path: "/row-edit",
+    element: RowEditPage,
   },
 ];
 
