@@ -171,8 +171,6 @@ const renderContent = () => {
 
 const MasterDetailGrid = () => {
   const [data, setData] = useState([]);
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(50);
 
   const allowedPageSizes = [50, 100, 150, 200];
   // const [items, setItems] = useState([]);
@@ -189,6 +187,9 @@ const MasterDetailGrid = () => {
 
   // Popup confirm
   const [isPopupVisible, setPopupVisibility] = useState(false);
+
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(50);
 
   const customizeColumnDate = (itemInfo) => `${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
   const customizeDate = (itemInfo) => `First: ${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
@@ -341,6 +342,7 @@ const MasterDetailGrid = () => {
         dataSource.remove(key);
       });
       togglePopup();
+      refreshDataGrid();
 
       let selectedAndDeletedItems = selectedItemKeys.length;
       const customText = `Xóa thành công `;
@@ -374,7 +376,7 @@ const MasterDetailGrid = () => {
     }
     finally {
       setSelectedItemKeys([]);
-      refreshDataGrid();
+      // refreshDataGrid();
     }
   }, [selectedItemKeys, togglePopup, refreshDataGrid]);
 
@@ -394,7 +396,6 @@ const MasterDetailGrid = () => {
     type: 'normal',
     onClick: togglePopup,
   }), [togglePopup]);
-
 
   const onPageChanged = (e) => {
     setCurrentPageIndex(e.component.pageIndex());
@@ -435,9 +436,9 @@ const MasterDetailGrid = () => {
           allowUpdating={true}
         />
 
-        <Column
-          caption="STT"
+        <Column caption="STT"
           dataField="STT"
+
           fixed={true}
           fixedPosition="left"
           alignment='center'
@@ -470,8 +471,6 @@ const MasterDetailGrid = () => {
           allowFiltering={false}
           fixed={true}
           fixedPosition="left"
-          selectedFilterOperation="contains"
-          filterOperations={['contains']}
         >
           <StringLengthRule max={5} message="The field OrderID must be a string with a maximum length of 5." />
         </Column>
@@ -497,7 +496,7 @@ const MasterDetailGrid = () => {
           filterType='numberic'
           selectedFilterOperation="contains"
           allowFiltering={false}
-          dataField="Freight" dataType="number" width={150}
+          dataField="Freight" dataType="number" width={120}
           filterOperations={['contains']}>
         </Column>
 
@@ -517,12 +516,7 @@ const MasterDetailGrid = () => {
           <RequiredRule message="The OrderDate field is required." />
         </Column>
 
-        <Column caption=""
-          visible={true}
-          allowEditing={false}
-          allowExporting={false}
-        >
-        </Column>
+        {/* <Column caption="" visible={true} allowEditing={false} allowExporting={false} /> */}
 
         <Summary>
           <TotalItem
@@ -546,7 +540,12 @@ const MasterDetailGrid = () => {
 
         <Toolbar>
           <Item location="left" locateInMenu="never" render={renderLabel} />
+
           <Item location="after" name="addRowButton" />
+          <Item location="after" name='refresh' ShowTextMode="always">
+            <Button icon='refresh' widget="dxButton" onClick={refreshDataGrid} text="Tải lại" />
+          </Item>
+
           <Item location="after" showText="always" name='mutiple-delete' widget="dxButton">
             <Button
               onClick={togglePopup}
@@ -558,6 +557,7 @@ const MasterDetailGrid = () => {
           </Item>
 
           <Item location='after' name='exportButton' />
+          {/* <Item location='after' name='searchPanel' /> */}
         </Toolbar>
 
         <Grouping autoExpandAll={false} />

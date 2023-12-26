@@ -42,8 +42,8 @@ const Login = () => {
           username: user,
           password: password,
           ma_tinh: "01",
-          ma_huyen: "01",
-          ma_xa: "001"
+          ma_huyen: "001",
+          ma_xa: "00001"
           // ma_so_gd: "01",
           // ma_truong: "0001",
           // ma_khoi: "09",

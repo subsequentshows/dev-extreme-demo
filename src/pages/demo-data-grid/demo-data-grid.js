@@ -286,10 +286,8 @@ const DemoDataGrid = () => {
   };
 
   return (
-    <React.Fragment>
-      <h2 className={'content-block'}>Demo Data Grid</h2>
-
-      <div className={'content-block'}>
+    <>
+      <div className={'content-block responsive-paddings'}>
 
         <DataGrid
           id="gridContainer"
@@ -338,7 +336,7 @@ const DemoDataGrid = () => {
             </Item>
 
             <Item locateInMenu="auto" widget="dxButton">
-              <Button text="Ghi" options={saveButtonOptions} />
+              <Button text="Ghi 2" options={saveButtonOptions} />
             </Item>
 
             <Item location='after' name='exportButton' />
@@ -389,7 +387,7 @@ const DemoDataGrid = () => {
         <Selection mode="multiple" />
         <FilterRow visible={true} />
       </div>
-    </React.Fragment>
+    </>
   );
 }
 
