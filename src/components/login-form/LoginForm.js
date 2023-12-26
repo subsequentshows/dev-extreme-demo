@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useContext } from 'react';
 import "./LoginForm.scss";
 import AuthContext from "../../contexts/authProvider";
-import { Link, useNavigate, useLocation, Routes, Route, Navigate, BrowserRouter } from "react-router-dom";
+import { Link, useNavigate, useLocation, Routes, Route, Navigate, BrowserRouter, Redirect } from "react-router-dom";
 import Home from "../../pages/home/home";
 import { localApi } from '../../api/api';
 import axios from 'axios';
@@ -28,75 +28,83 @@ const Login = () => {
 
   const [success, setSuccess] = useState(false);
 
-  const [soDatas, setSoDatas] = useState([]);
-  const [tinhThanhPhoDatas, settinhThanhPhoDatas] = useState([]);
-  const [quanHuyenDatas, setQuanHuyenDatas] = useState([]);
-  const [phuongXaDatas, setPhuongXaDatas] = useState([]);
+  const [truongData, setTruongData] = useState([]);
+  const [tinhThanhPhoData, setTinhThanhPhoData] = useState([]);
+  const [phuongXaData, setPhuongXaData] = useState([]);
+  const [capHocData, setCapHocData] = useState([]);
 
-  useEffect(() => {
-    userRef.current.focus();
-  }, [])
+  const [selectedXa, setSelectedXa] = useState('-1');
+  const [selectedTruong, setSelectedTruong] = useState('-1');
+  const [selectedTinh, setSelectedTinh] = useState('-1');
+  const [selectedCapHoc, setSelectedCapHoc] = useState('-1');
 
   useEffect(() => {
     setErrMsg('');
   }, [user, password])
 
+  // useEffect(() => {
+  //   userRef.current.focus();
+  // }, [])
+
+  // Tỉnh/Thành phố
   useEffect(() => {
+    console.log('Fetching TinhThanhPhoData');
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          'https://localhost:44300/api/DanhMuc/GetDMPhuongXa'
-        );
-        console.log(response);
+        const response = await axios.get('https://localhost:7223/api/DanhMuc/GetDMTinhThanhPho');
+        setTinhThanhPhoData(response.data);
 
-        setPhuongXaDatas(response);
-        // console.log("Data " + setDatas(response.data));
       } catch (error) {
-        console.error('Đã xảy ra lỗi khi lấy dữ liệu:', error);
+        console.error('Đã xảy ra lỗi khi lấy dữ liệu tỉnh/thành phố: ', error);
       }
     };
-
-    // Calling when component mounts
+    // Fetch TinhThanhPho data when component mounts
     fetchData();
   }, []);
 
+  // Cấp học
   useEffect(() => {
+    console.log('Fetching CapHoc');
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          'https://localhost:44300/api/DanhMuc/GetDMQuanHuyen'
-        );
-        console.log(response);
+        const response = await axios.get('https://localhost:7223/api/DanhMuc/GetDMCapHoc');
+        setCapHocData(response.data);
 
-        setQuanHuyenDatas(response);
-        // console.log("Data " + setDatas(response.data));
       } catch (error) {
-        console.error('Đã xảy ra lỗi khi lấy dữ liệu:', error);
+        console.error('Đã xảy ra lỗi khi lấy dữ liệu cấp học: ', error);
       }
     };
-
-    // Calling when component mounts
     fetchData();
   }, []);
 
+  // Phường/Xã
   useEffect(() => {
+    console.log('Fetching PhuongXa');
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          'https://localhost:44300/api/DanhMuc/GetDMTinhThanhPho'
-        );
-        console.log(response);
+        const response = await axios.get('https://localhost:7223/api/DanhMuc/GetDMPhuongXa');
+        setPhuongXaData(response.data);
 
-        settinhThanhPhoDatas(response);
-        // console.log("Data " + setDatas(response.data));
       } catch (error) {
-        console.error('Đã xảy ra lỗi khi lấy dữ liệu:', error);
+        console.error('Đã xảy ra lỗi khi lấy dữ liệu phường xã: ', error);
       }
     };
-
-    // Calling when component mounts
     fetchData();
   }, []);
+
+  // Trường
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await axios.get('https://localhost:7223/api/DanhMuc/GetDMTruong');
+  //       setPhuongXaData(response.data);
+
+  //     } catch (error) {
+  //       console.error('Đã xảy ra lỗi khi lấy dữ liệu phường xã: ', error);
+  //     }
+  //   };
+  //   fetchData();
+  // }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -109,10 +117,6 @@ const Login = () => {
           ma_tinh: "01",
           ma_huyen: "001",
           ma_xa: "00001"
-          // ma_so_gd: "01",
-          // ma_truong: "0001",
-          // ma_khoi: "09",
-          // ma_phong_gd: "01"
         }),
         {
           headers: { 'Content-Type': 'application/json' },
@@ -129,8 +133,10 @@ const Login = () => {
       setUser('');
       setPwd('');
 
+      const from = prevLocation.state?.from?.pathname || "/home";
       navigate(from, { replace: true });
       setSuccess(true);
+      alert("navigated")
     } catch (err) {
       if (!err?.response) {
         setErrMsg('No Server Response');
@@ -148,39 +154,16 @@ const Login = () => {
   return (
     <>
       {success ? (
-        <section>
-          <p>You are logged in!</p>
-        </section>
+        // <Routes>
+        //   <Route
+        //     index
+        //     element={<Navigate to="/home" />}
+        //   />
+        // </Routes>
+        <p>Logged in</p>
       ) : (
         <section>
           <form onSubmit={handleSubmit}>
-            {/* <div>
-              <label htmlFor="username">Username:</label>
-              <input
-                type="text"
-                id="username"
-                ref={userRef}
-                autoComplete="off"
-                onChange={(e) => setUser(e.target.value)}
-                value={user}
-                required
-              />
-
-              <label htmlFor="password">Password:</label>
-              <input
-                type="password"
-                id="password"
-                onChange={(e) => setPwd(e.target.value)}
-                value={password}
-                required
-              />
-
-              <div className="signin-btn">
-                <input type="submit" name="btSignin" value="Đăng nhập" id="btSignin" className="btn btn-default btn-qi" wfd-id="id18">
-                </input>
-              </div>
-            </div> */}
-
             <div className="container-fluid">
               <div className="height-100">
                 <div className="login-section">
@@ -200,6 +183,7 @@ const Login = () => {
                     <div className="account-title">
                       <p>Thông tin tài khoản</p>
                     </div>
+
                     <div className="margin_top_line">
                       <div className="input-group md-form form-sm form-2 pl-0"
                       >
@@ -220,14 +204,6 @@ const Login = () => {
 
                     <div className="margin_top_line">
                       <div className="input-group md-form form-sm form-2 pl-0">
-                        {/* <input name="tbPassword" type="password" id="tbPassword" className="form-control my-0 py-1 red-border input-left-textbox box-shadow-bt" placeholder="Mật khẩu" wfd-id="id7" />
-                        <div className="input-group-append">
-                          <span className="input-group-text red lighten-3 button-right-textbox box-shadow-bt">
-                            <i className="fas fa-lock text-grey qi-color"
-                              aria-hidden="true"></i>
-                          </span>
-                        </div> */}
-
                         <input id="password" type="password" name="tbPassword" placeholder="Mật khẩu"
                           onChange={(e) => setPwd(e.target.value)} value={password} required
                         />
@@ -245,35 +221,66 @@ const Login = () => {
                       <p>Thông tin đơn vị</p>
                     </div>
 
-                    <div className="margin_top_line required">
-                      <select>
-                        <option value="someOption">Chọn sở</option>
-                        <option value="otherOption">{soDatas.TEN}</option>
+                    {/* Thanh Pho */}
+                    <div className="margin_top_line required rcbTruong-wrapper">
+                      <select
+                        placeholder='Chọn Sở'
+                        value={selectedTinh}
+                        onChange={(e) => setSelectedTinh(e.target.value)}
+                      >
+                        {Array.isArray(tinhThanhPhoData.Data) &&
+                          tinhThanhPhoData.Data.map((value) => (
+                            <option key={value.MA} value={value.MA}>
+                              {value.TEN}
+                            </option>
+                          ))
+                        }
                       </select>
                     </div>
 
-                    <div className="margin_top_line rcbCapHoc-wrapper">
-                      <select>
-                        <option value="someOption">Chọn</option>
-                        <option value="otherOption">{quanHuyenDatas.TEN}</option>
-                        {/* <option value="otherOption">Tiểu học</option>
-                        <option value="otherOption">Trung học cơ sở</option>
-                        <option value="otherOption">Trung học phổ thông</option>
-                        <option value="otherOption">Giáo dục thường xuyên</option> */}
+                    {/* Cap Hoc */}
+                    <div className="margin_top_line required rcbTruong-wrapper">
+                      <select
+                        placeholder='Chọn cấp học'
+                        value={selectedCapHoc}
+                        onChange={(e) => setSelectedCapHoc(e.target.value)}
+                      >
+                        {Array.isArray(capHocData.Data) &&
+                          capHocData.Data.map((value) => (
+                            <option key={value.MA} value={value.MA}>
+                              {value.TEN}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+
+                    {/* Phường xã */}
+                    <div className="margin_top_line required rcbTruong-wrapper">
+                      <select
+                        placeholder='Chọn xã'
+                        value={selectedXa}
+                        onChange={(e) => setSelectedXa(e.target.value)}
+                      >
+                        {Array.isArray(phuongXaData.Data) &&
+                          phuongXaData.Data.map((value) => (
+                            <option key={value.MA} value={value.MA}>
+                              {value.TEN}
+                            </option>
+                          ))}
                       </select>
                     </div>
 
                     <div className="margin_top_line rcbPhongGD-wrapper">
                       <select>
                         <option value="someOption">Chọn phòng</option>
-                        <option value="otherOption">{tinhThanhPhoDatas.TEN}</option>
+                        <option value="otherOption">Phong.TEN</option>
                       </select>
                     </div>
 
-                    <div className="margin_top_line required rcbTruong-wrapper">
+                    <div className="margin_top_line rcbPhongGD-wrapper">
                       <select>
-                        <option value="someOption">Chọn trường</option>
-                        <option value="otherOption">{phuongXaDatas.TEN}</option>
+                        <option value="someOption">Chọn trường</option>
+                        <option value="otherOption">Truong.TEN</option>
                       </select>
                     </div>
 
@@ -295,7 +302,6 @@ const Login = () => {
                     </div>
 
                     <div className="signin-btn">
-                      {/* <button ID="btSignin" runat="server" CssClass="btn btn-default btn-qi" Text="Đăng nhập" ClientIDMode="Static" OnClick="btSignin_Click"></button> */}
                       <input type="submit" name="btSignin" value="Đăng nhập" id="btSignin" className="btn btn-default btn-qi" wfd-id="id18">
                       </input>
                     </div>

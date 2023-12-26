@@ -1,38 +1,47 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import './phan-quyen.scss';
-import DataGrid, { Column, Editing, Paging, Form, Selection, Lookup, LoadPanel, Toolbar, Item, DataGridTypes }
-  from 'devextreme-react/data-grid';
-import {
-  Popup, Position, ToolbarItem
-} from 'devextreme-react/popup';
-import { Button } from 'devextreme-react/button';
-import notify from 'devextreme/ui/notify';
-
-// Export to excel library
-import { exportDataGrid as exportDataGridToExcel } from 'devextreme/excel_exporter';
-import { Workbook } from 'exceljs';
-import { saveAs } from 'file-saver';
-
-// Export to pdf library
-import { exportDataGrid as exportDataGridToPdf } from 'devextreme/pdf_exporter';
-import { jsPDF } from "jspdf";
-// Default export is a4 paper, portrait, using millimeters for units
-
-import * as XLSX from "xlsx";
-import * as JSZIP from "jszip";
-import $ from 'jquery';
-import { Modal } from "react-bootstrap-v5";
-
-import readXlsxFile from 'read-excel-file';
 
 const PhanQuyen = () => {
+  const [phuongXaData, setPhuongXaData] = useState([]);
+  const [selectedXa, setSelectedXa] = useState('-1');
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('https://localhost:7223/api/DanhMuc/GetDMPhuongXa');
+        setPhuongXaData(response.data);
+
+      } catch (error) {
+        console.error('Error fetching PhuongXa data:', error);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <>
       <h2 className={'content-block'}>Phan Quyen</h2>
       <div className={'content-block'}>
         <div className={'dx-card responsive-paddings'}>
+
+          <div className="margin_top_line required rcbTruong-wrapper">
+            <select
+              placeholder='Chọn xã'
+              value={selectedXa}
+              onChange={(e) => setSelectedXa(e.target.value)}
+            >
+              <option value="-1">Chọn xã</option>
+
+              {Array.isArray(phuongXaData.Data) &&
+                phuongXaData.Data.map((value) => (
+                  <option key={value.MA} value={value.MA}>
+                    {value.TEN}
+                  </option>
+                ))
+              }
+            </select>
+          </div>
 
         </div>
       </div>
@@ -42,3 +51,5 @@ const PhanQuyen = () => {
 
 
 export default PhanQuyen;
+
+

@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
-
 import "./modal.scss";
 import 'devextreme/data/odata/store';
 import {
@@ -11,13 +10,8 @@ import {
   Editing,
   Grouping,
   Paging,
-  Form,
-  Pager,
-  CheckBox,
   SearchPanel,
-  Lookup,
   Summary,
-  RangeRule,
   RequiredRule,
   StringLengthRule,
   GroupItem,
@@ -39,6 +33,7 @@ import WarningIcon from "../../asset/image/confirm.png";
 import DataSource from 'devextreme/data/data_source';
 import ArrayStore from 'devextreme/data/array_store';
 import { createStore } from 'devextreme-aspnet-data-nojquery';
+import CustomStore from 'devextreme/data/custom_store';
 
 // Export to excel library
 import { exportDataGrid as exportDataGridToExcel } from 'devextreme/excel_exporter';
@@ -126,7 +121,7 @@ const renderContent = () => {
   )
 }
 
-const statuses = ['All', 'France', 'Germany', 'France', 'Brazil', 'Belgium'];
+const statuses = ['All', 'France', 'Germany', 'Brazil', 'Belgium'];
 const statusLabel = { 'aria-label': 'Status' };
 
 const MasterDetailGrid = () => {
@@ -152,14 +147,51 @@ const MasterDetailGrid = () => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(50);
 
-  const [searchTerm, setSearchTerm] = useState('');
-
   const [filterStatus, setFilterStatus] = useState(statuses[0]);
+  // const [shipCountryFilter, setShipCountryFilter] = useState('');
+  // const [shipCityFilter,setShipCityFilter] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
 
   const customizeColumnDate = (itemInfo) => `${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
   const customizeDate = (itemInfo) => `First: ${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
   const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
   $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
+
+  // Custom filter function for ShipCountry
+  const shipCountryFilter = useCallback((data) => {
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    return data.ShipCountry.toLowerCase().includes(lowerCaseSearchTerm);
+  }, [searchTerm]);
+
+  const shipCityFilter = useCallback((data) => {
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    return data.ShipCity.toLowerCase().includes(lowerCaseSearchTerm);
+  }, [searchTerm]);
+
+
+
+  const handleSearchTermChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  // Custom store for handling data and filtering
+  const customStore = useMemo(() => {
+    return new CustomStore({
+      key: 'OrderID',
+      load: (loadOptions) => {
+        // Import data loading fromdataSource
+        return dataSource.load(loadOptions);
+      },
+      // filter for ShipCountry
+      // byKey: (key) => {
+      //   return dataSource.byKey(key);
+      // },
+      // Implement the custom filter function for ShipCountry
+      filter: [shipCountryFilter, shipCityFilter],
+    });
+  }, [shipCountryFilter, shipCityFilter]);
+
+
 
   var ExcelToJSON = function () {
 
@@ -337,33 +369,71 @@ const MasterDetailGrid = () => {
     return <span> {rowIndex} </span>;
   }
 
-  // Search
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
+  // const onFilterValueChanged = useCallback(({ value }) => {
+  //   const dataGrid = dataGridRef.current.instance;
 
-  const onValueChanged = useCallback(({ value }) => {
+  //   if (value === 'All') {
+  //     dataGrid.clearFilter();
+  //   } else {
+  //     dataGrid.filter(['ShipCountry', '=', value]);
+  //   }
+
+  //   setFilterStatus(value);
+  // }, []);
+
+  // const onFilterValueChanged = useCallback(({ value }) => {
+  //   const dataGrid = dataGridRef.current.instance;
+
+  //   if (value === 'All') {
+  //     dataGrid.clearFilter();
+  //   } else {
+  //     // Update shipCountryFilter state
+
+  //     // Apply custom filter
+  //     dataGrid.filter(['ShipCountry', '=', value]);
+  //   }
+  // }, []);
+
+  const onFilterValueChanged = useCallback(({ value }) => {
     const dataGrid = dataGridRef.current.instance;
 
     if (value === 'All') {
       dataGrid.clearFilter();
     } else {
-      dataGrid.filter(['Task_Status', '=', value]);
-    }
 
-    setFilterStatus(value);
-  }, []);
+
+      // Apply custom filter
+      dataGrid.filter(['ShipCity', 'ShipCountry', '=', value]);
+      setSearchTerm(value);
+      setFilterStatus(value);
+    }
+  }, [setSearchTerm, setFilterStatus]);
 
   return (
     <>
-      <div className="right-side">
-        <p>Select</p>
-        <SelectBox
-          items={statuses}
-          inputAttr={statusLabel}
-          value={filterStatus}
-          onValueChanged={onValueChanged}
-        />
+      <div className="item-filter">
+        <div className='filter-items'>
+          <label>TP đặt hàng</label>
+          <SelectBox
+            items={statuses}
+            inputAttr={statusLabel}
+            value={filterStatus}
+            onValueChanged={onFilterValueChanged}
+          />
+        </div>
+
+        {/* <div className='filter-items'>
+          <label>shipCountryFilter</label>
+
+          <input
+            type='text'
+            className='ship-country-filter'
+            value={searchTerm}
+            onChange={handleSearchTermChange}
+            placeholder='Search...'
+          />
+        </div> */}
+
       </div>
 
       <DataGrid
@@ -374,7 +444,7 @@ const MasterDetailGrid = () => {
         ref={dataGridRef}
         width="100%"
         height="100%"
-        dataSource={dataSource}
+        dataSource={customStore}
         onExporting={onExporting}
         showBorders={true}
         remoteOperations={true}
@@ -405,7 +475,7 @@ const MasterDetailGrid = () => {
           allowFiltering={false}
           allowExporting={true}
           cellRender={rowIndexes}
-          headerCellTemplate="column"
+          headerCellTemplate="STT"
         >
           <StringLengthRule max={3} message="" />
         </Column>
@@ -456,8 +526,27 @@ const MasterDetailGrid = () => {
           filterOperations={['contains']}>
         </Column>
 
-        <Column caption="TP đặt hàng" dataField="ShipCountry" alignment='left' selectedFilterOperation="contains" width={120} filterOperations={['contains']}></Column>
-        <Column caption="TP giao hàng" dataField="ShipCity" alignment='left' selectedFilterOperation="contains" width={150} filterOperations={['contains']}></Column>
+        <Column
+          caption="TP đặt hàng"
+          dataField="ShipCountry"
+          alignment="left"
+          width={120}
+          allowSearch={false}
+          filterOperations={['custom']}
+          // calculateFilterExpression={() => {
+          //   return ['contains', 'ShipCountry', shipCountryFilter];
+          // }}
+          calculateFilterExpression={() => {
+            return ['custom', shipCountryFilter];
+          }}
+        // calculateFilterExpression={() => ['contains', 'ShipCountry', shipCountryFilter]}
+        />
+
+        <Column caption="TP giao hàng"
+          dataField="ShipCity"
+          alignment='left'
+          allowSearch={false}
+        />
         <Column caption="Địa chỉ giao hàng" dataField="ShipAddress" alignment='left' selectedFilterOperation="contains" width={150} filterOperations={['contains']}></Column>
 
         <Column caption="Ngày đặt hàng"
