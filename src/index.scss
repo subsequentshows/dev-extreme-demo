@@ -147,21 +147,23 @@ code {
   box-shadow: transparent;
 }
 
-.dx-toolbar-item {
-  .dx-button {
-    min-width: 100px !important;
-  }
-
-  .dx-toolbar-item-content {
-    .dx-button-content {
-      .dx-icon {
-        display: none;
-      }
+.dx-datagrid-header-panel {
+  .dx-toolbar-item {
+    .dx-button {
+      min-width: 100px !important;
     }
 
-    .dx-datagrid-export-button {
-      .dx-icon {
-        display: block;
+    .dx-toolbar-item-content {
+      .dx-button-content {
+        .dx-icon {
+          display: none;
+        }
+      }
+
+      .dx-datagrid-export-button {
+        .dx-icon {
+          display: block;
+        }
       }
     }
   }

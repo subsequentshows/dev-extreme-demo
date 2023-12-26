@@ -45,12 +45,16 @@ const remoteDataSource = createStore({
   loadUrl: serviceUrl + '/api/DanhMuc/GetDMPhuongXa',
   insertUrl: serviceUrl + '/InsertAction',
   updateUrl: serviceUrl + '/UpdateAction',
-  deleteUrl: serviceUrl + '/DeleteAction'
+  deleteUrl: serviceUrl + '/DeleteAction',
+
+  onBeforeSend: (method, ajaxOptions) => {
+    ajaxOptions.xhrFields = { withCredentials: true };
+  },
 });
 
 const dataSource = new DataSource({
-  // key: 'ID',
-  data: `${url}/api/DanhMuc/GetDMPhuongXa`,
+  key: 'ID',
+  loadUrl: `${url}/api/DanhMuc/GetDMPhuongXa`,
   // insertUrl: `${url}/InsertOrder`,
   // updateUrl: `${url}/UpdateOrder`,
   // deleteUrl: `${url}/DeleteOrder`,
@@ -105,6 +109,7 @@ const customDataSource = new CustomStore({
 
 const RowEdit = () => {
   const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
+  const dataGridRef = useRef(null);
 
   return (
     <React.Fragment>
@@ -112,7 +117,7 @@ const RowEdit = () => {
         <div>
           <DataGrid
             id="gridContainer"
-            // ref={dataGridRef}
+            ref={dataGridRef}
             dataSource={remoteDataSource}
             showBorders={true}
             remoteOperations={true}
@@ -120,12 +125,12 @@ const RowEdit = () => {
           >
             <RemoteOperations groupPaging={true} />
 
-            <Column dataField="STT" width={60} allowEditing={false}></Column>
-            <Column dataField="ID" width={100} allowEditing={false}></Column>
-            <Column dataField="MA"></Column>
-            <Column dataField="TEN"></Column>
-            <Column dataField="MA_HUYEN"></Column>
-            <Column dataField="MA_TINH"></Column>
+            <Column dataField="STT" caption='STT' width={60} allowEditing={false}></Column>
+            <Column dataField="ID" caption='ID' width={100} allowEditing={false}></Column>
+            <Column dataField="MA" caption='Mã'></Column>
+            <Column dataField="TEN" caption='Tên'></Column>
+            <Column dataField="MA_HUYEN" caption='Mã huyện'></Column>
+            <Column dataField="MA_TINH" caption='Mã tỉnh'></Column>
             <Column dataField="TEN_TINH" caption='Tên tỉnh'></Column>
             <Column dataField="TEN_HUYEN" caption='Tên huyện'></Column>
 

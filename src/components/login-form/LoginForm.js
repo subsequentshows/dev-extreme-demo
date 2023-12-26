@@ -4,11 +4,14 @@ import AuthContext from "../../contexts/authProvider";
 import { Link, useNavigate, useLocation, Routes, Route, Navigate, BrowserRouter } from "react-router-dom";
 import Home from "../../pages/home/home";
 import { localApi } from '../../api/api';
+import axios from 'axios';
 import Footer from "../footer/Footer";
 import LoginIcon from "../../asset/image/icondanhmuckhac.png";
 import LoginBackground from "../../asset/image/login-background.png";
 
 const LOGIN_URL = '/login';
+const getDMPhuongXaUrl = "/api/DanhMuc/GetDMPhuongXa"
+
 const Login = () => {
   const { setAuth } = useContext(AuthContext);
 
@@ -25,6 +28,11 @@ const Login = () => {
 
   const [success, setSuccess] = useState(false);
 
+  const [soDatas, setSoDatas] = useState([]);
+  const [tinhThanhPhoDatas, settinhThanhPhoDatas] = useState([]);
+  const [quanHuyenDatas, setQuanHuyenDatas] = useState([]);
+  const [phuongXaDatas, setPhuongXaDatas] = useState([]);
+
   useEffect(() => {
     userRef.current.focus();
   }, [])
@@ -32,6 +40,63 @@ const Login = () => {
   useEffect(() => {
     setErrMsg('');
   }, [user, password])
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          'https://localhost:44300/api/DanhMuc/GetDMPhuongXa'
+        );
+        console.log(response);
+
+        setPhuongXaDatas(response);
+        // console.log("Data " + setDatas(response.data));
+      } catch (error) {
+        console.error('Đã xảy ra lỗi khi lấy dữ liệu:', error);
+      }
+    };
+
+    // Calling when component mounts
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          'https://localhost:44300/api/DanhMuc/GetDMQuanHuyen'
+        );
+        console.log(response);
+
+        setQuanHuyenDatas(response);
+        // console.log("Data " + setDatas(response.data));
+      } catch (error) {
+        console.error('Đã xảy ra lỗi khi lấy dữ liệu:', error);
+      }
+    };
+
+    // Calling when component mounts
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          'https://localhost:44300/api/DanhMuc/GetDMTinhThanhPho'
+        );
+        console.log(response);
+
+        settinhThanhPhoDatas(response);
+        // console.log("Data " + setDatas(response.data));
+      } catch (error) {
+        console.error('Đã xảy ra lỗi khi lấy dữ liệu:', error);
+      }
+    };
+
+    // Calling when component mounts
+    fetchData();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -54,7 +119,7 @@ const Login = () => {
           withCredentials: true
         }
       );
-      console.log(JSON.stringify(response?.data));
+      console.log("JSON respone data" + JSON.stringify(response?.data));
       //console.log(JSON.stringify(response));
 
       const accessToken = response?.data?.accessToken;
@@ -183,31 +248,32 @@ const Login = () => {
                     <div className="margin_top_line required">
                       <select>
                         <option value="someOption">Chọn sở</option>
-                        <option value="otherOption">Other option</option>
+                        <option value="otherOption">{soDatas.TEN}</option>
                       </select>
                     </div>
 
                     <div className="margin_top_line rcbCapHoc-wrapper">
                       <select>
-                        <option value="someOption">Mần non</option>
-                        <option value="otherOption">Tiểu học</option>
+                        <option value="someOption">Chọn</option>
+                        <option value="otherOption">{quanHuyenDatas.TEN}</option>
+                        {/* <option value="otherOption">Tiểu học</option>
                         <option value="otherOption">Trung học cơ sở</option>
                         <option value="otherOption">Trung học phổ thông</option>
-                        <option value="otherOption">Giáo dục thường xuyên</option>
+                        <option value="otherOption">Giáo dục thường xuyên</option> */}
                       </select>
                     </div>
 
                     <div className="margin_top_line rcbPhongGD-wrapper">
                       <select>
                         <option value="someOption">Chọn phòng</option>
-                        <option value="otherOption">Other option</option>
+                        <option value="otherOption">{tinhThanhPhoDatas.TEN}</option>
                       </select>
                     </div>
 
                     <div className="margin_top_line required rcbTruong-wrapper">
                       <select>
                         <option value="someOption">Chọn trường</option>
-                        <option value="otherOption">Other option</option>
+                        <option value="otherOption">{phuongXaDatas.TEN}</option>
                       </select>
                     </div>
 

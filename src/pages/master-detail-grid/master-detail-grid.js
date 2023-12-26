@@ -14,7 +14,6 @@ import {
   Form,
   Pager,
   CheckBox,
-  SelectBox,
   SearchPanel,
   Lookup,
   Summary,
@@ -30,9 +29,8 @@ import {
   Toolbar,
   Item,
 } from 'devextreme-react/data-grid';
-import {
-  Popup, Position, ToolbarItem
-} from 'devextreme-react/popup';
+import { Popup, Position, ToolbarItem } from 'devextreme-react/popup';
+import SelectBox from 'devextreme-react/select-box';
 import { Button } from "devextreme-react/button";
 import "./master-detail-grid.scss";
 import notify from 'devextreme/ui/notify';
@@ -117,47 +115,6 @@ function onExporting(e) {
   };
 }
 
-// Import
-// const ExcelToJSON = function () {
-//   this.parseExcel = function (file) {
-//     let reader = new FileReader();
-
-//     reader.onload = function (e) {
-//       let data = e.target.result;
-//       let workbook = XLSX.read(data, {
-//         type: 'binary'
-//       });
-//       workbook.SheetNames.forEach(function (sheetName) {
-//         // Here is your object
-//         let XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
-//         let json_object = JSON.stringify(XL_row_object);
-//         console.log(JSON.parse(json_object));
-//         $('#xlx_json').val(json_object);
-//       })
-//     };
-
-//     reader.onerror = function (ex) {
-//       console.log(ex);
-//     };
-
-//     reader.readAsBinaryString(file);
-//   };
-// };
-
-// function handleFileSelect(evt) {
-//   let files = evt.target.files; // FileList object
-//   let xl2json = new ExcelToJSON();
-//   xl2json.parseExcel(files[0]);
-// }
-
-// const input = document.getElementById('input')
-// input.addEventListener('change', () => {
-//   readXlsxFile(input.files[0]).then((rows) => {
-//     // `rows` is an array of rows
-//     // each row being an array of cells.
-//   })
-// })
-
 const renderContent = () => {
   return (
     <>
@@ -168,6 +125,9 @@ const renderContent = () => {
     </>
   )
 }
+
+const statuses = ['All', 'France', 'Germany', 'France', 'Brazil', 'Belgium'];
+const statusLabel = { 'aria-label': 'Status' };
 
 const MasterDetailGrid = () => {
   const [data, setData] = useState([]);
@@ -182,6 +142,7 @@ const MasterDetailGrid = () => {
   const [fileContent, setFileContent] = useState('');
 
   // Delete
+  // const dataGridRef = useRef < DataGrid > (null);
   const dataGridRef = useRef(null);
   const [selectedItemKeys, setSelectedItemKeys] = useState([]);
 
@@ -191,46 +152,14 @@ const MasterDetailGrid = () => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(50);
 
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const [filterStatus, setFilterStatus] = useState(statuses[0]);
+
   const customizeColumnDate = (itemInfo) => `${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
   const customizeDate = (itemInfo) => `First: ${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
   const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
   $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
-
-  // const readExcel = (file) => {
-  //   const promise = new Promise((resolve, reject) => {
-  //     const fileReader = new FileReader();
-  //     fileReader.readAsArrayBuffer(file);
-
-  //     fileReader.onload = (e) => {
-  //       const bufferArray = e.target.result;
-
-  //       const wb = XLSX.read(bufferArray, { type: "buffer" });
-
-  //       const wsname = wb.SheetNames[0];
-
-  //       const ws = wb.Sheets[wsname];
-
-  //       const data = XLSX.utils.sheet_to_json(ws);
-
-  //       resolve(data);
-  //     };
-
-  //     fileReader.onerror = (error) => {
-  //       reject(error);
-  //     };
-  //   });
-
-  //   promise.then((d) => {
-  //     setItems(d);
-  //   });
-  // };
-
-  // document.getElementById('file').addEventListener('change', handleFileSelect, false);
-
-  // $("#file").on("change", function (e) {
-  //   e.preventDefault();
-  //   handleFileSelect();
-  // });
 
   var ExcelToJSON = function () {
 
@@ -408,8 +337,35 @@ const MasterDetailGrid = () => {
     return <span> {rowIndex} </span>;
   }
 
+  // Search
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const onValueChanged = useCallback(({ value }) => {
+    const dataGrid = dataGridRef.current.instance;
+
+    if (value === 'All') {
+      dataGrid.clearFilter();
+    } else {
+      dataGrid.filter(['Task_Status', '=', value]);
+    }
+
+    setFilterStatus(value);
+  }, []);
+
   return (
     <>
+      <div className="right-side">
+        <p>Select</p>
+        <SelectBox
+          items={statuses}
+          inputAttr={statusLabel}
+          value={filterStatus}
+          onValueChanged={onValueChanged}
+        />
+      </div>
+
       <DataGrid
         id="gridContainer"
         className='responsive-paddings master-detail-grid'
@@ -438,7 +394,6 @@ const MasterDetailGrid = () => {
 
         <Column caption="STT"
           dataField="STT"
-
           fixed={true}
           fixedPosition="left"
           alignment='center'
@@ -450,6 +405,7 @@ const MasterDetailGrid = () => {
           allowFiltering={false}
           allowExporting={true}
           cellRender={rowIndexes}
+          headerCellTemplate="column"
         >
           <StringLengthRule max={3} message="" />
         </Column>
@@ -496,7 +452,7 @@ const MasterDetailGrid = () => {
           filterType='numberic'
           selectedFilterOperation="contains"
           allowFiltering={false}
-          dataField="Freight" dataType="number" width={120}
+          dataField="Freight" dataType="number" width={150}
           filterOperations={['contains']}>
         </Column>
 
@@ -570,13 +526,14 @@ const MasterDetailGrid = () => {
           searchVisibleColumnsOnly={true}
           placeholder="Tìm kiếm"
         />
-        <FilterRow visible={true} allowFiltering={true} showResetValues={false} />
+        <FilterRow visible={false} allowFiltering={false} showResetValues={false} />
         <HeaderFilter enabled={false} visible={false} />
         <GroupPanel visible={false} />
         <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
         <Paging enabled={true} defaultPageSize={50} defaultPageIndex={0} />
       </DataGrid>
 
+      {/* Delete confirm popup */}
       <Popup
         id="popup"
         contentRender={renderContent}
