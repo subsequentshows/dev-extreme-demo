@@ -122,6 +122,8 @@ const renderContent = () => {
 }
 
 const statuses = ['All', 'France', 'Germany', 'Brazil', 'Belgium'];
+const cityStatuses = ['All', 'Reims', 'Rio de Janeiro', 'Lyon', 'Charleroi'];
+
 const statusLabel = { 'aria-label': 'Status' };
 
 const MasterDetailGrid = () => {
@@ -148,9 +150,11 @@ const MasterDetailGrid = () => {
   const [pageSize, setPageSize] = useState(50);
 
   const [filterStatus, setFilterStatus] = useState(statuses[0]);
-  // const [shipCountryFilter, setShipCountryFilter] = useState('');
-  // const [shipCityFilter,setShipCityFilter] = useState("");
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filterCityStatus, setFilterCityStatus] = useState(statuses[0]);
+  const [shipCountryFilter, setShipCountryFilter] = useState('');
+  const [shipCityFilter, setShipCityFilter] = useState("");
+
+  const [citySearchTerm, setCitySearchTerm] = useState('');
 
   const customizeColumnDate = (itemInfo) => `${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
   const customizeDate = (itemInfo) => `First: ${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
@@ -158,20 +162,21 @@ const MasterDetailGrid = () => {
   $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
 
   // Custom filter function for ShipCountry
-  const shipCountryFilter = useCallback((data) => {
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
-    return data.ShipCountry.toLowerCase().includes(lowerCaseSearchTerm);
-  }, [searchTerm]);
+  // const shipCountryFilter = useCallback((data) => {
+  //   const lowerCaseSearchTerm = searchTerm.toLowerCase();
+  //   return data.ShipCountry.toLowerCase().includes(lowerCaseSearchTerm);
+  // }, [searchTerm]);
 
-  const shipCityFilter = useCallback((data) => {
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+  const shipCityTerm = useCallback((data) => {
+    const lowerCaseSearchTerm = citySearchTerm.toLowerCase();
     return data.ShipCity.toLowerCase().includes(lowerCaseSearchTerm);
-  }, [searchTerm]);
+  }, [citySearchTerm]);
 
 
 
   const handleSearchTermChange = (event) => {
-    setSearchTerm(event.target.value);
+    setCitySearchTerm(event.target.value);
+    shipCityTerm();
   };
 
   // Custom store for handling data and filtering
@@ -187,9 +192,10 @@ const MasterDetailGrid = () => {
       //   return dataSource.byKey(key);
       // },
       // Implement the custom filter function for ShipCountry
-      filter: [shipCountryFilter, shipCityFilter],
+      // filter: [shipCityFilter],
+      filter: [],
     });
-  }, [shipCountryFilter, shipCityFilter]);
+  }, []);
 
 
 
@@ -369,17 +375,31 @@ const MasterDetailGrid = () => {
     return <span> {rowIndex} </span>;
   }
 
-  // const onFilterValueChanged = useCallback(({ value }) => {
-  //   const dataGrid = dataGridRef.current.instance;
+  const onFilterValueChanged = useCallback(({ value }) => {
+    const dataGrid = dataGridRef.current.instance;
 
-  //   if (value === 'All') {
-  //     dataGrid.clearFilter();
-  //   } else {
-  //     dataGrid.filter(['ShipCountry', '=', value]);
-  //   }
+    if (value === 'All') {
+      dataGrid.clearFilter();
+    } else {
+      setFilterCityStatus("All");
+      dataGrid.filter(['ShipCountry', '=', value]);
+    }
 
-  //   setFilterStatus(value);
-  // }, []);
+    setFilterStatus(value);
+  }, []);
+
+  const onCityFilterValueChanged = useCallback(({ value }) => {
+    const dataGrid = dataGridRef.current.instance;
+
+    if (value === 'All') {
+      dataGrid.clearFilter();
+    } else {
+      setFilterStatus("All");
+      dataGrid.filter(['ShipCity', '=', value]);
+    }
+
+    setFilterCityStatus(value);
+  }, []);
 
   // const onFilterValueChanged = useCallback(({ value }) => {
   //   const dataGrid = dataGridRef.current.instance;
@@ -394,26 +414,25 @@ const MasterDetailGrid = () => {
   //   }
   // }, []);
 
-  const onFilterValueChanged = useCallback(({ value }) => {
+  const onCityValueChanged = useCallback(({ value }) => {
     const dataGrid = dataGridRef.current.instance;
 
-    if (value === 'All') {
-      dataGrid.clearFilter();
+    if (value === '') {
+      dataGrid.reload();
+      console.log("hehe")
     } else {
-
-
       // Apply custom filter
-      dataGrid.filter(['ShipCity', 'ShipCountry', '=', value]);
-      setSearchTerm(value);
-      setFilterStatus(value);
+      dataGrid.filter(['ShipCity', '=', value]);
+      setCitySearchTerm(value);
+      // setFilterStatus(value);
     }
-  }, [setSearchTerm, setFilterStatus]);
+  }, [setCitySearchTerm]);
 
   return (
     <>
-      <div className="item-filter">
-        <div className='filter-items'>
-          <label>TP đặt hàng</label>
+      <div className="item-filter-wrapper responsive-paddings">
+        <div className='item-filter'>
+          <label className='items-filter-label'>Nước đặt hàng</label>
           <SelectBox
             items={statuses}
             inputAttr={statusLabel}
@@ -422,17 +441,28 @@ const MasterDetailGrid = () => {
           />
         </div>
 
-        {/* <div className='filter-items'>
-          <label>shipCountryFilter</label>
+        <div className='item-filter'>
+          <label className='items-filter-label'>TP đặt hàng</label>
+          <SelectBox
+            items={cityStatuses}
+            inputAttr={statusLabel}
+            value={filterCityStatus}
+            onValueChanged={onCityFilterValueChanged}
+          />
+        </div>
+
+        <div className='item-filter'>
+          <label className='items-filter-label'>Ship City Filter</label>
 
           <input
             type='text'
             className='ship-country-filter'
-            value={searchTerm}
-            onChange={handleSearchTermChange}
+            value={citySearchTerm}
+            // shipCityTerm 
+            onChange={onCityValueChanged}
             placeholder='Search...'
           />
-        </div> */}
+        </div>
 
       </div>
 
@@ -527,27 +557,31 @@ const MasterDetailGrid = () => {
         </Column>
 
         <Column
-          caption="TP đặt hàng"
+          caption="Nước đặt hàng"
           dataField="ShipCountry"
           alignment="left"
           width={120}
           allowSearch={false}
           filterOperations={['custom']}
-          // calculateFilterExpression={() => {
-          //   return ['contains', 'ShipCountry', shipCountryFilter];
-          // }}
           calculateFilterExpression={() => {
-            return ['custom', shipCountryFilter];
+            return ['contains', 'ShipCountry', shipCountryFilter];
           }}
+        // calculateFilterExpression={() => {
+        //   return ['custom', shipCountryFilter];
+        // }}
         // calculateFilterExpression={() => ['contains', 'ShipCountry', shipCountryFilter]}
         />
 
-        <Column caption="TP giao hàng"
+        <Column caption="TP đặt hàng"
           dataField="ShipCity"
           alignment='left'
           allowSearch={false}
+          filterOperations={['custom']}
+          calculateFilterExpression={() => {
+            return ['contains', 'ShipCity', shipCityFilter, citySearchTerm];
+          }}
         />
-        <Column caption="Địa chỉ giao hàng" dataField="ShipAddress" alignment='left' selectedFilterOperation="contains" width={150} filterOperations={['contains']}></Column>
+        <Column caption="Địa chỉ đặt hàng" dataField="ShipAddress" alignment='left' selectedFilterOperation="contains" width={150} filterOperations={['contains']}></Column>
 
         <Column caption="Ngày đặt hàng"
           dataField="OrderDate"

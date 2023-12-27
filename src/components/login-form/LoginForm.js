@@ -3,7 +3,7 @@ import "./LoginForm.scss";
 import AuthContext from "../../contexts/authProvider";
 import { Link, useNavigate, useLocation, Routes, Route, Navigate, BrowserRouter, Redirect } from "react-router-dom";
 import Home from "../../pages/home/home";
-import { localApi } from '../../api/api';
+import { localApi, baseURL } from '../../api/api';
 import axios from 'axios';
 import Footer from "../footer/Footer";
 import LoginIcon from "../../asset/image/icondanhmuckhac.png";
@@ -51,7 +51,7 @@ const Login = () => {
     console.log('Fetching TinhThanhPhoData');
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://localhost:7223/api/DanhMuc/GetDMTinhThanhPho');
+        const response = await axios.get(`${baseURL}/api/DanhMuc/GetDMTinhThanhPho`);
         setTinhThanhPhoData(response.data);
 
       } catch (error) {
@@ -67,7 +67,7 @@ const Login = () => {
     console.log('Fetching CapHoc');
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://localhost:7223/api/DanhMuc/GetDMCapHoc');
+        const response = await axios.get(`${baseURL}/api/DanhMuc/GetDMCapHoc`);
         setCapHocData(response.data);
 
       } catch (error) {
@@ -82,7 +82,7 @@ const Login = () => {
     console.log('Fetching PhuongXa');
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://localhost:7223/api/DanhMuc/GetDMPhuongXa');
+        const response = await axios.get(`${baseURL}/api/DanhMuc/GetDMPhuongXa`);
         setPhuongXaData(response.data);
 
       } catch (error) {
@@ -136,7 +136,9 @@ const Login = () => {
       const from = prevLocation.state?.from?.pathname || "/home";
       navigate(from, { replace: true });
       setSuccess(true);
-      alert("navigated")
+      console.log("navigated")
+      navigate("/home")
+
     } catch (err) {
       if (!err?.response) {
         setErrMsg('No Server Response');

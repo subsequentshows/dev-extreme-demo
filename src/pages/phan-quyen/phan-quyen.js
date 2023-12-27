@@ -1,6 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import './phan-quyen.scss';
+import axios from 'axios';
+import { baseURL } from '../../api/api';
+import {
+  Column,
+  DataGrid,
+  FilterRow,
+  HeaderFilter,
+  GroupPanel,
+  Editing,
+  Grouping,
+  Paging,
+  SearchPanel,
+  Summary,
+  RequiredRule,
+  StringLengthRule,
+  GroupItem,
+  TotalItem,
+  ValueFormat,
+  ColumnFixing,
+  Export,
+  Selection,
+  Toolbar,
+  Item,
+} from 'devextreme-react/data-grid';
+import { Popup, Position, ToolbarItem } from 'devextreme-react/popup';
+import SelectBox from 'devextreme-react/select-box';
+import { Button } from "devextreme-react/button";
+import notify from 'devextreme/ui/notify';
 
 const PhanQuyen = () => {
   const [phuongXaData, setPhuongXaData] = useState([]);
@@ -9,7 +36,7 @@ const PhanQuyen = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('https://localhost:7223/api/DanhMuc/GetDMPhuongXa');
+        const response = await axios.get(`${baseURL}/api/DanhMuc/GetDMPhuongXa`);
         setPhuongXaData(response.data);
 
       } catch (error) {
@@ -21,9 +48,14 @@ const PhanQuyen = () => {
 
   return (
     <>
-      <h2 className={'content-block'}>Phan Quyen</h2>
       <div className={'content-block'}>
         <div className={'dx-card responsive-paddings'}>
+
+          <DataGrid
+            dataSource={phuongXaData.Data}
+            showBorders={true}
+          >
+          </DataGrid>
 
           <div className="margin_top_line required rcbTruong-wrapper">
             <select

@@ -168,3 +168,22 @@ code {
     }
   }
 }
+
+.item-filter-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+
+  .item-filter {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .items-filter-label {
+    display: block;
+    width: 130px;
+    text-align: right;
+    padding-right: 10px;
+  }
+}
