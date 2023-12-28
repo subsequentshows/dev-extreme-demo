@@ -2,15 +2,15 @@ import { useRef, useState, useEffect, useContext } from 'react';
 import "./LoginForm.scss";
 import AuthContext from "../../contexts/authProvider";
 import { Link, useNavigate, useLocation, Routes, Route, Navigate, BrowserRouter, Redirect } from "react-router-dom";
-import Home from "../../pages/home/home";
+import { loadCaptchaEnginge, LoadCanvasTemplate, LoadCanvasTemplateNoReload, validateCaptcha } from 'react-simple-captcha';
 import { localApi, baseURL } from '../../api/api';
 import axios from 'axios';
+import $ from 'jquery';
 import Footer from "../footer/Footer";
 import LoginIcon from "../../asset/image/icondanhmuckhac.png";
 import LoginBackground from "../../asset/image/login-background.png";
 
 const LOGIN_URL = '/login';
-const getDMPhuongXaUrl = "/api/DanhMuc/GetDMPhuongXa"
 
 const Login = () => {
   const { setAuth } = useContext(AuthContext);
@@ -106,50 +106,67 @@ const Login = () => {
   //   fetchData();
   // }, []);
 
+  // function componentDidMount() {
+  //   loadCaptchaEnginge(6);
+  // };
+
+  useEffect(() => {
+    loadCaptchaEnginge(6);
+    loadCaptchaEnginge(5, "gray");
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    let user_captcha_value = $("#user_captcha_input").val();
 
-    try {
-      const response = await localApi.post(LOGIN_URL,
-        JSON.stringify({
-          username: user,
-          password: password,
-          ma_tinh: "01",
-          ma_huyen: "001",
-          ma_xa: "00001"
-        }),
-        {
-          headers: { 'Content-Type': 'application/json' },
-          withCredentials: true
+    if (validateCaptcha(user_captcha_value) === true) {
+      try {
+        const response = await localApi.post(LOGIN_URL,
+          JSON.stringify({
+            username: user,
+            password: password,
+            ma_tinh: "01",
+            ma_huyen: "001",
+            ma_xa: "00001"
+          }),
+          {
+            headers: { 'Content-Type': 'application/json' },
+            withCredentials: true
+          }
+        );
+        console.log("JSON respone data" + JSON.stringify(response?.data));
+        //console.log(JSON.stringify(response));
+
+        const accessToken = response?.data?.accessToken;
+        const roles = response?.data?.roles;
+
+        setAuth({ user, password, roles, accessToken });
+        setUser('');
+        setPwd('');
+
+        const from = prevLocation.state?.from?.pathname || "/#/home";
+        navigate(from, { replace: true });
+        setSuccess(true);
+        console.log("navigated")
+        navigate("/#/home")
+
+      } catch (err) {
+        if (!err?.response) {
+          setErrMsg('No Server Response');
+        } else if (err.response?.status === 400) {
+          setErrMsg('Missing Username or Password');
+        } else if (err.response?.status === 401) {
+          setErrMsg('Unauthorized');
+        } else {
+          setErrMsg('Login Failed');
         }
-      );
-      console.log("JSON respone data" + JSON.stringify(response?.data));
-      //console.log(JSON.stringify(response));
-
-      const accessToken = response?.data?.accessToken;
-      const roles = response?.data?.roles;
-
-      setAuth({ user, password, roles, accessToken });
-      setUser('');
-      setPwd('');
-
-      const from = prevLocation.state?.from?.pathname || "/home";
-      navigate(from, { replace: true });
-      setSuccess(true);
-      console.log("navigated")
-      navigate("/home")
-
-    } catch (err) {
-      if (!err?.response) {
-        setErrMsg('No Server Response');
-      } else if (err.response?.status === 400) {
-        setErrMsg('Missing Username or Password');
-      } else if (err.response?.status === 401) {
-        setErrMsg('Unauthorized');
-      } else {
-        setErrMsg('Login Failed');
+        errRef.current.focus();
       }
-      errRef.current.focus();
+    } else if (user_captcha_value === "") {
+      setErrMsg('Vui lòng nhập mã xác nhận');
+    } else {
+      setErrMsg('Mã xác nhận không đúng');
+      $("#user_captcha_input").val("")
     }
   }
 
@@ -166,6 +183,7 @@ const Login = () => {
       ) : (
         <section>
           <form onSubmit={handleSubmit}>
+            {/* <form> */}
             <div className="container-fluid">
               <div className="height-100">
                 <div className="login-section">
@@ -190,14 +208,17 @@ const Login = () => {
                       <div className="input-group md-form form-sm form-2 pl-0"
                       >
                         {/* <input name="tbUserName" type="text" id="tbUserName" className="form-control my-0 py-1 red-border input-left-textbox box-shadow-bt" placeholder="Tài khoản đăng nhập" wfd-id="id6" /> */}
-                        <input type="text" id="username" ref={userRef} autoComplete="off"
+                        <input
+                          type="text"
+                          id="username"
+                          ref={userRef}
+                          autoComplete="off"
+                          placeholder="Mật khẩu"
                           onChange={(e) => setUser(e.target.value)} value={user} required
                         />
                         <div className="input-group-append">
                           <span className="input-group-text red lighten-3 button-right-textbox box-shadow-bt">
-                            <i className="fas fa-user text-grey qi-color"
-                              aria-hidden="true">
-                            </i>
+                            <i className="fas fa-user text-grey qi-color" aria-hidden="true"></i>
                           </span>
                         </div>
 
@@ -206,8 +227,14 @@ const Login = () => {
 
                     <div className="margin_top_line">
                       <div className="input-group md-form form-sm form-2 pl-0">
-                        <input id="password" type="password" name="tbPassword" placeholder="Mật khẩu"
-                          onChange={(e) => setPwd(e.target.value)} value={password} required
+                        <input
+                          id="password"
+                          type="password"
+                          name="tbPassword"
+                          placeholder="Mật khẩu"
+                          onChange={(e) => setPwd(e.target.value)}
+                          value={password}
+                          required
                         />
 
                         <div className="input-group-append">
@@ -289,11 +316,19 @@ const Login = () => {
                     <div className="margin_top_line captcha-section required">
                       <div className="captcha-wrapper">
                         <div className="captcha-input input-group">
-                          <input name="tbCapcha" type="text" id="tbCapcha" className="form-control input-captcha" nulltext="Mã xác nhận" placeholder="Nhập mã xác nhận" autoComplete="off" wfd-id="id16" />
-
+                          <input id="user_captcha_input"
+                            className="form-control input-captcha"
+                            name="tbCapcha"
+                            type="text"
+                            nulltext="Mã xác nhận"
+                            placeholder="Nhập mã xác nhận"
+                            autoComplete="off"
+                            wfd-id="id16"
+                          />
                         </div>
-                        <div className="captcha-text">
-                          <img src="Surface/captcha" alt="Captcha" className="captcha-image" id="captcha-img" />
+
+                        <div className="captcha-text captcha">
+                          <LoadCanvasTemplate reloadText="Reload" />
                         </div>
                       </div>
                     </div>
@@ -304,7 +339,14 @@ const Login = () => {
                     </div>
 
                     <div className="signin-btn">
-                      <input type="submit" name="btSignin" value="Đăng nhập" id="btSignin" className="btn btn-default btn-qi" wfd-id="id18">
+                      <input type="submit"
+                        name="btSignin"
+                        value="Đăng nhập"
+                        id="btSignin"
+                        className="btn btn-default btn-qi"
+                        wfd-id="id18"
+                      // onClick={doSubmit}
+                      >
                       </input>
                     </div>
 
@@ -317,7 +359,7 @@ const Login = () => {
             </div>
 
           </form>
-        </section>
+        </section >
       )}
     </>
   )

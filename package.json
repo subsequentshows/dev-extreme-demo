@@ -10,7 +10,9 @@
     "@types/node": "^16.18.67",
     "@types/react": "^18.2.42",
     "@types/react-dom": "^18.2.17",
+    "assert": "^2.1.0",
     "axios": "^1.6.2",
+    "buffer": "^6.0.3",
     "devextreme": "^23.1.6",
     "devextreme-aspnet-data-nojquery": "^3.0.0",
     "devextreme-react": "^23.1.6",
@@ -26,11 +28,13 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
+    "react-simple-captcha": "^9.3.1",
+    "read-excel-file": "^5.7.1",
     "sass": "^1.34.1",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4",
-    "xlsx": "^0.18.5",
-    "whatwg-fetch": "2.0.4"
+    "whatwg-fetch": "2.0.4",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -50,7 +50,7 @@ import * as JSZIP from "jszip";
 import $ from 'jquery';
 import { Modal } from "react-bootstrap-v5";
 
-import readXlsxFile from 'read-excel-file';
+// import readXlsxFile from 'read-excel-file';
 import { formatDate } from 'devextreme/localization';
 
 const url = 'https://js.devexpress.com/Demos/Mvc/api/DataGridWebApi';
@@ -418,13 +418,16 @@ const MasterDetailGrid = () => {
     const dataGrid = dataGridRef.current.instance;
 
     if (value === '') {
-      dataGrid.reload();
+      // dataGrid.reload();
+      // dataGrid.clearFilter();
       console.log("hehe")
     } else {
       // Apply custom filter
       dataGrid.filter(['ShipCity', '=', value]);
       setCitySearchTerm(value);
-      // setFilterStatus(value);
+      handleSearchTermChange(value)
+      // handleSearchTermChange(value);
+
     }
   }, [setCitySearchTerm]);
 
@@ -454,14 +457,16 @@ const MasterDetailGrid = () => {
         <div className='item-filter'>
           <label className='items-filter-label'>Ship City Filter</label>
 
-          <input
-            type='text'
-            className='ship-country-filter'
-            value={citySearchTerm}
-            // shipCityTerm 
-            onChange={onCityValueChanged}
-            placeholder='Search...'
-          />
+          <div className='input-wrapper'>
+            <input
+              className='ship-country-filter search-input'
+              type='text'
+              value={citySearchTerm}
+              // shipCityTerm 
+              onChange={onCityValueChanged}
+              placeholder='Search...'
+            />
+          </div>
         </div>
 
       </div>
