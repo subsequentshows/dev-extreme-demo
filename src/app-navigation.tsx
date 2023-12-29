@@ -53,4 +53,9 @@ export const navigation = [
     path: "/error-page",
     icon: "folder",
   },
+  {
+    text: "View Name",
+    path: "/view-name",
+    icon: "folder",
+  },
 ];

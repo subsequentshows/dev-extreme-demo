@@ -50,23 +50,21 @@ import $ from 'jquery';
 
 const url = 'https://js.devexpress.com/Demos/Mvc/api/DataGridWebApi';
 
-const serviceUrl = 'https://localhost:44300';
+// const remoteDataSource = createStore({
+//   key: 'ID',
+//   loadUrl: serviceUrl + '/DanhMuc/GetDMPhuongXa',
+//   // insertUrl: serviceUrl + '/InsertAction',
+//   // updateUrl: serviceUrl + '/UpdateAction',
+//   // deleteUrl: serviceUrl + '/DeleteAction',
 
-const remoteDataSource = createStore({
+//   onBeforeSend: (method, ajaxOptions) => {
+//     ajaxOptions.xhrFields = { withCredentials: true };
+//   },
+// });
+
+const dataSource = createStore({
   key: 'ID',
-  loadUrl: serviceUrl + '/api/DanhMuc/GetDMPhuongXa',
-  insertUrl: serviceUrl + '/InsertAction',
-  updateUrl: serviceUrl + '/UpdateAction',
-  deleteUrl: serviceUrl + '/DeleteAction',
-
-  onBeforeSend: (method, ajaxOptions) => {
-    ajaxOptions.xhrFields = { withCredentials: true };
-  },
-});
-
-const dataSource = new DataSource({
-  key: 'ID',
-  loadUrl: `${url}/api/DanhMuc/GetDMPhuongXa`,
+  loadUrl: `${baseURL}/DanhMuc/GetDMPhuongXa`,
   // insertUrl: `${url}/InsertOrder`,
   // updateUrl: `${url}/UpdateOrder`,
   // deleteUrl: `${url}/DeleteOrder`,
@@ -83,43 +81,62 @@ function handleErrors(response) {
   return response;
 }
 
-const customDataSource = new CustomStore({
-  key: 'ID',
-  load: (loadOptions) => {
-    // ...
-  },
-  insert: (values) => {
-    return fetch('https://mydomain.com/MyDataService', {
-      method: 'POST',
-      body: JSON.stringify(values),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(handleErrors)
-      .catch(() => { throw 'Network error' });
-  },
-  remove: (key) => {
-    return fetch(`https://mydomain.com/MyDataService/${encodeURIComponent(key)}`, {
-      method: 'DELETE'
-    })
-      .then(handleErrors)
-      .catch(() => { throw 'Network error' });
-  },
-  update: (key, values) => {
-    return fetch(`https://mydomain.com/MyDataService/${encodeURIComponent(key)}`, {
-      method: 'PUT',
-      body: JSON.stringify(values),
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-      .then(handleErrors)
-      .catch(() => { throw 'Network error' });
-  }
-});
+
+
+// const customDataSource = new CustomStore({
+//   key: 'ID',
+//   load: (loadOptions) => {
+//     // ...
+//   },
+//   insert: (values) => {
+//     return fetch('https://mydomain.com/MyDataService', {
+//       method: 'POST',
+//       body: JSON.stringify(values),
+//       headers: {
+//         'Content-Type': 'application/json'
+//       }
+//     })
+//       .then(handleErrors)
+//       .catch(() => { throw 'Network error' });
+//   },
+//   remove: (key) => {
+//     return fetch(`https://mydomain.com/MyDataService/${encodeURIComponent(key)}`, {
+//       method: 'DELETE'
+//     })
+//       .then(handleErrors)
+//       .catch(() => { throw 'Network error' });
+//   },
+//   update: (key, values) => {
+//     return fetch(`https://mydomain.com/MyDataService/${encodeURIComponent(key)}`, {
+//       method: 'PUT',
+//       body: JSON.stringify(values),
+//       headers: {
+//         'Content-Type': 'application/json'
+//       }
+//     })
+//       .then(handleErrors)
+//       .catch(() => { throw 'Network error' });
+//   }
+// });
 
 const RowEdit = () => {
+  const customStore = useMemo(() => {
+    return new CustomStore({
+      key: 'ID',
+      load: (loadOptions) => {
+        // Import data loading fromdataSource
+        return dataSource.load(loadOptions);
+      },
+      // filter for ShipCountry
+      // byKey: (key) => {
+      //   return dataSource.byKey(key);
+      // },
+      // Implement the custom filter function for ShipCountry
+      // filter: [shipCityFilter],
+      filter: [],
+    });
+  }, []);
+
   const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
   const statuses = ['All', 'France', 'Germany', 'Brazil', 'Belgium'];
   const cityStatuses = ['All', 'Reims', 'Rio de Janeiro', 'Lyon', 'Charleroi'];
@@ -145,18 +162,18 @@ const RowEdit = () => {
 
   const [citySearchTerm, setCitySearchTerm] = useState('');
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${baseURL}/api/DanhMuc/GetDMPhuongXa`);
-        setPhuongXaData(response.data);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await axios.get(`${baseURL}/DanhMuc/GetDMPhuongXa`);
+  //       setPhuongXaData(response.data);
 
-      } catch (error) {
-        console.error('Error fetching PhuongXa data:', error);
-      }
-    };
-    fetchData();
-  }, []);
+  //     } catch (error) {
+  //       console.error('Error fetching PhuongXa data:', error);
+  //     }
+  //   };
+  //   fetchData();
+  // }, []);
 
   // Export files
   const exportFormats = ['xlsx', 'pdf'];
@@ -274,7 +291,7 @@ const RowEdit = () => {
             width="100%"
             height="100%"
             ref={dataGridRef}
-            dataSource={phuongXaData.Data}
+            dataSource={customStore}
             allowColumnReordering={false}
             focusedRowEnabled={true}
             showBorders={true}
@@ -344,13 +361,10 @@ const RowEdit = () => {
             </Column> */}
 
             <Column dataField="MA" caption='Mã' width={80}></Column>
-
             <Column dataField="MA_HUYEN" caption='Mã huyện' width={80}></Column>
             <Column dataField="MA_TINH" caption='Mã tỉnh' width={80}></Column>
             <Column dataField="TEN_TINH" caption='Tên tỉnh' width={120}></Column>
             <Column dataField="TEN_HUYEN" caption='Tên huyện' width={120}></Column>
-
-
 
             <Toolbar>
               <Item location="left" locateInMenu="never" render={renderLabel} />

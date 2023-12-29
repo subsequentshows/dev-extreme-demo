@@ -9,6 +9,7 @@ import {
   DemoDataGridPage,
   RowEditPage,
   ErrorPagePage,
+  ViewNamePage,
 } from "./pages";
 import { withNavigationWatcher } from "./contexts/navigation";
 
@@ -52,6 +53,11 @@ const routes = [
   {
     path: "/error-page",
     element: ErrorPagePage,
+  },
+
+  {
+    path: "/view-name",
+    element: ViewNamePage,
   },
 ];
 

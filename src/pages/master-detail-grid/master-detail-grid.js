@@ -10,6 +10,7 @@ import {
   Editing,
   Grouping,
   Paging,
+  Pager,
   SearchPanel,
   Summary,
   RequiredRule,
@@ -425,8 +426,6 @@ const MasterDetailGrid = () => {
       // Apply custom filter
       dataGrid.filter(['ShipCity', '=', value]);
       setCitySearchTerm(value);
-      handleSearchTermChange(value)
-      // handleSearchTermChange(value);
 
     }
   }, [setCitySearchTerm]);
@@ -659,6 +658,7 @@ const MasterDetailGrid = () => {
         <GroupPanel visible={false} />
         <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
         <Paging enabled={true} defaultPageSize={50} defaultPageIndex={0} />
+        <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} />
       </DataGrid>
 
       {/* Delete confirm popup */}

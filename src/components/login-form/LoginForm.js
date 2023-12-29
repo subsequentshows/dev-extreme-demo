@@ -51,7 +51,7 @@ const Login = () => {
     console.log('Fetching TinhThanhPhoData');
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${baseURL}/api/DanhMuc/GetDMTinhThanhPho`);
+        const response = await axios.get(`${baseURL}/DanhMuc/GetDMTinhThanhPho`);
         setTinhThanhPhoData(response.data);
 
       } catch (error) {
@@ -67,7 +67,7 @@ const Login = () => {
     console.log('Fetching CapHoc');
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${baseURL}/api/DanhMuc/GetDMCapHoc`);
+        const response = await axios.get(`${baseURL}/DanhMuc/GetDMCapHoc`);
         setCapHocData(response.data);
 
       } catch (error) {
@@ -82,7 +82,7 @@ const Login = () => {
     console.log('Fetching PhuongXa');
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${baseURL}/api/DanhMuc/GetDMPhuongXa`);
+        const response = await axios.get(`${baseURL}/DanhMuc/GetDMPhuongXa`);
         setPhuongXaData(response.data);
 
       } catch (error) {
@@ -165,7 +165,7 @@ const Login = () => {
     } else if (user_captcha_value === "") {
       setErrMsg('Vui lòng nhập mã xác nhận');
     } else {
-      setErrMsg('Mã xác nhận không đúng');
+      setErrMsg('Mã xác nhận không chính xác');
       $("#user_captcha_input").val("")
     }
   }
