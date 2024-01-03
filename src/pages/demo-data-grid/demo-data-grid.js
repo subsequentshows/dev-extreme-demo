@@ -20,6 +20,7 @@ import $ from 'jquery';
 import { Modal } from "react-bootstrap-v5";
 
 import readXlsxFile from 'read-excel-file';
+import { baseURL } from '../../api/api';
 
 const URL = 'https://js.devexpress.com/Demos/Mvc/api/DataGridBatchUpdateWebApi';
 
@@ -27,8 +28,9 @@ const URL = 'https://js.devexpress.com/Demos/Mvc/api/DataGridBatchUpdateWebApi';
 const uploadUrl = "https://js.devexpress.com/Demos/NetCore/FileUploader/Upload";
 
 const ordersStore = createStore({
-  key: 'OrderID',
-  loadUrl: `${URL}/Orders`,
+  key: 'ID',
+  loadUrl: `${baseURL}/DanhMuc/GetDMPhuongXa`,
+
   onBeforeSend: (method, ajaxOptions) => {
     ajaxOptions.xhrFields = { withCredentials: true };
   },
@@ -44,7 +46,7 @@ function handleErrors(response) {
 const dataSource = new CustomStore({
   key: 'ID',
   load: (loadOptions) => {
-    return fetch('https://localhost:44300/api/DanhMuc/GetDMPhuongXa', {
+    return fetch(`${baseURL}/DanhMuc/GetDMPhuongXa`, {
       // method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -52,7 +54,7 @@ const dataSource = new CustomStore({
     })
       .then(handleErrors)
       .then(response => response.json())
-      .catch(() => { throw 'Network error' });
+      .catch((error) => { throw 'Network error' + error });
   },
   // insert: (values) => {
   //   return fetch('https://mydomain.com/MyDataService', {
@@ -123,102 +125,17 @@ const DemoDataGrid = () => {
 
   const dataGridRef = useRef(null);
   const [selectedItemKeys, setSelectedItemKeys] = useState([]);
+  const [isPopupVisible, setPopupVisibility] = useState(false);
 
+  const formElement = useRef(null);
+
+  const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
   $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
-
-  // var ExcelToJSON = function () {
-
-  //   this.parseExcel = function (file) {
-  //     var reader = new FileReader();
-
-  //     reader.onload = function (e) {
-  //       var data = e.target.result;
-  //       var workbook = XLSX.read(data, {
-  //         type: 'binary'
-  //       });
-  //       workbook.SheetNames.forEach(function (sheetName) {
-  //         // Here is your object
-  //         var XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
-  //         var json_object = JSON.stringify(XL_row_object);
-  //         console.log(JSON.parse(json_object));
-  //         $('#xlx_json').val(json_object);
-  //       })
-  //     };
-
-  //     reader.onerror = function (ex) {
-  //       console.log(ex);
-  //     };
-
-  //     reader.readAsBinaryString(file);
-  //   };
-  // };
-
-  // const handleUpload = async (e) => {
-  //   if (file) {
-  //     const formData = new FormData();
-  //     formData.append("file", file);
-
-  //     function getExtension() {
-  //       return file.name.split('.').pop().toLowerCase();
-  //     }
-
-  //     if (getExtension() === "xls" || getExtension() === "xlsx") {
-  //       try {
-  //         const result = await fetch("https://localhost:44300/upload", {
-  //           method: "POST",
-  //           body: formData,
-  //           success: function (fileData) {
-  //             alert(fileData)
-  //           },
-  //         });
-
-  //         // Download file
-  //         // const data = await result.json();
-  //         // console.log("Data:" + data);
-
-  //         // Read the content of the file using FileReader
-  //         const reader = new FileReader();
-
-  //         reader.onload = (event) => {
-  //           // Set the file content to state
-  //           setFileContent(event.target.result);
-  //         };
-
-  //         // Start reading the file as text
-  //         reader.readAsText(file);
-
-  //         // Set the file to state if needed for further processing
-  //         setFile(file);
-  //         // console.log("setFile is" + file);
-  //         // console.log(setFile());
-
-  //         const excelJSON = JSON.stringify(file);
-  //         console.log(typeof (excelJSON));
-
-  //         let xl2json = new ExcelToJSON();
-  //         console.log(typeof (xl2json));
-  //         let excelArray = xl2json.parseExcel(file);
-  //         console.log(typeof (file));
-
-  //         // let excelObject = excelArray.reduce(function (o, val) { o[val] = val; return o; }, {});
-  //         // console.log(JSON.stringify(excelObject));
-  //       }
-  //       catch (error) {
-  //         console.error("Lỗi: " + error);
-  //       }
-  //     } else {
-  //       console.error("Chỉ cho phép nhập dữ liệu từ file Excel (*.xls, *.xlsx)")
-  //     }
-  //   } else {
-  //     console.error("Bạn chưa lựa chọn file excel!")
-  //   }
-  // };
 
   const handleFileUpload = async (file) => {
     try {
       const data = await readXlsxFile(file);
       setUploadedData(data);
-      // notify('File uploaded successfully!');
     } catch (error) {
       console.error('Error reading file:', error);
       notify('Error reading file. Please check the file format.');
@@ -228,7 +145,6 @@ const DemoDataGrid = () => {
   const onSelectedFilesChanged = useCallback((e) => {
     setSelectedFiles(e.value);
     if (e.value.length > 0) {
-      // Handle file upload when a file is selected
       handleFileUpload(e.value[0]);
     }
   }, [setSelectedFiles]);
@@ -240,10 +156,6 @@ const DemoDataGrid = () => {
       e.promise = processBatchRequest(`${URL}/Batch`, e.changes, e.component);
     }
   }, []);
-
-  const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
-
-  const [isPopupVisible, setPopupVisibility] = useState(false);
 
   const togglePopup = useCallback(() => {
     setPopupVisibility(!isPopupVisible);
@@ -258,7 +170,6 @@ const DemoDataGrid = () => {
   }, [setUploadMode]);
 
 
-  const formElement = useRef(null);
 
   const onClick = useCallback(() => {
     notify('Uncomment the line to enable sending a form to the server.');
@@ -291,7 +202,7 @@ const DemoDataGrid = () => {
 
         <DataGrid
           id="gridContainer"
-          dataSource={ordersStore}
+          dataSource={dataSource}
           showBorders={true}
           remoteOperations={true}
           repaintChangesOnly={true}
@@ -377,7 +288,9 @@ const DemoDataGrid = () => {
               <DataGrid
                 className='uploaded-data'
                 dataSource={uploadedData}
-              ></DataGrid>
+              >
+
+              </DataGrid>
 
               <Button className="submit-button" text="Thêm" type="success" onClick={onClick} />
             </form>

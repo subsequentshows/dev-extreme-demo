@@ -16,56 +16,38 @@ import { SelectBox, SelectBoxTypes } from "devextreme-react/select-box";
 import CustomStore from "devextreme/data/custom_store";
 import { formatDate } from "devextreme/localization";
 import "whatwg-fetch";
+import { baseURL } from "../../api/api";
 
 const refreshModeLabel = { "aria-label": "Refresh Mode" };
-const URL = "https://localhost:44300";
 
 const REFRESH_MODES = ["full", "reshape", "repaint"];
 
 const App = () => {
+  const [requests, setRequests] = useState([]);
+  const [refreshMode, setRefreshMode] = useState("reshape");
+
   const [ordersData] = useState(
     new CustomStore({
       key: "ID",
-      load: () => sendRequest(`${URL}/DanhMuc/GetDMPhuongXa`),
-
-
-
-
-      insert: (values) =>
-        sendRequest(`${URL}/InsertOrder`, "POST", {
-          values: JSON.stringify(values),
-        }),
-      update: (key, values) =>
-        sendRequest(`${URL}/UpdateOrder`, "PUT", {
-          key,
-          values: JSON.stringify(values),
-        }),
-      remove: (key) =>
-        sendRequest(`${URL}/DeleteOrder`, "DELETE", {
-          key,
-        }),
+      load: () => sendRequest(`${baseURL}/DanhMuc/GetDMPhuongXa`),
+      // insert: (values) =>
+      //   sendRequest(`${baseURL}/InsertOrder`, "POST", {
+      //     values: JSON.stringify(values),
+      //   }),
+      // update: (key, values) =>
+      //   sendRequest(`${baseURL}/UpdateOrder`, "PUT", {
+      //     key,
+      //     values: JSON.stringify(values),
+      //   }),
+      // remove: (key) =>
+      //   sendRequest(`${baseURL}/DeleteOrder`, "DELETE", {
+      //     key,
+      //   }),
     })
   );
 
-  // const [customersData] = useState(
-  //   new CustomStore({
-  //     key: "Value",
-  //     loadMode: "raw",
-  //     load: () => sendRequest(`${URL}/CustomersLookup`),
-  //   })
-  // );
-
-  // const [shippersData] = useState(
-  //   new CustomStore({
-  //     key: "Value",
-  //     loadMode: "raw",
-  //     load: () => sendRequest(`${URL}/ShippersLookup`),
-  //   })
-  // );
-
-  const [requests, setRequests] = useState([]);
-  const [refreshMode, setRefreshMode] =
-    useState("reshape");
+  console.table(ordersData)
+  console.log(typeof (ordersData))
 
   const handleRefreshModeChange = useCallback(
     (e) => {
@@ -126,39 +108,42 @@ const App = () => {
 
       if (!response.ok) {
         throw result.Message;
+      } else {
+        console.log(result.data)
       }
 
       return method === "GET" ? result.data : {};
+
     },
     [logRequest]
   );
 
   return (
-    <React.Fragment>
-      <DataGrid
-        id="grid"
-        showBorders={true}
-        dataSource={ordersData}
-        repaintChangesOnly={true}
-      >
-        <Editing
+    <>
+      <div className="responsive-paddings">
+        <DataGrid
+          id="grid"
+          showBorders={true}
+          dataSource={ordersData}
+          repaintChangesOnly={true}
+        >
+          {/* <Editing
           refreshMode={refreshMode}
-          mode="cell"
+          mode="batch"
           allowAdding={true}
           allowDeleting={true}
           allowUpdating={true}
-        />
+        /> */}
 
-        <Scrolling mode="virtual" />
-
-        {/* <Column dataField="CustomerID" caption="Customer">
+          {/* <Column dataField="CustomerID" caption="Customer">
           <Lookup
             dataSource={customersData}
             valueExpr="Value"
             displayExpr="Text"
           />
         </Column> */}
-        {/* <Column dataField="OrderDate" dataType="date" />
+
+          {/* <Column dataField="OrderDate" dataType="date" />
         <Column dataField="Freight" />
         <Column dataField="ShipCountry" />
         <Column
@@ -173,35 +158,39 @@ const App = () => {
           />
         </Column> */}
 
-        {/* <Summary>
+          {/* <Summary>
           <TotalItem column="CustomerID" summaryType="count" />
           <TotalItem column="Freight" summaryType="sum" valueFormat="#0.00" />
         </Summary> */}
-      </DataGrid>
-      <div className="options">
-        <div className="caption">Options</div>
-        <div className="option">
-          <span>Refresh Mode: </span>
-          <SelectBox
-            value={refreshMode}
-            inputAttr={refreshModeLabel}
-            items={REFRESH_MODES}
-            onValueChanged={handleRefreshModeChange}
-          />
-        </div>
-        <div id="requests">
-          <div>
-            <div className="caption">Network Requests</div>
-            <Button id="clear" text="Clear" onClick={clearRequests} />
+        </DataGrid>
+        <br />
+        <br />
+        <br />
+        <div className="options" >
+          <div className="caption">Options</div>
+          <div className="option">
+            <span>Refresh Mode: </span>
+            <SelectBox
+              value={refreshMode}
+              inputAttr={refreshModeLabel}
+              items={REFRESH_MODES}
+              onValueChanged={handleRefreshModeChange}
+            />
           </div>
-          <ul>
-            {requests.map((request, index) => (
-              <li key={index}>{request}</li>
-            ))}
-          </ul>
+          <div id="requests">
+            <div>
+              <div className="caption">Network Requests</div>
+              <Button id="clear" text="Clear" onClick={clearRequests} />
+            </div>
+            <ul>
+              {requests.map((request, index) => (
+                <li key={index}>{request}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
-    </React.Fragment>
+    </>
   );
 };
 

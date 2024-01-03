@@ -9,6 +9,8 @@ import $ from 'jquery';
 import Footer from "../footer/Footer";
 import LoginIcon from "../../asset/image/icondanhmuckhac.png";
 import LoginBackground from "../../asset/image/login-background.png";
+import { Captcha, captchaSettings } from 'reactjs-captcha';
+
 
 const LOGIN_URL = '/login';
 
@@ -110,63 +112,67 @@ const Login = () => {
   //   loadCaptchaEnginge(6);
   // };
 
-  useEffect(() => {
-    loadCaptchaEnginge(6);
-    loadCaptchaEnginge(5, "gray");
-  }, []);
+
+  // Old captcha
+  // useEffect(() => {
+  //   loadCaptchaEnginge(6);
+  //   loadCaptchaEnginge(5, "gray");
+  // }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     let user_captcha_value = $("#user_captcha_input").val();
 
-    if (validateCaptcha(user_captcha_value) === true) {
-      try {
-        const response = await localApi.post(LOGIN_URL,
-          JSON.stringify({
-            username: user,
-            password: password,
-            ma_tinh: "01",
-            ma_huyen: "001",
-            ma_xa: "00001"
-          }),
-          {
-            headers: { 'Content-Type': 'application/json' },
-            withCredentials: true
-          }
-        );
-        console.log("JSON respone data" + JSON.stringify(response?.data));
-        //console.log(JSON.stringify(response));
+    // if (validateCaptcha(user_captcha_value) === true) {
 
-        const accessToken = response?.data?.accessToken;
-        const roles = response?.data?.roles;
+    // } else if (user_captcha_value === "") {
+    //   setErrMsg('Vui lòng nhập mã xác nhận');
+    // } else {
+    //   setErrMsg('Mã xác nhận không chính xác');
+    //   $("#user_captcha_input").val("")
+    // }
 
-        setAuth({ user, password, roles, accessToken });
-        setUser('');
-        setPwd('');
-
-        const from = prevLocation.state?.from?.pathname || "/#/home";
-        navigate(from, { replace: true });
-        setSuccess(true);
-        console.log("navigated")
-        navigate("/#/home")
-
-      } catch (err) {
-        if (!err?.response) {
-          setErrMsg('No Server Response');
-        } else if (err.response?.status === 400) {
-          setErrMsg('Missing Username or Password');
-        } else if (err.response?.status === 401) {
-          setErrMsg('Unauthorized');
-        } else {
-          setErrMsg('Login Failed');
+    try {
+      const response = await localApi.post(LOGIN_URL,
+        JSON.stringify({
+          username: user,
+          password: password,
+          ma_tinh: "01",
+          ma_huyen: "001",
+          ma_xa: "00001"
+        }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true
         }
-        errRef.current.focus();
+      );
+      console.log("JSON respone data" + JSON.stringify(response?.data));
+      //console.log(JSON.stringify(response));
+
+      const accessToken = response?.data?.accessToken;
+      const roles = response?.data?.roles;
+
+      setAuth({ user, password, roles, accessToken });
+      setUser('');
+      setPwd('');
+
+      const from = prevLocation.state?.from?.pathname || "/#/home";
+      navigate(from, { replace: true });
+      setSuccess(true);
+      console.log("navigated")
+      navigate("/#/home")
+
+    } catch (err) {
+      if (!err?.response) {
+        setErrMsg('No Server Response');
+      } else if (err.response?.status === 400) {
+        setErrMsg('Missing Username or Password');
+      } else if (err.response?.status === 401) {
+        setErrMsg('Unauthorized');
+      } else {
+        setErrMsg('Login Failed');
       }
-    } else if (user_captcha_value === "") {
-      setErrMsg('Vui lòng nhập mã xác nhận');
-    } else {
-      setErrMsg('Mã xác nhận không chính xác');
-      $("#user_captcha_input").val("")
+      errRef.current.focus();
     }
   }
 
@@ -328,7 +334,16 @@ const Login = () => {
                         </div>
 
                         <div className="captcha-text captcha">
-                          <LoadCanvasTemplate reloadText="Reload" />
+                          {/* <LoadCanvasTemplate reloadText="Reload" /> */}
+                          <Captcha captchaStyleName="yourFirstCaptchaStyle"
+                            ref={(captcha) => { this.captcha = captcha }}
+                          />
+
+                          <label>
+                            <span>Retype the characters from the picture:</span>
+                            {/* captcha code: user-input textbox */}
+                            <input id="yourFirstCaptchaUserInput" type="text" />
+                          </label>
                         </div>
                       </div>
                     </div>

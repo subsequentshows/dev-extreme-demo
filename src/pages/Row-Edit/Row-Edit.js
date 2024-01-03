@@ -20,6 +20,7 @@ import {
   Selection,
   Toolbar,
   Item,
+  Pager
 } from 'devextreme-react/data-grid';
 
 import { Popup, Position, ToolbarItem } from 'devextreme-react/popup';
@@ -48,32 +49,6 @@ import * as XLSX from "xlsx";
 import * as JSZIP from "jszip";
 import $ from 'jquery';
 
-const url = 'https://js.devexpress.com/Demos/Mvc/api/DataGridWebApi';
-
-// const remoteDataSource = createStore({
-//   key: 'ID',
-//   loadUrl: serviceUrl + '/DanhMuc/GetDMPhuongXa',
-//   // insertUrl: serviceUrl + '/InsertAction',
-//   // updateUrl: serviceUrl + '/UpdateAction',
-//   // deleteUrl: serviceUrl + '/DeleteAction',
-
-//   onBeforeSend: (method, ajaxOptions) => {
-//     ajaxOptions.xhrFields = { withCredentials: true };
-//   },
-// });
-
-const dataSource = createStore({
-  key: 'ID',
-  loadUrl: `${baseURL}/DanhMuc/GetDMPhuongXa`,
-  // insertUrl: `${url}/InsertOrder`,
-  // updateUrl: `${url}/UpdateOrder`,
-  // deleteUrl: `${url}/DeleteOrder`,
-
-  onBeforeSend: (method, ajaxOptions) => {
-    ajaxOptions.xhrFields = { withCredentials: true };
-  },
-});
-
 function handleErrors(response) {
   if (!response.ok) {
     throw Error(response.statusText);
@@ -81,62 +56,7 @@ function handleErrors(response) {
   return response;
 }
 
-
-
-// const customDataSource = new CustomStore({
-//   key: 'ID',
-//   load: (loadOptions) => {
-//     // ...
-//   },
-//   insert: (values) => {
-//     return fetch('https://mydomain.com/MyDataService', {
-//       method: 'POST',
-//       body: JSON.stringify(values),
-//       headers: {
-//         'Content-Type': 'application/json'
-//       }
-//     })
-//       .then(handleErrors)
-//       .catch(() => { throw 'Network error' });
-//   },
-//   remove: (key) => {
-//     return fetch(`https://mydomain.com/MyDataService/${encodeURIComponent(key)}`, {
-//       method: 'DELETE'
-//     })
-//       .then(handleErrors)
-//       .catch(() => { throw 'Network error' });
-//   },
-//   update: (key, values) => {
-//     return fetch(`https://mydomain.com/MyDataService/${encodeURIComponent(key)}`, {
-//       method: 'PUT',
-//       body: JSON.stringify(values),
-//       headers: {
-//         'Content-Type': 'application/json'
-//       }
-//     })
-//       .then(handleErrors)
-//       .catch(() => { throw 'Network error' });
-//   }
-// });
-
-const RowEdit = () => {
-  const customStore = useMemo(() => {
-    return new CustomStore({
-      key: 'ID',
-      load: (loadOptions) => {
-        // Import data loading fromdataSource
-        return dataSource.load(loadOptions);
-      },
-      // filter for ShipCountry
-      // byKey: (key) => {
-      //   return dataSource.byKey(key);
-      // },
-      // Implement the custom filter function for ShipCountry
-      // filter: [shipCityFilter],
-      filter: [],
-    });
-  }, []);
-
+const RowEdit = ({ itemsPerPage }) => {
   const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
   const statuses = ['All', 'France', 'Germany', 'Brazil', 'Belgium'];
   const cityStatuses = ['All', 'Reims', 'Rio de Janeiro', 'Lyon', 'Charleroi'];
@@ -154,6 +74,7 @@ const RowEdit = () => {
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(50);
+  const allowedPageSizes = [50, 100, 150, 200];
 
   const [filterStatus, setFilterStatus] = useState(statuses[0]);
   const [filterCityStatus, setFilterCityStatus] = useState(statuses[0]);
@@ -162,18 +83,40 @@ const RowEdit = () => {
 
   const [citySearchTerm, setCitySearchTerm] = useState('');
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await axios.get(`${baseURL}/DanhMuc/GetDMPhuongXa`);
-  //       setPhuongXaData(response.data);
+  //
+  const [itemOffset, setItemOffset] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  //     } catch (error) {
-  //       console.error('Error fetching PhuongXa data:', error);
-  //     }
-  //   };
-  //   fetchData();
-  // }, []);
+  // Modal
+  const [show, setShow] = useState(false);
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  // File upload
+  // const [file, setFile] = useState();
+  const [file, setFile] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState();
+  const [error, setError] = useState();
+
+  // Delete
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [editedItems, setEditedItems] = useState({});
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `${baseURL}/DanhMuc/GetDMPhuongXa`
+        );
+        // setPhuongXaData(response.data);
+        setPhuongXaData(response.data.Data)
+
+      } catch (error) {
+        console.error('Error fetching PhuongXa data:', error);
+      }
+    };
+    fetchData();
+  }, []);
 
   // Export files
   const exportFormats = ['xlsx', 'pdf'];
@@ -210,67 +153,6 @@ const RowEdit = () => {
     dataGridRef.current.instance.refresh();
   }, []);
 
-  const deleteRecords = useCallback(() => {
-    try {
-      selectedItemKeys.forEach((key) => {
-        dataSource.remove(key);
-      });
-      togglePopup();
-      refreshDataGrid();
-
-      let selectedAndDeletedItems = selectedItemKeys.length;
-      const customText = `Xóa thành công `;
-      const customText2 = ` mục`;
-      const message = customText + selectedAndDeletedItems + customText2;
-
-      notify(
-        {
-          message,
-          position: {
-            my: 'after bottom',
-            at: 'after bottom',
-          },
-        },
-        'success',
-        3000,
-      );
-    }
-    catch (error) {
-      notify(
-        {
-          error,
-          position: {
-            my: 'after botom',
-            at: 'after botom',
-          },
-        },
-        `error` + { error },
-        5000,
-      )
-    }
-    finally {
-      setSelectedItemKeys([]);
-      // refreshDataGrid();
-    }
-  }, [selectedItemKeys, togglePopup, refreshDataGrid]);
-
-  const onSelectionChanged = useCallback((data) => {
-    setSelectedItemKeys(data.selectedRowKeys);
-  }, []);
-
-  const getDeleteButtonOptions = useCallback(() => ({
-    text: 'Đồng ý',
-    stylingMode: 'contained',
-    onClick: deleteRecords,
-  }), [deleteRecords]);
-
-  const getCloseButtonOptions = useCallback(() => ({
-    text: 'Đóng',
-    stylingMode: 'outlined',
-    type: 'normal',
-    onClick: togglePopup,
-  }), [togglePopup]);
-
   const onPageChanged = (e) => {
     setCurrentPageIndex(e.component.pageIndex());
   };
@@ -282,26 +164,167 @@ const RowEdit = () => {
     return <span> {rowIndex} </span>;
   }
 
+  //
+  const handlePageClick = (event) => {
+    const newOffset = event.selected * itemsPerPage;
+
+    setItemOffset(newOffset);
+  };
+
+  // Search
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  // Delete
+  const handleSelectChange = (event, id) => {
+    if (event.target.checked) {
+      // Add the selected item to the array
+      setSelectedItems([...selectedItems, id]);
+    } else {
+      // Remove the item from the array
+      setSelectedItems(selectedItems.filter((itemId) => itemId !== id));
+    }
+  };
+
+  // Update
+  const handleEditItem = (id) => {
+    // Set the item to be edited
+    setEditedItems((prevEditedItems) => ({
+      ...prevEditedItems,
+      [id]: { ...phuongXaData.find((phuongXa) => phuongXa.id === id) },
+    }));
+  };
+
+  const handleUpdateItem = (id) => {
+    // Implement your logic for updating the item on the backend
+    // Send a request to your backend with the edited item
+
+    // After successful update, clear the edited item
+    setEditedItems((prevEditedItems) => {
+      const updatedItems = { ...prevEditedItems };
+      delete updatedItems[id];
+      return updatedItems;
+    });
+  };
+
+  // Modify the handleInputChange function to update the edited items
+  const handleInputChange = (event, id, field) => {
+    const { value } = event.target;
+    setEditedItems((prevEditedItems) => ({
+      ...prevEditedItems,
+      [id]: { ...prevEditedItems[id], [field]: value },
+    }));
+  };
+  const handleUpdateSelected = () => {
+    // Implement your logic for updating the selected items on the backend
+    // Send a request to your backend with the editedItems array
+
+    // After successful update, clear the selected and edited items
+    setSelectedItems([]);
+    setEditedItems({});
+  };
+
+  // const handleDeleteSelected = () => {
+  //   // Filter out the selected items from the 'phuongXaData' array
+  //   const updatedPokemons = phuongXaData.filter((phuongXa) => !selectedItems.includes(phuongXa.id));
+
+  //   // Update the state with the modified array
+  //   setPhuongXaData(updatedPokemons);
+
+  //   // Clear the selected items
+  //   setSelectedItems([]);
+  // };
+
+  // const filteredPokemons = phuongXaData.filter((phuongXa) =>
+  //   phuongXa.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+
+  function Items({ currentItems, startIndex, searchTerm, onDelete, onSelectChange, selectedItems, onInputChange, onUpdateSelected, onEditItem, onUpdateItem, }) {
+    return (
+      <>
+        {currentItems &&
+          currentItems.map((phuongXa, index) => (
+            <tr className='items' key={phuongXa.id}>
+              <td className={`stt-${startIndex + index + 1}`}>{startIndex + index + 1}</td>
+              {/* <td>
+                <input
+                  type="checkbox"
+                  name={phuongXa.name}
+                  checked={selectedItems.includes(phuongXa.id)}
+                  onChange={(event) => handleSelectChange(event, phuongXa.id)}
+                />
+              </td> */}
+              {/* <td>
+                {editedItems[phuongXa.id] ? (
+                  <button className='edit-btn ' onClick={() => handleUpdateItem(phuongXa.id)}>Update</button>
+                ) : (
+                  <button className='edit-btn' onClick={() => handleEditItem(phuongXa.id)}>
+                    <Icon.Gear />
+                  </button>
+                )}
+              </td> */}
+              <td>{phuongXa.name}</td>
+              <td>{phuongXa.ID}</td>
+              <td>{phuongXa.MA}</td>
+            </tr>
+          ))}
+      </>
+    );
+  }
+
+  // Calculating the end offset for the current page
+  const endOffset = itemOffset + itemsPerPage;
+
+  // Get the current items for the current page
+  // const currentItems = filteredPokemons.slice(itemOffset, endOffset);
+  // const pageCount = Math.ceil(filteredPokemons.length / itemsPerPage);
+
   return (
     <React.Fragment>
       <div className={'content-block responsive-paddings'}>
         <div>
+          <div className='item-filter'>
+            <div className='search-field'>
+              <label>Tên</label>
+              <input
+                type='text'
+                placeholder='Tên'
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+            </div>
+          </div>
+
+          <Items
+            // currentItems={currentItems}
+            startIndex={itemOffset}
+            searchTerm={searchTerm}
+            // onDelete={handleDeleteSelected}
+            onSelectChange={handleSelectChange}
+            selectedItems={selectedItems}
+            onInputChange={handleInputChange}
+            onUpdateSelected={handleUpdateSelected}
+            onEditItem={handleEditItem}
+            onUpdateItem={handleUpdateItem}
+          />
           <DataGrid
             id="gridContainer"
             width="100%"
             height="100%"
             ref={dataGridRef}
-            dataSource={customStore}
+            dataSource={phuongXaData}
             allowColumnReordering={false}
-            focusedRowEnabled={true}
+            focusedRowEnabled={false}
             showBorders={true}
             remoteOperations={true}
             repaintChangesOnly={true}
             onExporting={onExporting}
             selectedRowKeys={selectedItemKeys}
-            onSelectionChanged={onSelectionChanged}
             onPageChanged={onPageChanged}
-          >
+          ></DataGrid>
+
+          {/* 
 
             <Editing
               mode="popup"
@@ -311,6 +334,8 @@ const RowEdit = () => {
               allowDeleting={false}
               allowUpdating={true}
             />
+
+
 
             <Column caption="STT"
               dataField="STT"
@@ -344,27 +369,16 @@ const RowEdit = () => {
               caption='Tên'
               fixed={true}
               fixedPosition="left"
-              width={150}
+              width={180}
+              allowEditing={false}
             >
             </Column>
 
-            {/* <Column caption="ID"
-              dataField="ID"
-              alignment='left'
-              width={100}
-              allowEditing={false}
-              allowFiltering={false}
-              fixed={true}
-              fixedPosition="left"
-            >
-              <StringLengthRule max={5} message="The field OrderID must be a string with a maximum length of 5." />
-            </Column> */}
-
-            <Column dataField="MA" caption='Mã' width={80}></Column>
-            <Column dataField="MA_HUYEN" caption='Mã huyện' width={80}></Column>
-            <Column dataField="MA_TINH" caption='Mã tỉnh' width={80}></Column>
-            <Column dataField="TEN_TINH" caption='Tên tỉnh' width={120}></Column>
-            <Column dataField="TEN_HUYEN" caption='Tên huyện' width={120}></Column>
+            <Column dataField="MA" caption='Mã' width={120} allowEditing={false}></Column>
+            <Column dataField="MA_HUYEN" caption='Mã huyện' width={80} allowEditing={false}></Column>
+            <Column dataField="MA_TINH" caption='Mã tỉnh' width={80} allowEditing={false}></Column>
+            <Column dataField="TEN_TINH" caption='Tên tỉnh' width={180} allowEditing={false}></Column>
+            <Column dataField="TEN_HUYEN" caption='Tên huyện' width={150} allowEditing={false}></Column>
 
             <Toolbar>
               <Item location="left" locateInMenu="never" render={renderLabel} />
@@ -380,29 +394,19 @@ const RowEdit = () => {
               </Item>
 
               <Item location='after' name='exportButton' />
-              {/* <Item location='after' name='searchPanel' /> */}
             </Toolbar>
 
             <Grouping autoExpandAll={false} />
             <ColumnFixing enabled={false} />
             <Selection mode="multiple" />
-            <SearchPanel
-              visible={true}
-              width={240}
-              highlightSearchText={true}
-              searchVisibleColumnsOnly={true}
-              placeholder="Tìm kiếm"
-            />
+            <SearchPanel visible={false} width={240} highlightSearchText={true} searchVisibleColumnsOnly={true} placeholder="Tìm kiếm" />
             <FilterRow visible={false} allowFiltering={false} showResetValues={false} />
             <HeaderFilter enabled={false} visible={false} />
             <GroupPanel visible={false} />
             <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
-            <Paging enabled={true} defaultPageSize={50} defaultPageIndex={0} />
-
-          </DataGrid>
-
-          <Selection mode="multiple" />
-          <FilterRow visible={true} />
+            <Paging enabled={true} defaultPageSize={5} defaultPageIndex={0} />
+            <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} />
+          </DataGrid> */}
         </div>
       </div>
     </React.Fragment>

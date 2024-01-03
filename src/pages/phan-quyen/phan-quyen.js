@@ -32,6 +32,13 @@ import { Button } from "devextreme-react/button";
 import notify from 'devextreme/ui/notify';
 import MasterDetailGrid from '../error-page/error-page';
 import ErrorPage from '../error-page/error-page';
+import { formatDate } from 'devextreme/localization';
+import 'whatwg-fetch';
+
+const refreshModeLabel = { 'aria-label': 'Refresh Mode' };
+const URL = 'https://js.devexpress.com/Demos/Mvc/api/DataGridWebApi';
+
+const REFRESH_MODES = ['full', 'reshape', 'repaint'];
 
 // const dataSource = createStore({
 //   key: 'name',
@@ -57,42 +64,33 @@ const dataSource = createStore({
   },
 });
 
-const dataSource2 = createStore({
-  key: 'OrderID',
-  loadUrl: `${baseURL}/DanhMuc/GetDMPhuongXa`,
-  // insertUrl: `${url}/InsertOrder`,
-  // updateUrl: `${url}/UpdateOrder`,
-  // deleteUrl: `${url}/DeleteOrder`,
-
-  onBeforeSend: (method, ajaxOptions) => {
-    ajaxOptions.xhrFields = { withCredentials: true };
-  },
-});
-
-
 const PhanQuyen = () => {
   const [phuongXaData, setPhuongXaData] = useState([]);
   const [selectedXa, setSelectedXa] = useState('-1');
+  const [requests, setRequests] = useState([]);
+
 
   useEffect(() => {
-    // const fetchData = () => {
-    //   axios.get(`${baseURL}/DanhMuc/GetDMPhuongXa`)
-    //     .then(response => setPhuongXaData(response.data))
-    //     .catch(ex => console.error('Error fetching PhuongXa data:', ex));
-    // };
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`${baseURL}/DanhMuc/GetDMPhuongXa`);
+        setPhuongXaData(response.data);
 
-    axios.get(`${baseURL}/DanhMuc/GetDMPhuongXa`)
-      .then(response => setPhuongXaData(response.data))
-      .catch(ex => console.error('Error fetching PhuongXa data:', ex));
-
-    // fetchData();
+      } catch (error) {
+        console.error('Error fetching PhuongXa data:', error);
+      }
+    };
+    fetchData();
   }, []);
 
   return (
     <>
       <div className={'content-block'}>
         <div className={'dx-card responsive-paddings'}>
-          <DataGrid dataSource={phuongXaData.Data} >
+          <DataGrid
+            dataSource={phuongXaData.Data}
+            showBorder={true}
+          >
           </DataGrid>
         </div>
       </div>
