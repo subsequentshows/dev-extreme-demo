@@ -29,6 +29,7 @@ import SelectBox from 'devextreme-react/select-box';
 import { Button } from "devextreme-react/button";
 import "./master-detail-grid.scss";
 import notify from 'devextreme/ui/notify';
+import { baseURL } from '../../api/api';
 import WarningIcon from "../../asset/image/confirm.png";
 
 import DataSource from 'devextreme/data/data_source';
@@ -55,34 +56,6 @@ import { Modal } from "react-bootstrap-v5";
 import { formatDate } from 'devextreme/localization';
 
 const url = 'https://js.devexpress.com/Demos/Mvc/api/DataGridWebApi';
-
-const dataSource = createStore({
-  key: 'OrderID',
-  loadUrl: `${url}/Orders`,
-  insertUrl: `${url}/InsertOrder`,
-  updateUrl: `${url}/UpdateOrder`,
-  deleteUrl: `${url}/DeleteOrder`,
-
-  onBeforeSend: (method, ajaxOptions) => {
-    ajaxOptions.xhrFields = { withCredentials: true };
-  },
-});
-
-const customersData = createStore({
-  key: 'Value',
-  loadUrl: `${url}/CustomersLookup`,
-  onBeforeSend: (method, ajaxOptions) => {
-    ajaxOptions.xhrFields = { withCredentials: true };
-  },
-});
-
-const shippersData = createStore({
-  key: 'Value',
-  loadUrl: `${url}/ShippersLookup`,
-  onBeforeSend: (method, ajaxOptions) => {
-    ajaxOptions.xhrFields = { withCredentials: true };
-  },
-});
 
 // Export files
 const exportFormats = ['xlsx', 'pdf'];
@@ -127,6 +100,18 @@ const cityStatuses = ['All', 'Reims', 'Rio de Janeiro', 'Lyon', 'Charleroi'];
 
 const statusLabel = { 'aria-label': 'Status' };
 
+// const dataSource = createStore({
+//   key: 'OrderID',
+//   loadUrl: `${url}/Orders`,
+//   insertUrl: `${url}/InsertOrder`,
+//   updateUrl: `${url}/UpdateOrder`,
+//   deleteUrl: `${url}/DeleteOrder`,
+
+//   onBeforeSend: (method, ajaxOptions) => {
+//     ajaxOptions.xhrFields = { withCredentials: true };
+//   },
+// });
+
 const MasterDetailGrid = () => {
   const [data, setData] = useState([]);
 
@@ -156,6 +141,7 @@ const MasterDetailGrid = () => {
   const [shipCityFilter, setShipCityFilter] = useState("");
 
   const [citySearchTerm, setCitySearchTerm] = useState('');
+  const [searchValue, setSearchValue] = useState("");
 
   const customizeColumnDate = (itemInfo) => `${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
   const customizeDate = (itemInfo) => `First: ${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
@@ -173,32 +159,143 @@ const MasterDetailGrid = () => {
     return data.ShipCity.toLowerCase().includes(lowerCaseSearchTerm);
   }, [citySearchTerm]);
 
-
-
   const handleSearchTermChange = (event) => {
     setCitySearchTerm(event.target.value);
     shipCityTerm();
   };
 
-  // Custom store for handling data and filtering
-  const customStore = useMemo(() => {
-    return new CustomStore({
-      key: 'OrderID',
-      load: (loadOptions) => {
-        // Import data loading fromdataSource
-        return dataSource.load(loadOptions);
+  const [phuongXaData, setPhuongXaData] = useState(
+    new CustomStore({
+      key: "ID",
+      load: async () => {
+        try {
+          const response = await fetch(
+            `${baseURL}/DanhMuc/GetDMPhuongXa`
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const data = await response.json();
+          console.log(data.Data.find(o => o.TEN === "xá"))
+
+          // Apply search filter
+          if (searchValue) {
+            return data.Data.filter((item) =>
+              item.TEN.toLowerCase().includes(searchValue.toLowerCase())
+            );
+          }
+
+          // return data.Data;
+          return {
+            data: data.Data,
+            totalCount: true,
+            // summary: false,
+            // groupCount: false
+          };
+          // Assuming the API response is an array of objects
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          return [];
+        }
       },
-      // filter for ShipCountry
-      // byKey: (key) => {
-      //   return dataSource.byKey(key);
-      // },
-      // Implement the custom filter function for ShipCountry
-      // filter: [shipCityFilter],
-      filter: [],
-    });
-  }, []);
+
+      onBeforeSend: (method, ajaxOptions) => {
+        ajaxOptions.xhrFields = { withCredentials: true };
+      },
+
+      //     update: async (key, values) => {
+      //       try {
+      //         const response = await fetch(
+      //           `${baseURL}/Manager/Menu/UpdateMenu/${key}`,
+      //           {
+      //             method: "POST",
+      //             headers: {
+      //               "Content-Type": "application/json",
+      //             },
+      //             body: JSON.stringify(values),
+      //           }
+      //         );
+
+      //         if (!response.ok) {
+      //           throw new Error(`HTTP error! Status: ${response.status}`);
+      //         }
+
+      //         const updatedData = await response.json();
+      //         // Return the updated data if needed
+      //         return updatedData;
+      //       } catch (error) {
+      //         console.error("Error updating data:", error);
+      //         throw error;
+      //       }
+      //     },
+      //     remove: async (key) => {
+      //       try {
+      //         const response = await fetch(
+      //           `${baseURL}/Manager/Menu/DeleteMenu/${key}`,
+      //           {
+      //             method: "DELETE",
+      //             headers: {
+      //               "Content-Type": "application/json",
+      //             },
+      //           }
+      //         );
+
+      //         if (!response.ok) {
+      //           throw new Error(`HTTP error! Status: ${response.status}`);
+      //         }
+
+      //         const deletedData = await response.json();
+      //         return deletedData; // Return the deleted data if needed
+      //       } catch (error) {
+      //         console.error("Error deleting data:", error);
+      //         throw error;
+      //       }
+      //     },
 
 
+
+      //     // // filter for ShipCountry
+      //     // // byKey: (key) => {
+      //     // //   return dataSource.byKey(key);
+      //     // // },
+      //     // // Implement the custom filter function for ShipCountry
+      //     // // filter: [shipCityFilter],
+      //     // filter: [],
+
+      //     // insert: (values) =>
+      //     //   sendRequest(`${baseURL}/InsertOrder`, "POST", {
+      //     //     values: JSON.stringify(values),
+      //     //   }),
+      //     // update: (key, values) =>
+      //     //   sendRequest(`${baseURL}/UpdateOrder`, "PUT", {
+      //     //     key,
+      //     //     values: JSON.stringify(values),
+      //     //   }),
+      //     // remove: (key) =>
+      //     //   sendRequest(`${baseURL}/DeleteOrder`, "DELETE", {
+      //     //     key,
+      //     //   }),
+    })
+  );
+
+  // Custom store for handling data and filtering
+  // const customStore = useMemo(() => {
+  //   return new CustomStore({
+  //     key: 'OrderID',
+  //     load: (loadOptions) => {
+  //       // Import data loading fromdataSource
+  //       return dataSource.load(loadOptions);
+  //     },
+  //     // filter for ShipCountry
+  //     // byKey: (key) => {
+  //     //   return dataSource.byKey(key);
+  //     // },
+  //     // Implement the custom filter function for ShipCountry
+  //     // filter: [shipCityFilter],
+  //     filter: [],
+  //   });
+  // }, []);
 
   var ExcelToJSON = function () {
 
@@ -245,7 +342,7 @@ const MasterDetailGrid = () => {
 
       if (getExtension() === "xls" || getExtension() === "xlsx") {
         try {
-          const result = await fetch("https://localhost:44300/upload", {
+          const result = await fetch(`${baseURL}/upload`, {
             method: "POST",
             body: formData,
             success: function (fileData) {
@@ -307,7 +404,7 @@ const MasterDetailGrid = () => {
   const deleteRecords = useCallback(() => {
     try {
       selectedItemKeys.forEach((key) => {
-        dataSource.remove(key);
+        // dataSource.remove(key);
       });
       togglePopup();
       refreshDataGrid();
@@ -383,7 +480,7 @@ const MasterDetailGrid = () => {
       dataGrid.clearFilter();
     } else {
       setFilterCityStatus("All");
-      dataGrid.filter(['ShipCountry', '=', value]);
+      dataGrid.filter(['TEN_TINH', '=', value]);
     }
 
     setFilterStatus(value);
@@ -424,7 +521,7 @@ const MasterDetailGrid = () => {
       console.log("hehe")
     } else {
       // Apply custom filter
-      dataGrid.filter(['ShipCity', '=', value]);
+      dataGrid.filter(['TEN_HUYEN', '=', value]);
       setCitySearchTerm(value);
 
     }
@@ -478,7 +575,7 @@ const MasterDetailGrid = () => {
         ref={dataGridRef}
         width="100%"
         height="100%"
-        dataSource={customStore}
+        dataSource={phuongXaData}
         onExporting={onExporting}
         showBorders={true}
         remoteOperations={true}
@@ -524,7 +621,7 @@ const MasterDetailGrid = () => {
         </Column>
 
         <Column caption="ID"
-          dataField="OrderID"
+          dataField="ID"
           alignment='left'
           width={100}
           allowEditing={false}
@@ -532,11 +629,11 @@ const MasterDetailGrid = () => {
           fixed={true}
           fixedPosition="left"
         >
-          <StringLengthRule max={5} message="The field OrderID must be a string with a maximum length of 5." />
+          <StringLengthRule max={5} message="The field ID must be a string with a maximum length of 5." />
         </Column>
 
-        <Column caption="Họ tên"
-          dataField="ShipName"
+        <Column caption="Tên"
+          dataField="TEN"
           allowHeaderFiltering={true}
           fixed={true}
           fixedPosition="left"
@@ -551,57 +648,56 @@ const MasterDetailGrid = () => {
           <StringLengthRule max={15} message="The field ShipName must be a string with a maximum length of 15." />
         </Column>
 
-        <Column caption="Tổng tiền"
+        {/* <Column caption="Tổng tiền"
           allowHeaderFiltering={false}
           filterType='numberic'
           selectedFilterOperation="contains"
           allowFiltering={false}
           dataField="Freight" dataType="number" width={150}
           filterOperations={['contains']}>
-        </Column>
+        </Column> */}
+
+        <Column caption="Tên tỉnh"
+          dataField="TEN_TINH"
+          alignment='left'
+          allowSearch={false}
+          filterOperations={['custom']}
+          calculateFilterExpression={() => {
+            return ['contains', 'TEN_TINH', shipCityFilter, citySearchTerm];
+          }}
+        />
 
         <Column
-          caption="Nước đặt hàng"
-          dataField="ShipCountry"
+          caption="Tên huyện"
+          dataField="TEN_HUYEN"
           alignment="left"
           width={120}
           allowSearch={false}
           filterOperations={['custom']}
           calculateFilterExpression={() => {
-            return ['contains', 'ShipCountry', shipCountryFilter];
+            return ['contains', 'TEN_HUYEN', shipCountryFilter];
           }}
         // calculateFilterExpression={() => {
         //   return ['custom', shipCountryFilter];
         // }}
         // calculateFilterExpression={() => ['contains', 'ShipCountry', shipCountryFilter]}
-        />
+        >
+        </Column>
 
-        <Column caption="TP đặt hàng"
-          dataField="ShipCity"
-          alignment='left'
-          allowSearch={false}
-          filterOperations={['custom']}
-          calculateFilterExpression={() => {
-            return ['contains', 'ShipCity', shipCityFilter, citySearchTerm];
-          }}
-        />
-        <Column caption="Địa chỉ đặt hàng" dataField="ShipAddress" alignment='left' selectedFilterOperation="contains" width={150} filterOperations={['contains']}></Column>
-
-        <Column caption="Ngày đặt hàng"
+        {/* <Column caption="Ngày đặt hàng"
           dataField="OrderDate"
           alignment='left'
-          dataType="date"
+          // dataType="date"
           width={150}
           customizeText={customizeColumnDate}
           selectedFilterOperation="contains"
           filterOperations={['contains']}
         >
           <RequiredRule message="The OrderDate field is required." />
-        </Column>
+        </Column> */}
 
-        {/* <Column caption="" visible={true} allowEditing={false} allowExporting={false} /> */}
 
-        <Summary>
+        {/* <Summary>
           <TotalItem
             name="SelectedRowsSummary"
             column="Freight"
@@ -619,7 +715,7 @@ const MasterDetailGrid = () => {
 
           <GroupItem summaryType="count" >
           </GroupItem>
-        </Summary>
+        </Summary> */}
 
         <Toolbar>
           <Item location="left" locateInMenu="never" render={renderLabel} />
@@ -640,7 +736,6 @@ const MasterDetailGrid = () => {
           </Item>
 
           <Item location='after' name='exportButton' />
-          {/* <Item location='after' name='searchPanel' /> */}
         </Toolbar>
 
         <Grouping autoExpandAll={false} />

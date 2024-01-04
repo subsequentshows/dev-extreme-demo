@@ -1,15 +1,29 @@
 /* global RequestInit */
 import React, { useCallback, useState, useRef } from "react";
 import {
-  DataGrid,
   Column,
+  DataGrid,
+  FilterRow,
+  HeaderFilter,
+  GroupPanel,
   Editing,
-  Scrolling,
-  Lookup,
+  Grouping,
+  Paging,
+  Pager,
+  SearchPanel,
   Summary,
+  RequiredRule,
+  StringLengthRule,
+  GroupItem,
   TotalItem,
-  DataGridTypes,
-} from "devextreme-react/data-grid";
+  ValueFormat,
+  ColumnFixing,
+  Export,
+  Selection,
+  Toolbar,
+  Item,
+} from 'devextreme-react/data-grid';
+import { Popup, Position, ToolbarItem } from 'devextreme-react/popup';
 import { Button } from "devextreme-react/button";
 import { SelectBox, SelectBoxTypes } from "devextreme-react/select-box";
 
@@ -17,10 +31,66 @@ import CustomStore from "devextreme/data/custom_store";
 import { formatDate } from "devextreme/localization";
 import "whatwg-fetch";
 import { baseURL } from "../../api/api";
+import WarningIcon from "../../asset/image/confirm.png";
+import notify from 'devextreme/ui/notify';
+
+// Export to excel library
+import { exportDataGrid as exportDataGridToExcel } from 'devextreme/excel_exporter';
+import { Workbook } from 'exceljs';
+import { saveAs } from 'file-saver';
+
+// Export to pdf library
+import { exportDataGrid as exportDataGridToPdf } from 'devextreme/pdf_exporter';
+import { jsPDF } from "jspdf";
+// Default export is a4 paper, portrait, using millimeters for units
+
+import * as XLSX from "xlsx";
+import * as JSZIP from "jszip";
+import $ from 'jquery';
+import { Modal } from "react-bootstrap-v5";
+
+// import readXlsxFile from 'read-excel-file';
 
 const refreshModeLabel = { "aria-label": "Refresh Mode" };
-
 const REFRESH_MODES = ["full", "reshape", "repaint"];
+const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
+const exportFormats = ['xlsx', 'pdf'];
+
+const renderContent = () => {
+  return (
+    <>
+      <div className='warning-icon'>
+        <img src={WarningIcon} alt='icon-canh-bao' />
+      </div>
+      <p>Bạn có chắc chắn là muốn thực hiện thao tác này!</p>
+    </>
+  )
+}
+
+function onExporting(e) {
+  if (e.format === 'xlsx') {
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Companies');
+    exportDataGridToExcel({
+      component: e.component,
+      worksheet,
+      autoFilterEnabled: true,
+    }).then(() => {
+      workbook.xlsx.writeBuffer().then((buffer) => {
+        saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Companies.xlsx');
+      });
+    });
+  }
+  else if (e.format === 'pdf') {
+    const doc = new jsPDF();
+    exportDataGridToPdf({
+      jsPDFDocument: doc,
+      component: e.component
+    }).then(() => {
+      doc.save('Companies.pdf');
+    })
+  };
+}
 
 const App = () => {
   const [requests, setRequests] = useState([]);
@@ -28,7 +98,14 @@ const App = () => {
   const [searchValue, setSearchValue] = useState("");
   const dataGridRef = useRef(null);
 
-  const [ordersData, setOrdersData] = useState(
+  const [isPopupVisible, setPopupVisibility] = useState(false);
+  const [selectedItemKeys, setSelectedItemKeys] = useState([]);
+  const allowedPageSizes = [50, 100, 150, 200];
+
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+
+  //
+  const [contentData, setContentData] = useState(
     new CustomStore({
       key: "ID",
       load: async () => {
@@ -199,7 +276,7 @@ const App = () => {
   const handleSearchButtonClick = async () => {
     // Trigger a reload of the data with the new search value
     refreshDataGrid();
-    await ordersData.load({ searchValue });
+    await contentData.load({ searchValue });
   };
 
   const handleSearchInputChange = (e) => {
@@ -209,9 +286,85 @@ const App = () => {
     console.log((e.target.value))
   };
 
+  const togglePopup = useCallback(() => {
+    setPopupVisibility(!isPopupVisible);
+  }, [isPopupVisible]);
+
+  const rowIndexes = (data) => {
+    const pageIndex = data.component.pageIndex();
+    const pageSize = data.component.pageSize();
+    const rowIndex = pageIndex * pageSize + data.rowIndex + 1;
+    return <span> {rowIndex} </span>;
+  }
+
+  const deleteRecords = useCallback(() => {
+    try {
+      selectedItemKeys.forEach((key) => {
+        // dataSource.remove(key);
+      });
+      togglePopup();
+      refreshDataGrid();
+
+      let selectedAndDeletedItems = selectedItemKeys.length;
+      const customText = `Xóa thành công `;
+      const customText2 = ` mục`;
+      const message = customText + selectedAndDeletedItems + customText2;
+
+      notify(
+        {
+          message,
+          position: {
+            my: 'after bottom',
+            at: 'after bottom',
+          },
+        },
+        'success',
+        3000,
+      );
+    }
+    catch (error) {
+      notify(
+        {
+          error,
+          position: {
+            my: 'after botom',
+            at: 'after botom',
+          },
+        },
+        `error` + { error },
+        5000,
+      )
+    }
+    finally {
+      setSelectedItemKeys([]);
+      // refreshDataGrid();
+    }
+  }, [selectedItemKeys, togglePopup, refreshDataGrid]);
+
+  const getDeleteButtonOptions = useCallback(() => ({
+    text: 'Đồng ý',
+    stylingMode: 'contained',
+    onClick: deleteRecords,
+  }), [deleteRecords]);
+
+  const getCloseButtonOptions = useCallback(() => ({
+    text: 'Đóng',
+    stylingMode: 'outlined',
+    type: 'normal',
+    onClick: togglePopup,
+  }), [togglePopup]);
+
+  const onSelectionChanged = useCallback((data) => {
+    setSelectedItemKeys(data.selectedRowKeys);
+  }, []);
+
+  const onPageChanged = (e) => {
+    setCurrentPageIndex(e.component.pageIndex());
+  };
+
   return (
     <>
-      <div className="search-container">
+      <div className="search-container responsive-paddings">
         <button icon='refresh' widget="dxButton" onClick={refreshDataGrid} text="Tải lại" > Reload </button>
 
         <input
@@ -225,19 +378,68 @@ const App = () => {
 
       <div className="responsive-paddings">
         <DataGrid
-          id="grid"
-          showBorders={true}
-          dataSource={ordersData}
-          repaintChangesOnly={true}
+          id="grid-container"
+          className='master-detail-grid'
+          dataSource={contentData}
           ref={dataGridRef}
+          width="100%"
+          height="100%"
+          showBorders={true}
+          focusedRowEnabled={true}
+          // remoteOperations={true}
+          repaintChangesOnly={true}
+          allowColumnReordering={false}
+          onExporting={onExporting}
+          selectedRowKeys={selectedItemKeys}
+          onSelectionChanged={onSelectionChanged}
+          onPageChanged={onPageChanged}
         >
           <Editing
             refreshMode={refreshMode}
             mode="row"
             allowAdding={true}
-            allowDeleting={true}
+            allowDeleting={false}
             allowUpdating={true}
           />
+
+          <Column caption="STT"
+            dataField="STT"
+            fixed={true}
+            fixedPosition="left"
+            alignment='center'
+            width={80}
+            allowEditing={false}
+            allowSorting={false}
+            allowReordering={false}
+            allowSearch={false}
+            allowFiltering={false}
+            allowExporting={true}
+            cellRender={rowIndexes}
+            headerCellTemplate="STT"
+          >
+            <StringLengthRule max={3} message="" />
+          </Column>
+
+          <Column caption="Sửa"
+            type="buttons"
+            width={80}
+            fixed={true}
+            fixedPosition="left"
+          >
+            <Button name="edit" />
+          </Column>
+
+          <Column caption="ID"
+            dataField="ID"
+            alignment='left'
+            width={100}
+            allowEditing={false}
+            allowFiltering={false}
+            fixed={true}
+            fixedPosition="left"
+          >
+            <StringLengthRule max={5} message="The field ID must be a string with a maximum length of 5." />
+          </Column>
 
           <Column dataField="MA" />
           <Column dataField="TEN" />
@@ -245,13 +447,74 @@ const App = () => {
           <Column dataField="MA_TINH" />
           <Column dataField="TEN_TINH" />
           <Column dataField="TEN_HUYEN" />
+
+          <Toolbar>
+            <Item location="left" locateInMenu="never" render={renderLabel} />
+
+            <Item location="after" name="addRowButton" />
+            <Item location="after" showText="always" name='mutiple-delete' widget="dxButton">
+              <Button
+                onClick={togglePopup}
+                widget="dxButton"
+                icon="trash"
+                disabled={!selectedItemKeys.length}
+                text="Xóa mục đã chọn"
+              />
+            </Item>
+
+            <Item location='after' name='exportButton' />
+          </Toolbar>
+
+          <Grouping autoExpandAll={false} />
+          <ColumnFixing enabled={false} />
+          <Selection mode="multiple" />
+          <SearchPanel
+            visible={true}
+            width={240}
+            highlightSearchText={true}
+            searchVisibleColumnsOnly={true}
+            placeholder="Tìm kiếm"
+          />
+          <FilterRow visible={false} allowFiltering={false} showResetValues={false} />
+          <HeaderFilter enabled={false} visible={false} />
+          <GroupPanel visible={false} />
+          <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
+          <Paging enabled={true} defaultPageSize={50} defaultPageIndex={0} />
+          <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} />
         </DataGrid>
 
-        <br />
-        <br />
+        {/* Delete confirm popup */}
+        <Popup
+          id="popup"
+          contentRender={renderContent}
+          visible={isPopupVisible}
+          hideOnOutsideClick={true}
+          onHiding={togglePopup}
+          dragEnabled={false}
+          showCloseButton={true}
+          showTitle={true}
+          title="Thông báo"
+          container=".dx-viewport"
+          width={500}
+          height={300}
+        >
+          <ToolbarItem
+            widget="dxButton"
+            toolbar="bottom"
+            location="center"
+            options={getDeleteButtonOptions()}
+          />
+          <ToolbarItem
+            widget="dxButton"
+            toolbar="bottom"
+            location="center"
+            options={getCloseButtonOptions()}
+          />
+        </Popup>
+
         <br />
         <div className="options" >
-          <div className="caption">Options</div>
+          {/* <div className="caption">Options</div>
           <div className="option">
             <span>Refresh Mode: </span>
             <SelectBox
@@ -260,7 +523,7 @@ const App = () => {
               items={REFRESH_MODES}
               onValueChanged={handleRefreshModeChange}
             />
-          </div>
+          </div> */}
           <div id="requests">
             <div>
               <div className="caption">Network Requests</div>
