@@ -1,5 +1,5 @@
 /* global RequestInit */
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useState, useRef } from "react";
 import {
   DataGrid,
   Column,
@@ -25,11 +25,87 @@ const REFRESH_MODES = ["full", "reshape", "repaint"];
 const App = () => {
   const [requests, setRequests] = useState([]);
   const [refreshMode, setRefreshMode] = useState("reshape");
+  const [searchValue, setSearchValue] = useState("");
+  const dataGridRef = useRef(null);
 
-  const [ordersData] = useState(
+  const [ordersData, setOrdersData] = useState(
     new CustomStore({
       key: "ID",
-      load: () => sendRequest(`${baseURL}/DanhMuc/GetDMPhuongXa`),
+      load: async () => {
+        try {
+          const response = await fetch(
+            `${baseURL}/DanhMuc/GetDMPhuongXa`
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          console.log(data.Data.find(o => o.TEN === "xá"))
+          // Apply search filter
+          if (searchValue) {
+            return data.Data.filter((item) =>
+              item.TEN.toLowerCase().includes(searchValue.toLowerCase())
+            );
+          }
+
+          return data.Data;
+          // Assuming the API response is an array of objects
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          return [];
+        }
+      },
+      update: async (key, values) => {
+        try {
+          const response = await fetch(
+            `${baseURL}/Manager/Menu/UpdateMenu/${key}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(values),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const updatedData = await response.json();
+          // Return the updated data if needed
+          return updatedData;
+        } catch (error) {
+          console.error("Error updating data:", error);
+          throw error;
+        }
+      },
+      remove: async (key) => {
+        try {
+          const response = await fetch(
+            `${baseURL}/Manager/Menu/DeleteMenu/${key}`,
+            {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const deletedData = await response.json();
+          return deletedData; // Return the deleted data if needed
+        } catch (error) {
+          console.error("Error deleting data:", error);
+          throw error;
+        }
+      },
+
       // insert: (values) =>
       //   sendRequest(`${baseURL}/InsertOrder`, "POST", {
       //     values: JSON.stringify(values),
@@ -45,9 +121,6 @@ const App = () => {
       //   }),
     })
   );
-
-  console.table(ordersData)
-  console.log(typeof (ordersData))
 
   const handleRefreshModeChange = useCallback(
     (e) => {
@@ -118,51 +191,62 @@ const App = () => {
     [logRequest]
   );
 
+  const refreshDataGrid = useCallback(() => {
+    dataGridRef.current.instance.refresh();
+    console.log("Reloaded")
+  }, []);
+
+  const handleSearchButtonClick = async () => {
+    // Trigger a reload of the data with the new search value
+    refreshDataGrid();
+    await ordersData.load({ searchValue });
+  };
+
+  const handleSearchInputChange = (e) => {
+    setSearchValue(e.target.value);
+
+
+    console.log((e.target.value))
+  };
+
   return (
     <>
+      <div className="search-container">
+        <button icon='refresh' widget="dxButton" onClick={refreshDataGrid} text="Tải lại" > Reload </button>
+
+        <input
+          type="text"
+          placeholder="Search by TEN"
+          value={searchValue}
+          onChange={handleSearchInputChange}
+        />
+        <button onClick={handleSearchButtonClick}>Search</button>
+      </div>
+
       <div className="responsive-paddings">
         <DataGrid
           id="grid"
           showBorders={true}
           dataSource={ordersData}
           repaintChangesOnly={true}
+          ref={dataGridRef}
         >
-          {/* <Editing
-          refreshMode={refreshMode}
-          mode="batch"
-          allowAdding={true}
-          allowDeleting={true}
-          allowUpdating={true}
-        /> */}
-
-          {/* <Column dataField="CustomerID" caption="Customer">
-          <Lookup
-            dataSource={customersData}
-            valueExpr="Value"
-            displayExpr="Text"
+          <Editing
+            refreshMode={refreshMode}
+            mode="row"
+            allowAdding={true}
+            allowDeleting={true}
+            allowUpdating={true}
           />
-        </Column> */}
 
-          {/* <Column dataField="OrderDate" dataType="date" />
-        <Column dataField="Freight" />
-        <Column dataField="ShipCountry" />
-        <Column
-          dataField="ShipVia"
-          caption="Shipping Company"
-          dataType="number"
-        >
-          <Lookup
-            dataSource={shippersData}
-            valueExpr="Value"
-            displayExpr="Text"
-          />
-        </Column> */}
-
-          {/* <Summary>
-          <TotalItem column="CustomerID" summaryType="count" />
-          <TotalItem column="Freight" summaryType="sum" valueFormat="#0.00" />
-        </Summary> */}
+          <Column dataField="MA" />
+          <Column dataField="TEN" />
+          <Column dataField="MA_HUYEN" />
+          <Column dataField="MA_TINH" />
+          <Column dataField="TEN_TINH" />
+          <Column dataField="TEN_HUYEN" />
         </DataGrid>
+
         <br />
         <br />
         <br />

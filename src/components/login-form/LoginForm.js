@@ -2,14 +2,12 @@ import { useRef, useState, useEffect, useContext } from 'react';
 import "./LoginForm.scss";
 import AuthContext from "../../contexts/authProvider";
 import { Link, useNavigate, useLocation, Routes, Route, Navigate, BrowserRouter, Redirect } from "react-router-dom";
-import { loadCaptchaEnginge, LoadCanvasTemplate, LoadCanvasTemplateNoReload, validateCaptcha } from 'react-simple-captcha';
 import { localApi, baseURL } from '../../api/api';
 import axios from 'axios';
 import $ from 'jquery';
 import Footer from "../footer/Footer";
 import LoginIcon from "../../asset/image/icondanhmuckhac.png";
 import LoginBackground from "../../asset/image/login-background.png";
-import { Captcha, captchaSettings } from 'reactjs-captcha';
 
 
 const LOGIN_URL = '/login';
@@ -335,9 +333,6 @@ const Login = () => {
 
                         <div className="captcha-text captcha">
                           {/* <LoadCanvasTemplate reloadText="Reload" /> */}
-                          <Captcha captchaStyleName="yourFirstCaptchaStyle"
-                            ref={(captcha) => { this.captcha = captcha }}
-                          />
 
                           <label>
                             <span>Retype the characters from the picture:</span>
