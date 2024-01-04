@@ -1,3 +1,5 @@
+import path from "path";
+
 export const navigation = [
   {
     text: "Home",
@@ -44,6 +46,11 @@ export const navigation = [
     icon: "globe",
   },
   {
+    text: "Danh sách nhóm quyền",
+    path: "/danh-sach-nhom-quyen",
+    icon: "folder",
+  },
+  {
     text: "Row Edit",
     path: "/row-edit",
     icon: "folder",
@@ -51,11 +58,6 @@ export const navigation = [
   {
     text: "Error Page",
     path: "/error-page",
-    icon: "folder",
-  },
-  {
-    text: "View Name",
-    path: "/view-name",
     icon: "folder",
   },
 ];

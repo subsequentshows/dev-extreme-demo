@@ -9,7 +9,7 @@ import {
   DemoDataGridPage,
   RowEditPage,
   ErrorPagePage,
-  ViewNamePage,
+  DanhSachNhomQuyenPage,
 } from "./pages";
 import { withNavigationWatcher } from "./contexts/navigation";
 
@@ -39,6 +39,10 @@ const routes = [
     element: PhanQuyenPage,
   },
   {
+    path: "/danh-sach-nhom-quyen",
+    element: DanhSachNhomQuyenPage,
+  },
+  {
     path: "/users",
     element: UsersPage,
   },
@@ -53,11 +57,6 @@ const routes = [
   {
     path: "/error-page",
     element: ErrorPagePage,
-  },
-
-  {
-    path: "/view-name",
-    element: ViewNamePage,
   },
 ];
 
