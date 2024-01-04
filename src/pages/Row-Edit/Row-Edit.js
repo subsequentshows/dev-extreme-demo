@@ -461,7 +461,6 @@ const RowEdit = () => {
             />
           </div>
         </div>
-
       </div>
 
       <div className="responsive-paddings">
