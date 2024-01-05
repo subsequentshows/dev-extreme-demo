@@ -28,6 +28,8 @@ import { SelectBox, SelectBoxTypes } from "devextreme-react/select-box";
 import CustomStore from "devextreme/data/custom_store";
 import notify from 'devextreme/ui/notify';
 import WarningIcon from "../../asset/image/confirm.png";
+import axios, { isCancel, AxiosError } from 'axios';
+
 
 import { baseURL, localApi } from "../../api/api";
 
@@ -52,7 +54,11 @@ const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu ph
 $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
 
 const config = {
-  headers: { Authorization: `Bearer ${api_token}` }
+
+  headers: {
+    'Content-Type': 'multipart/form-data', // <- HERE,
+    Authorization: `Bearer ${api_token}`,
+  }
 };
 
 const renderContent = () => {
@@ -87,9 +93,6 @@ const DanhSachNhomQuyenPage = () => {
             `${baseURL}/Manager/Menu`,
             config
           );
-          // const response = await localApi.get(
-          //   getUrl,
-          //   config);
 
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -145,29 +148,41 @@ const DanhSachNhomQuyenPage = () => {
           //     // "Data": [{ "menuId": `${key}` }],
           //   }
           // );
-          console.log(key)
-          const response = await localApi.delete(
-            deleteUrl,
-            {
-              method: 'DELETE',
-              // headers: {
-              //   Authorization: `Bearer ${api_token}`,
-              //   "Content-Type": "application/json-patch+json",
-              // },
-              headers: {
-                'Content-Type': 'multipart/form-data',
-                'Authorization': `Bearer ${api_token}`,
-                'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
-              },
-              //         body: JSON.stringify(values),
-              // body: JSON.stringify([
-              //   {
-              //     "menuId": `${key}`
-              //   }]),
+          // const response = await localApi.delete(
+          //   deleteUrl,
+          //   {
+          //     method: 'DELETE',
+          //     // headers: {
+          //     //   Authorization: `Bearer ${api_token}`,
+          //     //   "Content-Type": "application/json-patch+json",
+          //     // },
+          //     headers: {
+          //       'Content-Type': 'multipart/form-data',
+          //       'Authorization': `Bearer ${api_token}`,
+          //       'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+          //     },
+          //     //         body: JSON.stringify(values),
+          //     // body: JSON.stringify([
+          //     //   {
+          //     //     "menuId": `${key}`
+          //     //   }]),
 
-              // body: { "menuId": 68 }
-              // "Data": [{ "menuId": `${key}` }],
-            });
+          //     // body: { "menuId": 68 }
+          //     // "Data": [{ "menuId": `${key}` }],
+          // body: {
+          //   "eventId": 5,
+          //     "eventName": "Event 5",
+          //       "eventDescription": "Event 5 Description",
+          //         "eventLocation": "Kuala Lumpur, Malaysia",
+          //           "eventDateTime": "2019-03-28"
+          // },
+          //   });
+
+          const response = axios.delete(
+            `${baseURL}/Manager/Menu/DeleteMenu`,
+            config,
+            { data: { "menuId": `${key}` } });
+
 
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -180,98 +195,8 @@ const DanhSachNhomQuyenPage = () => {
           throw error;
         }
       },
-
-
-      // remove: (key) => {
-      //   try {
-      //     return fetch(`${baseURL}/Manager/Menu/DeleteMenu`, {
-      //       headers: { Authorization: `Bearer ${api_token}` },
-      //       method: "DELETE",
-      //       "Data": [{ "menuId": `${key}` }],
-      //     })
-      //   } catch (error) {
-      //     console.error("Error deleting data:", error);
-      //     throw error;
-      //   }
-      // }
     })
   );
-
-  //
-  // const [ordersData] = useState(new CustomStore({
-  //   key: 'MenuID',
-  //   load: () => sendRequest(`${baseURL}/Manager/Menu`),
-  //   insert: (values) => sendRequest(`${baseURL}/InsertOrder`, 'POST', {
-  //     values: JSON.stringify(values),
-  //   }),
-  //   update: (key, values) => sendRequest(`${baseURL}/UpdateOrder`, 'PUT', {
-  //     key,
-  //     values: JSON.stringify(values),
-  //   }),
-  //   remove: (key) => sendRequest(`${baseURL}/Manager/Menu/DeleteMenu`, 'DELETE', {
-  //     key,
-  //   }),
-  // }));
-  // const [customersData] = useState(new CustomStore({
-  //   key: 'Value',
-  //   loadMode: 'raw',
-  //   load: () => sendRequest(`${baseURL}/CustomersLookup`),
-  // }));
-  // const [shippersData] = useState(new CustomStore({
-  //   key: 'Value',
-  //   loadMode: 'raw',
-  //   load: () => sendRequest(`${baseURL}/ShippersLookup`),
-  // }));
-
-  // const [requests, setRequests] = useState([]);
-  // const [refreshMode, setRefreshMode] = useState('reshape');
-
-  // const handleRefreshModeChange = useCallback((e) => {
-  //   setRefreshMode(e.value);
-  // }, []);
-
-  // const clearRequests = useCallback(() => {
-  //   setRequests([]);
-  // }, []);
-
-  // const logRequest = useCallback((method, url, data) => {
-  //   const args = Object.keys(data || {}).map((key) => `${key}=${data[key]}`).join(' ');
-
-  //   const time = formatDate(new Date(), 'HH:mm:ss');
-  //   const request = [time, method, url.slice(URL.length), args].join(' ');
-
-  //   setRequests((prevRequests) => [request].concat(prevRequests));
-  // }, []);
-
-  // const sendRequest = useCallback(async (url, method = 'GET', data = {}) => {
-  //   logRequest(method, url, data);
-
-  //   const request = {
-  //     method, credentials: 'include',
-  //   };
-
-  //   if (['DELETE', 'POST', 'PUT'].includes(method)) {
-  //     const params = Object.keys(data)
-  //       .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`)
-  //       .join('&');
-
-  //     request.body = params;
-  //     request.headers = { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' };
-  //   }
-
-  //   const response = await fetch(url, request);
-
-  //   const isJson = response.headers.get('content-type')?.includes('application/json');
-  //   const result = isJson ? await response.json() : {};
-
-  //   if (!response.ok) {
-  //     throw result.Message;
-  //   }
-
-  //   return method === 'GET' ? result.data : {};
-  // }, [logRequest]);
-
-  //
 
   const onSelectionChanged = useCallback((data) => {
     setSelectedItemKeys(data.selectedRowKeys);
