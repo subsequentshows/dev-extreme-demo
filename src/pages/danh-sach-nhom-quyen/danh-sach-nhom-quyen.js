@@ -29,7 +29,7 @@ import CustomStore from "devextreme/data/custom_store";
 import notify from 'devextreme/ui/notify';
 import WarningIcon from "../../asset/image/confirm.png";
 
-import { baseURL } from "../../api/api";
+import { baseURL, localApi } from "../../api/api";
 
 // Export to excel library
 import { exportDataGrid as exportDataGridToExcel } from 'devextreme/excel_exporter';
@@ -44,8 +44,9 @@ import { jsPDF } from "jspdf";
 import * as XLSX from "xlsx";
 import * as JSZIP from "jszip";
 import $ from 'jquery';
+import { formatDate } from 'devextreme/localization';
 
-//s
+//
 let api_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJOZ3VvaUR1bmdJZCI6IjEiLCJNQV9IVVlFTiI6IjAwMSIsIk1BX1RJTkgiOiIwMSIsIk1BX1hBIjoiMDAwMDciLCJuYmYiOjE3MDM4MjA5NDksImV4cCI6MTc2MzgyMDg4OSwiaWF0IjoxNzAzODIwOTQ5LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQ0MzAwIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo0NDMwMCJ9.m-PSJWciAyy9VwezqvX6A2RFqe9WiEiST8htiMeTHYQ";
 const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
 $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
@@ -65,9 +66,12 @@ const renderContent = () => {
   )
 }
 
+let getUrl = "/Manager/Menu";
+let deleteUrl = "/Manager/Menu/DeleteMenu";
+
 const DanhSachNhomQuyenPage = () => {
   const dataGridRef = useRef(null);
-  const allowedPageSizes = [50, 100, 150, 200];
+  const allowedPageSizes = [20, 50, 100, 150, 200];
   const exportFormats = ['xlsx', 'pdf'];
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
@@ -83,6 +87,9 @@ const DanhSachNhomQuyenPage = () => {
             `${baseURL}/Manager/Menu`,
             config
           );
+          // const response = await localApi.get(
+          //   getUrl,
+          //   config);
 
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -90,49 +97,77 @@ const DanhSachNhomQuyenPage = () => {
 
           const data = await response.json();
           return data.Data;
-
-          // Assuming the API response is an array of objects
         } catch (error) {
           console.error("Error fetching data:", error);
           return [];
         }
       },
-      // update: async (key, values) => {
-      //   try {
-      //     const response = await fetch(
-      //       `${baseURL}/Manager/Menu/UpdateMenu/${key}`,
-      //       {
-      //         method: "POST",
-      //         headers: {
-      //           "Content-Type": "application/json",
-      //         },
-      //         body: JSON.stringify(values),
-      //       }
-      //     );
-
-      //     if (!response.ok) {
-      //       throw new Error(`HTTP error! Status: ${response.status}`);
-      //     }
-
-      //     const updatedData = await response.json();
-      //     // Return the updated data if needed
-      //     return updatedData;
-      //   } catch (error) {
-      //     console.error("Error updating data:", error);
-      //     throw error;
-      //   }
-      // },
-      remove: async (key) => {
+      update: async (key, values) => {
         try {
           const response = await fetch(
-            `${baseURL}/Manager/Menu/DeleteMenu/${key}`,
+            `${baseURL}/Manager/Menu/UpdateMenu`,
             {
-              method: "DELETE",
+              method: "POST",
               headers: {
                 "Content-Type": "application/json",
+                Authorization: `Bearer ${api_token}`
               },
+              // Data: {
+              //   key
+              // },
+              key,
+              values: JSON.stringify(values),
+              body: JSON.stringify(values),
+              ///${key}
             }
           );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const updatedData = await response.json();
+          // Return the updated data if needed
+          return updatedData;
+        } catch (error) {
+          console.error("Error updating data:", error);
+          throw error;
+        }
+      },
+      remove: async (key) => {
+        try {
+          // const response = await fetch(
+          //   `${baseURL}/Manager/Menu/DeleteMenu`,
+          //   config,
+          //   {
+          //     method: 'DELETE',
+          //     // headers: { Authorization: `Bearer ${api_token}` },
+          //     // "Data": [{ "menuId": `${key}` }],
+          //   }
+          // );
+          console.log(key)
+          const response = await localApi.delete(
+            deleteUrl,
+            {
+              method: 'DELETE',
+              // headers: {
+              //   Authorization: `Bearer ${api_token}`,
+              //   "Content-Type": "application/json-patch+json",
+              // },
+              headers: {
+                'Content-Type': 'multipart/form-data',
+                'Authorization': `Bearer ${api_token}`,
+                'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+              },
+              //         body: JSON.stringify(values),
+              // body: JSON.stringify([
+              //   {
+              //     "menuId": `${key}`
+              //   }]),
+
+              // body: { "menuId": 68 }
+              // "Data": [{ "menuId": `${key}` }],
+            });
 
           if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
@@ -145,8 +180,98 @@ const DanhSachNhomQuyenPage = () => {
           throw error;
         }
       },
+
+
+      // remove: (key) => {
+      //   try {
+      //     return fetch(`${baseURL}/Manager/Menu/DeleteMenu`, {
+      //       headers: { Authorization: `Bearer ${api_token}` },
+      //       method: "DELETE",
+      //       "Data": [{ "menuId": `${key}` }],
+      //     })
+      //   } catch (error) {
+      //     console.error("Error deleting data:", error);
+      //     throw error;
+      //   }
+      // }
     })
   );
+
+  //
+  // const [ordersData] = useState(new CustomStore({
+  //   key: 'MenuID',
+  //   load: () => sendRequest(`${baseURL}/Manager/Menu`),
+  //   insert: (values) => sendRequest(`${baseURL}/InsertOrder`, 'POST', {
+  //     values: JSON.stringify(values),
+  //   }),
+  //   update: (key, values) => sendRequest(`${baseURL}/UpdateOrder`, 'PUT', {
+  //     key,
+  //     values: JSON.stringify(values),
+  //   }),
+  //   remove: (key) => sendRequest(`${baseURL}/Manager/Menu/DeleteMenu`, 'DELETE', {
+  //     key,
+  //   }),
+  // }));
+  // const [customersData] = useState(new CustomStore({
+  //   key: 'Value',
+  //   loadMode: 'raw',
+  //   load: () => sendRequest(`${baseURL}/CustomersLookup`),
+  // }));
+  // const [shippersData] = useState(new CustomStore({
+  //   key: 'Value',
+  //   loadMode: 'raw',
+  //   load: () => sendRequest(`${baseURL}/ShippersLookup`),
+  // }));
+
+  // const [requests, setRequests] = useState([]);
+  // const [refreshMode, setRefreshMode] = useState('reshape');
+
+  // const handleRefreshModeChange = useCallback((e) => {
+  //   setRefreshMode(e.value);
+  // }, []);
+
+  // const clearRequests = useCallback(() => {
+  //   setRequests([]);
+  // }, []);
+
+  // const logRequest = useCallback((method, url, data) => {
+  //   const args = Object.keys(data || {}).map((key) => `${key}=${data[key]}`).join(' ');
+
+  //   const time = formatDate(new Date(), 'HH:mm:ss');
+  //   const request = [time, method, url.slice(URL.length), args].join(' ');
+
+  //   setRequests((prevRequests) => [request].concat(prevRequests));
+  // }, []);
+
+  // const sendRequest = useCallback(async (url, method = 'GET', data = {}) => {
+  //   logRequest(method, url, data);
+
+  //   const request = {
+  //     method, credentials: 'include',
+  //   };
+
+  //   if (['DELETE', 'POST', 'PUT'].includes(method)) {
+  //     const params = Object.keys(data)
+  //       .map((key) => `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`)
+  //       .join('&');
+
+  //     request.body = params;
+  //     request.headers = { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' };
+  //   }
+
+  //   const response = await fetch(url, request);
+
+  //   const isJson = response.headers.get('content-type')?.includes('application/json');
+  //   const result = isJson ? await response.json() : {};
+
+  //   if (!response.ok) {
+  //     throw result.Message;
+  //   }
+
+  //   return method === 'GET' ? result.data : {};
+  // }, [logRequest]);
+
+  //
 
   const onSelectionChanged = useCallback((data) => {
     setSelectedItemKeys(data.selectedRowKeys);
@@ -200,6 +325,7 @@ const DanhSachNhomQuyenPage = () => {
   const deleteRecords = useCallback(() => {
     try {
       selectedItemKeys.forEach((key) => {
+        console.log("begin delete")
         dataSource.remove(key);
       });
       togglePopup();
@@ -271,15 +397,14 @@ const DanhSachNhomQuyenPage = () => {
           allowColumnReordering={false}
           remoteOperations={false}
           onExporting={onExporting}
-          selectedRowKeys={selectedItemKeys}
-          onSelectionChanged={onSelectionChanged}
+          // selectedRowKeys={selectedItemKeys}
+          // onSelectionChanged={onSelectionChanged}
           onPageChanged={onPageChanged}
         >
 
-          <Editing
-            mode="row"
+          <Editing mode="popup"
             allowAdding={true}
-            allowDeleting={false}
+            allowDeleting={true}
             allowUpdating={true}
           />
 
@@ -333,7 +458,7 @@ const DanhSachNhomQuyenPage = () => {
             fixedPosition="left"
             alignment='left'
             width={300}
-            allowEditing={false}
+            allowEditing={true}
             allowSorting={false}
             allowReordering={false}
             allowSearch={false}
@@ -341,7 +466,6 @@ const DanhSachNhomQuyenPage = () => {
             allowExporting={true}
             headerCellTemplate="Tên"
           >
-            <StringLengthRule max={3} message="" />
           </Column>
 
           <Column caption="Đường dẫn"
@@ -350,7 +474,7 @@ const DanhSachNhomQuyenPage = () => {
             fixedPosition="left"
             alignment='left'
             width={80}
-            allowEditing={false}
+            allowEditing={true}
             allowSorting={false}
             allowReordering={false}
             allowSearch={false}
@@ -358,7 +482,6 @@ const DanhSachNhomQuyenPage = () => {
             allowExporting={true}
             headerCellTemplate="Đường dẫn"
           >
-            <StringLengthRule max={3} message="" />
           </Column>
 
           <Toolbar>
@@ -369,7 +492,7 @@ const DanhSachNhomQuyenPage = () => {
                 onClick={togglePopup}
                 widget="dxButton"
                 icon="trash"
-                disabled={!selectedItemKeys.length}
+                // disabled={!selectedItemKeys.length}
                 text="Xóa mục đã chọn"
               />
             </Item>
@@ -384,7 +507,7 @@ const DanhSachNhomQuyenPage = () => {
           <HeaderFilter enabled={false} visible={false} />
           <GroupPanel visible={false} />
           <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
-          <Paging enabled={true} defaultPageSize={50} defaultPageIndex={0} />
+          <Paging enabled={true} defaultPageSize={20} defaultPageIndex={0} />
           <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} />
 
         </DataGrid>

@@ -11,7 +11,7 @@ export const baseURL = "https://localhost:44300";
 
 export const localApi = axios.create({
   baseURL: BASE_URL,
-  headers: { 'Content-Type': 'application/json' },
+  // headers: { 'Content-Type': 'application/json' },
   withCredentials: true
 });
 

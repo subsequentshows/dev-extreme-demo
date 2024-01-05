@@ -235,37 +235,38 @@ code {
 }
 
 .dx-datagrid-borders>.dx-datagrid-pager {
-  display: flex;
-  flex-wrap: wrap;
-  margin-top: 30px;
-  padding: 0;
+  //   display: flex;
+  //   flex-wrap: wrap;
+  //   margin-top: 30px;
+  //   padding: 0;
 
   .dx-page-sizes {
-    order: 2;
-    margin-left: 15px;
+
+    //     order: 2;
+    //     margin-left: 15px;
     border-radius: 0;
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
+    //     display: flex;
+    //     flex-wrap: wrap;
+    //     flex-direction: row;
 
-    .dx-page-size {
-      margin-left: 0;
-      margin-right: 0;
-      padding: 3px 3px;
-      line-height: 12px;
-      border: 0.3px solid #ccc;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: center;
-    }
+    //     .dx-page-size {
+    //       margin-left: 0;
+    //       margin-right: 0;
+    //       padding: 3px 3px;
+    //       line-height: 12px;
+    //       border: 0.3px solid #ccc;
+    //       width: 32px;
+    //       height: 32px;
+    //       display: flex;
+    //       flex-wrap: wrap;
+    //       justify-content: center;
+    //       align-items: center;
+    //     }
   }
 
-  .dx-pages {
-    order: 1;
-  }
+  //   .dx-pages {
+  //     order: 1;
+  //   }
 }
 
 .dx-pager .dx-page-sizes .dx-selection {
