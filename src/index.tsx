@@ -16,9 +16,9 @@ root.render(
 
   // React strict mode render compoments twice
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    {/* <AuthProvider> */}
+    <App />
+    {/* </AuthProvider> */}
   </React.StrictMode>
 );
 

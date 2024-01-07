@@ -56,7 +56,7 @@ $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
 const config = {
 
   headers: {
-    'Content-Type': 'multipart/form-data', // <- HERE,
+    'Content-Type': 'multipart/form-data',
     Authorization: `Bearer ${api_token}`,
   }
 };
@@ -71,9 +71,6 @@ const renderContent = () => {
     </>
   )
 }
-
-let getUrl = "/Manager/Menu";
-let deleteUrl = "/Manager/Menu/DeleteMenu";
 
 const DanhSachNhomQuyenPage = () => {
   const dataGridRef = useRef(null);
@@ -105,8 +102,53 @@ const DanhSachNhomQuyenPage = () => {
           return [];
         }
       },
+      insert: async (values) => {
+        try {
+          const response = await fetch(
+            `${baseURL}/Manager/Menu/AddMenu`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${api_token}`,
+              },
+              body: JSON.stringify([values]),
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+
+          const insertedData = await response.json();
+
+          if (insertedData.Success) {
+            console.log("Insertion successful:", insertedData);
+            return insertedData;
+          } else {
+            console.error(`Error inserting item. ErrorCode: ${insertedData.ErrorCode}, ErrorMessage: ${insertedData.ErrorMessage}`);
+            throw new Error("Insertion failed");
+          }
+        } catch (error) {
+          console.error("Error inserting data:", error);
+          throw error;
+        }
+      },
       update: async (key, values) => {
         try {
+          const requestBody = {
+            menuId: key,
+            parentId: values.parentId,
+            menuCode: values.menuCode,
+            levelItem: values.levelItem,
+            MenuName: values.MenuName,
+            Link: values.Link,
+            order: values.order,
+            isView: values.isView,
+            status: values.status,
+            menuNameEg: values.menuNameEg,
+          };
+
           const response = await fetch(
             `${baseURL}/Manager/Menu/UpdateMenu`,
             {
@@ -115,13 +157,7 @@ const DanhSachNhomQuyenPage = () => {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${api_token}`
               },
-              // Data: {
-              //   key
-              // },
-              key,
-              values: JSON.stringify(values),
-              body: JSON.stringify(values),
-              ///${key}
+              body: JSON.stringify([requestBody]),
             }
           );
 
@@ -130,71 +166,25 @@ const DanhSachNhomQuyenPage = () => {
           }
 
           const updatedData = await response.json();
-          // Return the updated data if needed
-          return updatedData;
+
+          if (updatedData.Success) {
+            // The update was successful
+            console.log("Update successful:", updatedData);
+            // Additional logic can be added here if needed
+
+            // Return the updated data if needed
+            return updatedData;
+          } else {
+            // Handle the case where the update was not successful
+            console.error(`Error updating item. ErrorCode: ${updatedData.ErrorCode}, ErrorMessage: ${updatedData.ErrorMessage}`);
+            throw new Error("Update failed");
+          }
         } catch (error) {
           console.error("Error updating data:", error);
           throw error;
         }
-      },
-      remove: async (key) => {
-        try {
-          // const response = await fetch(
-          //   `${baseURL}/Manager/Menu/DeleteMenu`,
-          //   config,
-          //   {
-          //     method: 'DELETE',
-          //     // headers: { Authorization: `Bearer ${api_token}` },
-          //     // "Data": [{ "menuId": `${key}` }],
-          //   }
-          // );
-          // const response = await localApi.delete(
-          //   deleteUrl,
-          //   {
-          //     method: 'DELETE',
-          //     // headers: {
-          //     //   Authorization: `Bearer ${api_token}`,
-          //     //   "Content-Type": "application/json-patch+json",
-          //     // },
-          //     headers: {
-          //       'Content-Type': 'multipart/form-data',
-          //       'Authorization': `Bearer ${api_token}`,
-          //       'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
-          //     },
-          //     //         body: JSON.stringify(values),
-          //     // body: JSON.stringify([
-          //     //   {
-          //     //     "menuId": `${key}`
-          //     //   }]),
+      }
 
-          //     // body: { "menuId": 68 }
-          //     // "Data": [{ "menuId": `${key}` }],
-          // body: {
-          //   "eventId": 5,
-          //     "eventName": "Event 5",
-          //       "eventDescription": "Event 5 Description",
-          //         "eventLocation": "Kuala Lumpur, Malaysia",
-          //           "eventDateTime": "2019-03-28"
-          // },
-          //   });
-
-          const response = axios.delete(
-            `${baseURL}/Manager/Menu/DeleteMenu`,
-            config,
-            { data: { "menuId": `${key}` } });
-
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-
-          const deletedData = await response.json();
-          return deletedData; // Return the deleted data if needed
-        } catch (error) {
-          console.error("Error deleting data:", error);
-          throw error;
-        }
-      },
     })
   );
 
@@ -247,50 +237,59 @@ const DanhSachNhomQuyenPage = () => {
     console.log("Reloaded")
   }, []);
 
-  const deleteRecords = useCallback(() => {
+  const deleteRecords = useCallback(async () => {
     try {
-      selectedItemKeys.forEach((key) => {
-        console.log("begin delete")
-        dataSource.remove(key);
-      });
-      togglePopup();
-      refreshDataGrid();
+      const response = await axios.delete(
+        `${baseURL}/Manager/Menu/DeleteMenu`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${api_token}`,
+          },
+          data: selectedItemKeys.map(menuId => ({ menuId })),
+        }
+      );
 
-      let selectedAndDeletedItems = selectedItemKeys.length;
-      const customText = `Xóa thành công `;
-      const customText2 = ` mục`;
-      const message = customText + selectedAndDeletedItems + customText2;
+      if (response.data.Success) {
+        // The deletion was successful
+        togglePopup();
+        refreshDataGrid();
 
+        const selectedAndDeletedItems = selectedItemKeys.length;
+        const message = `Xóa thành công ${selectedAndDeletedItems} mục`;
+        notify(
+          {
+            message,
+            position: {
+              my: 'after bottom',
+              at: 'after bottom',
+            },
+          },
+          'success',
+          3000,
+        );
+      } else {
+        // Handle the case where the deletion was not successful
+        console.error(`Error deleting items. ErrorCode: ${response.data.ErrorCode}, ErrorMessage: ${response.data.ErrorMessage}`);
+      }
+    } catch (error) {
+      console.error("Error deleting data:", error);
       notify(
         {
-          message,
+          error,
           position: {
             my: 'after bottom',
             at: 'after bottom',
           },
         },
-        'success',
-        3000,
-      );
-    }
-    catch (error) {
-      notify(
-        {
-          error,
-          position: {
-            my: 'after botom',
-            at: 'after botom',
-          },
-        },
-        `error` + { error },
+        `error: ${error.message}`,
         5000,
-      )
-    }
-    finally {
+      );
+    } finally {
       setSelectedItemKeys([]);
-      // refreshDataGrid();
     }
-  }, [selectedItemKeys, togglePopup, refreshDataGrid, dataSource]);
+  }, [selectedItemKeys, togglePopup, refreshDataGrid]);
+
 
   const getDeleteButtonOptions = useCallback(() => ({
     text: 'Đồng ý',
@@ -313,7 +312,7 @@ const DanhSachNhomQuyenPage = () => {
           id="grid-container"
           className='master-detail-grid'
           dataSource={dataSource}
-          // ref={dataGridRef}
+          ref={dataGridRef}
           width="100%"
           height="100%"
           showBorders={true}
@@ -322,14 +321,14 @@ const DanhSachNhomQuyenPage = () => {
           allowColumnReordering={false}
           remoteOperations={false}
           onExporting={onExporting}
-          // selectedRowKeys={selectedItemKeys}
-          // onSelectionChanged={onSelectionChanged}
+          selectedRowKeys={selectedItemKeys}
+          onSelectionChanged={onSelectionChanged}
           onPageChanged={onPageChanged}
         >
 
           <Editing mode="popup"
             allowAdding={true}
-            allowDeleting={true}
+            allowDeleting={false}
             allowUpdating={true}
           />
 
@@ -417,7 +416,7 @@ const DanhSachNhomQuyenPage = () => {
                 onClick={togglePopup}
                 widget="dxButton"
                 icon="trash"
-                // disabled={!selectedItemKeys.length}
+                disabled={!selectedItemKeys.length}
                 text="Xóa mục đã chọn"
               />
             </Item>
