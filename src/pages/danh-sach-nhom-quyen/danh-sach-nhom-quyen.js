@@ -137,16 +137,16 @@ const DanhSachNhomQuyenPage = () => {
       update: async (key, values) => {
         try {
           const requestBody = {
-            menuId: key,
-            parentId: values.parentId,
-            menuCode: values.menuCode,
-            levelItem: values.levelItem,
+            MenuId: key,
+            ParentId: values.ParentId,
+            MenuCode: values.MenuCode,
+            LevelItem: values.LevelItem,
             MenuName: values.MenuName,
             Link: values.Link,
-            order: values.order,
-            isView: values.isView,
-            status: values.status,
-            menuNameEg: values.menuNameEg,
+            Order: values.Order,
+            IsView: values.IsView,
+            Status: values.Status,
+            MenuNameEg: values.MenuNameEg,
           };
 
           const response = await fetch(
