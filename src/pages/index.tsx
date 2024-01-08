@@ -7,6 +7,6 @@ export { default as AccessDeniedPage } from "./access-denied/access-denied";
 export { default as PhanQuyenPage } from "./phan-quyen/phan-quyen";
 export { default as UsersPage } from "./users/users";
 export { default as DemoDataGridPage } from "./demo-data-grid/demo-data-grid";
-export { default as RowEditPage } from "./Row-Edit/Row-Edit";
+export { default as DanhMucPhuongXaPage } from "./danh-muc-phuong-xa/danh-muc-phuong-xa";
 export { default as ErrorPagePage } from "./error-page/error-page";
 export { default as ViewNamePage } from "./view-name/view-name";

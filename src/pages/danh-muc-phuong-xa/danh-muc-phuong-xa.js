@@ -96,7 +96,7 @@ function onExporting(e) {
   };
 }
 
-const RowEdit = () => {
+const DanhMucPhuongXaPage = () => {
   const [requests, setRequests] = useState([]);
   const [refreshMode, setRefreshMode] = useState("reshape");
   const [searchValue, setSearchValue] = useState("");
@@ -144,68 +144,6 @@ const RowEdit = () => {
           return [];
         }
       },
-      update: async (key, values) => {
-        try {
-          const response = await fetch(
-            `${baseURL}/Manager/Menu/UpdateMenu/${key}`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(values),
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-
-          const updatedData = await response.json();
-          // Return the updated data if needed
-          return updatedData;
-        } catch (error) {
-          console.error("Error updating data:", error);
-          throw error;
-        }
-      },
-      remove: async (key) => {
-        try {
-          const response = await fetch(
-            `${baseURL}/Manager/Menu/DeleteMenu/${key}`,
-            {
-              method: "DELETE",
-              headers: {
-                "Content-Type": "application/json",
-              },
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-
-          const deletedData = await response.json();
-          return deletedData; // Return the deleted data if needed
-        } catch (error) {
-          console.error("Error deleting data:", error);
-          throw error;
-        }
-      },
-
-      // insert: (values) =>
-      //   sendRequest(`${baseURL}/InsertOrder`, "POST", {
-      //     values: JSON.stringify(values),
-      //   }),
-      // update: (key, values) =>
-      //   sendRequest(`${baseURL}/UpdateOrder`, "PUT", {
-      //     key,
-      //     values: JSON.stringify(values),
-      //   }),
-      // remove: (key) =>
-      //   sendRequest(`${baseURL}/DeleteOrder`, "DELETE", {
-      //     key,
-      //   }),
     })
   );
 
@@ -656,4 +594,4 @@ const RowEdit = () => {
   );
 };
 
-export default RowEdit;
+export default DanhMucPhuongXaPage;

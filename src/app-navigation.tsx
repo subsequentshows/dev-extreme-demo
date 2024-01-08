@@ -51,8 +51,8 @@ export const navigation = [
     icon: "folder",
   },
   {
-    text: "Row Edit",
-    path: "/row-edit",
+    text: "Danh mục phường xã",
+    path: "/danh-muc-phuong-xa",
     icon: "folder",
   },
   {

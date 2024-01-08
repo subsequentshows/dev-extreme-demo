@@ -272,3 +272,13 @@ code {
 .dx-pager .dx-page-sizes .dx-selection {
   background-color: #0071a6;
 }
+
+.dx-header-row {
+  td {
+    &:hover {
+      .dx-datagrid-text-content {
+        color: #fff !important;
+      }
+    }
+  }
+}

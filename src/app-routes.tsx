@@ -7,7 +7,7 @@ import {
   PhanQuyenPage,
   UsersPage,
   DemoDataGridPage,
-  RowEditPage,
+  DanhMucPhuongXaPage,
   ErrorPagePage,
   DanhSachNhomQuyenPage,
 } from "./pages";
@@ -51,8 +51,8 @@ const routes = [
     element: DemoDataGridPage,
   },
   {
-    path: "/row-edit",
-    element: RowEditPage,
+    path: "/danh-muc-phuong-xa",
+    element: DanhMucPhuongXaPage,
   },
   {
     path: "/error-page",

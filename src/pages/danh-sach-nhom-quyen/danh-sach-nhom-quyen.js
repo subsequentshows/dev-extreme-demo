@@ -50,7 +50,7 @@ import { formatDate } from 'devextreme/localization';
 
 //
 let api_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJOZ3VvaUR1bmdJZCI6IjEiLCJNQV9IVVlFTiI6IjAwMSIsIk1BX1RJTkgiOiIwMSIsIk1BX1hBIjoiMDAwMDciLCJuYmYiOjE3MDM4MjA5NDksImV4cCI6MTc2MzgyMDg4OSwiaWF0IjoxNzAzODIwOTQ5LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQ0MzAwIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo0NDMwMCJ9.m-PSJWciAyy9VwezqvX6A2RFqe9WiEiST8htiMeTHYQ";
-const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
+const renderLabel = () => <div className="toolbar-label">Danh sách nhóm quyền</div>;
 $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
 
 const config = {
@@ -409,6 +409,7 @@ const DanhSachNhomQuyenPage = () => {
           </Column>
 
           <Toolbar>
+            <Item location="left" locateInMenu="never" render={renderLabel} />
 
             <Item location="after" name="addRowButton" caption="Thêm" />
             <Item location="after" showText="always" name='mutiple-delete' widget="dxButton">
