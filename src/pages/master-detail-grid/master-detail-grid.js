@@ -146,7 +146,7 @@ const MasterDetailGrid = () => {
   const customizeColumnDate = (itemInfo) => `${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
   const customizeDate = (itemInfo) => `First: ${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
   const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
-  $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
+  $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm 2');
 
   // Custom filter function for ShipCountry
   // const shipCountryFilter = useCallback((data) => {
@@ -186,13 +186,13 @@ const MasterDetailGrid = () => {
             );
           }
 
-          // return data.Data;
-          return {
-            data: data.Data,
-            totalCount: true,
-            // summary: false,
-            // groupCount: false
-          };
+          return data.Data;
+          // return {
+          //   data: data.Data,
+          //   totalCount: true,
+          //   // summary: false,
+          //   // groupCount: false
+          // };
           // Assuming the API response is an array of objects
         } catch (error) {
           console.error("Error fetching data:", error);
@@ -204,57 +204,6 @@ const MasterDetailGrid = () => {
         ajaxOptions.xhrFields = { withCredentials: true };
       },
 
-      //     update: async (key, values) => {
-      //       try {
-      //         const response = await fetch(
-      //           `${baseURL}/Manager/Menu/UpdateMenu/${key}`,
-      //           {
-      //             method: "POST",
-      //             headers: {
-      //               "Content-Type": "application/json",
-      //             },
-      //             body: JSON.stringify(values),
-      //           }
-      //         );
-
-      //         if (!response.ok) {
-      //           throw new Error(`HTTP error! Status: ${response.status}`);
-      //         }
-
-      //         const updatedData = await response.json();
-      //         // Return the updated data if needed
-      //         return updatedData;
-      //       } catch (error) {
-      //         console.error("Error updating data:", error);
-      //         throw error;
-      //       }
-      //     },
-      //     remove: async (key) => {
-      //       try {
-      //         const response = await fetch(
-      //           `${baseURL}/Manager/Menu/DeleteMenu/${key}`,
-      //           {
-      //             method: "DELETE",
-      //             headers: {
-      //               "Content-Type": "application/json",
-      //             },
-      //           }
-      //         );
-
-      //         if (!response.ok) {
-      //           throw new Error(`HTTP error! Status: ${response.status}`);
-      //         }
-
-      //         const deletedData = await response.json();
-      //         return deletedData; // Return the deleted data if needed
-      //       } catch (error) {
-      //         console.error("Error deleting data:", error);
-      //         throw error;
-      //       }
-      //     },
-
-
-
       //     // // filter for ShipCountry
       //     // // byKey: (key) => {
       //     // //   return dataSource.byKey(key);
@@ -262,20 +211,6 @@ const MasterDetailGrid = () => {
       //     // // Implement the custom filter function for ShipCountry
       //     // // filter: [shipCityFilter],
       //     // filter: [],
-
-      //     // insert: (values) =>
-      //     //   sendRequest(`${baseURL}/InsertOrder`, "POST", {
-      //     //     values: JSON.stringify(values),
-      //     //   }),
-      //     // update: (key, values) =>
-      //     //   sendRequest(`${baseURL}/UpdateOrder`, "PUT", {
-      //     //     key,
-      //     //     values: JSON.stringify(values),
-      //     //   }),
-      //     // remove: (key) =>
-      //     //   sendRequest(`${baseURL}/DeleteOrder`, "DELETE", {
-      //     //     key,
-      //     //   }),
     })
   );
 
@@ -578,7 +513,7 @@ const MasterDetailGrid = () => {
         dataSource={phuongXaData}
         onExporting={onExporting}
         showBorders={true}
-        remoteOperations={true}
+        remoteOperations={false}
         repaintChangesOnly={true}
         selectedRowKeys={selectedItemKeys}
         onSelectionChanged={onSelectionChanged}

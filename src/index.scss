@@ -282,3 +282,48 @@ code {
     }
   }
 }
+
+.dx-toolbar .dx-toolbar-items-container {
+  min-height: 56px;
+  height: 100% !important;
+}
+
+.dx-toolbar-after {
+  top: 0;
+  right: 0;
+}
+
+@media (min-width: 320px) and (max-width: 1024px) {
+  .dx-datagrid-header-panel {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+  }
+
+  .dx-toolbar-items-container {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+
+    .dx-toolbar-before,
+    .dx-toolbar-center,
+    .dx-toolbar-after {
+      width: 100%;
+      padding: 0;
+      position: relative;
+      display: block;
+    }
+
+    .dx-toolbar-before {
+      margin-bottom: 15px;
+    }
+
+    .dx-toolbar-after {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      top: unset;
+      right: unset;
+    }
+  }
+
+}

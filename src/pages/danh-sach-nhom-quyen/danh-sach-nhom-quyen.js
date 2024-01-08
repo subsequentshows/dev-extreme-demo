@@ -21,8 +21,10 @@ import {
   Selection,
   Toolbar,
   Item,
+  RemoteOperations
 } from 'devextreme-react/data-grid';
 import { Popup, Position, ToolbarItem } from 'devextreme-react/popup';
+import FileUploader, { FileUploaderTypes } from 'devextreme-react/file-uploader';
 import { Button } from "devextreme-react/button";
 import { SelectBox, SelectBoxTypes } from "devextreme-react/select-box";
 import CustomStore from "devextreme/data/custom_store";
@@ -38,6 +40,9 @@ import { exportDataGrid as exportDataGridToExcel } from 'devextreme/excel_export
 import { Workbook } from 'exceljs';
 import { saveAs } from 'file-saver';
 
+// Read excel file library
+import readXlsxFile from 'read-excel-file';
+
 // Export to pdf library
 import { exportDataGrid as exportDataGridToPdf } from 'devextreme/pdf_exporter';
 import { jsPDF } from "jspdf";
@@ -50,8 +55,13 @@ import { formatDate } from 'devextreme/localization';
 
 //
 let api_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJOZ3VvaUR1bmdJZCI6IjEiLCJNQV9IVVlFTiI6IjAwMSIsIk1BX1RJTkgiOiIwMSIsIk1BX1hBIjoiMDAwMDciLCJuYmYiOjE3MDM4MjA5NDksImV4cCI6MTc2MzgyMDg4OSwiaWF0IjoxNzAzODIwOTQ5LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQ0MzAwIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo0NDMwMCJ9.m-PSJWciAyy9VwezqvX6A2RFqe9WiEiST8htiMeTHYQ";
+
 const renderLabel = () => <div className="toolbar-label">Danh sách nhóm quyền</div>;
 $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
+const fileExtensions = ['.xls', '.xlsx'];
+
+// const uploadUrl = "https://localhost:44300/upload";
+const uploadUrl = "https://js.devexpress.com/Demos/NetCore/FileUploader/Upload";
 
 const config = {
 
@@ -80,6 +90,12 @@ const DanhSachNhomQuyenPage = () => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [isPopupVisible, setPopupVisibility] = useState(false);
   const [selectedItemKeys, setSelectedItemKeys] = useState([]);
+
+  const [uploadMode, setUploadMode] = useState('instantly');
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [uploadedData, setUploadedData] = useState(null);
+
+  const formElement = useRef(null);
 
   const [dataSource, setDataSource] = useState(
     new CustomStore({
@@ -290,7 +306,6 @@ const DanhSachNhomQuyenPage = () => {
     }
   }, [selectedItemKeys, togglePopup, refreshDataGrid]);
 
-
   const getDeleteButtonOptions = useCallback(() => ({
     text: 'Đồng ý',
     stylingMode: 'contained',
@@ -303,6 +318,27 @@ const DanhSachNhomQuyenPage = () => {
     type: 'normal',
     onClick: togglePopup,
   }), [togglePopup]);
+
+  const onSelectedFilesChanged = useCallback((e) => {
+    setSelectedFiles(e.value);
+    if (e.value.length > 0) {
+      handleFileUpload(e.value[0]);
+    }
+  }, [setSelectedFiles]);
+
+  const handleFileUpload = async (file) => {
+    try {
+      const data = await readXlsxFile(file);
+      setUploadedData(data);
+    } catch (error) {
+      console.error('Error reading file:', error);
+      notify('Error reading file. Please check the file format.');
+    }
+  };
+
+  const onFormSubmitClick = useCallback(() => {
+    formElement.current.submit();
+  }, []);
 
   return (
     <>
@@ -325,7 +361,6 @@ const DanhSachNhomQuyenPage = () => {
           onSelectionChanged={onSelectionChanged}
           onPageChanged={onPageChanged}
         >
-
           <Editing mode="popup"
             allowAdding={true}
             allowDeleting={false}
@@ -422,6 +457,10 @@ const DanhSachNhomQuyenPage = () => {
               />
             </Item>
 
+            <Item location="after" widget="dxButton" >
+              <Button text="Nhập từ excel" onClick={togglePopup} />
+            </Item>
+
             <Item location='after' name='exportButton' />
           </Toolbar>
 
@@ -464,6 +503,50 @@ const DanhSachNhomQuyenPage = () => {
             location="center"
             options={getCloseButtonOptions()}
           />
+        </Popup>
+
+        {/* Upload popup */}
+        <Popup
+          id="popup"
+          showTitle={true}
+          title="Nhập từ excel"
+          visible={isPopupVisible}
+          hideOnOutsideClick={false}
+          showCloseButton={true}
+          onHiding={togglePopup}
+          width={1000}
+          height={500}
+          position="center"
+          dragEnabled={false}
+          resizeEnabled={false}
+          maxFileSize={2000000}
+        >
+          <div>
+            <FileUploader
+              multiple={false}
+              // uploadMode="useButtons"
+              uploadMode={uploadMode}
+              uploadUrl={uploadUrl}
+              allowedFileExtensions={fileExtensions}
+              onValueChanged={onSelectedFilesChanged}
+            />
+            <span className="note">{' : '}
+              <span>.xls, .xlsx</span>
+            </span>
+          </div>
+
+          <div className=''>
+            <form id="form" ref={formElement} method="post" action="" encType="multipart/form-data">
+              <DataGrid
+                className='uploaded-data'
+                dataSource={uploadedData}
+              >
+
+              </DataGrid>
+
+              <Button className="submit-button" text="Thêm" type="success" onClick={onFormSubmitClick} />
+            </form>
+          </div>
         </Popup>
 
       </div>

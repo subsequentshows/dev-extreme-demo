@@ -53,12 +53,14 @@ import { Modal } from "react-bootstrap-v5";
 
 const refreshModeLabel = { "aria-label": "Refresh Mode" };
 const REFRESH_MODES = ["full", "reshape", "repaint"];
-const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
+const renderLabel = () => <div className="toolbar-label">Danh mục phường xã</div>;
 const exportFormats = ['xlsx', 'pdf'];
 
 const statuses = ['Chọn', 'Tỉnh Sóc Trăng', 'Thành phố Hà Nội', 'Tỉnh Kiên Giang', 'Thành phố Hồ Chí Minh'];
 const cityStatuses = ['Chọn', 'Huyện Gò Quao', 'Huyện Sóc Sơn', 'Quận Bắc Từ Liêm', 'Huyện Đồng Văn'];
 const statusLabel = { 'aria-label': 'Status' };
+
+$('.dx-datagrid-addrow-button .dx-button-text').text('Thêm 2');
 
 const renderContent = () => {
   return (
@@ -97,9 +99,6 @@ function onExporting(e) {
 }
 
 const DanhMucPhuongXaPage = () => {
-  const [requests, setRequests] = useState([]);
-  const [refreshMode, setRefreshMode] = useState("reshape");
-  const [searchValue, setSearchValue] = useState("");
   const dataGridRef = useRef(null);
 
   const [isPopupVisible, setPopupVisibility] = useState(false);
@@ -109,7 +108,10 @@ const DanhMucPhuongXaPage = () => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [tenQuanHuyenFilter, setTenQuanHuyenFilter] = useState('');
   const [tenTinhThanhPhoFilter, setTenTinhThanhPhoFilter] = useState("");
-  const [tenXaSearch, setTenXaSearch] = useState('');
+
+  const [tenXaSearch, setTenXaSearch] = useState("");
+  const [tenHuyenSearch, setTenHuyenSearch] = useState('');
+  const [searchValue, setSearchValue] = useState("");
 
   const [filterStatus, setFilterStatus] = useState(statuses[0]);
   const [filterCityStatus, setFilterCityStatus] = useState(statuses[0]);
@@ -129,9 +131,11 @@ const DanhMucPhuongXaPage = () => {
           }
 
           const data = await response.json();
-          console.log(data.Data.find(o => o.TEN === "xá"))
+
+          // console.log(data.Data.find(o => o.TEN === "Xá"))
           // Apply search filter
           if (searchValue) {
+            // console.log(data.Data.filter(o => o.TEN === "Xá"))
             return data.Data.filter((item) =>
               item.TEN.toLowerCase().includes(searchValue.toLowerCase())
             );
@@ -147,105 +151,10 @@ const DanhMucPhuongXaPage = () => {
     })
   );
 
-  const handleRefreshModeChange = useCallback(
-    (e) => {
-      setRefreshMode(e.value);
-    },
-    []
-  );
-
-  const clearRequests = useCallback(() => {
-    setRequests([]);
-  }, []);
-
-  const logRequest = useCallback(
-    (method, url, data) => {
-      const args = Object.keys(data || {})
-        .map((key) => `${key}=${data[key]}`)
-        .join(" ");
-
-      const time = formatDate(new Date(), "HH:mm:ss");
-      const request = [time, method, url.slice(URL.length), args].join(" ");
-
-      setRequests((prevRequests) =>
-        [request].concat(prevRequests)
-      );
-    },
-    []
-  );
-
-  const sendRequest = useCallback(
-    async (url, method = "GET", data = {}) => {
-      logRequest(method, url, data);
-
-      const request = {
-        method,
-        credentials: "include",
-      };
-
-      if (["DELETE", "POST", "PUT"].includes(method)) {
-        const params = Object.keys(data)
-          .map(
-            (key) =>
-              `${encodeURIComponent(key)}=${encodeURIComponent(data[key])}`
-          )
-          .join("&");
-
-        request.body = params;
-        request.headers = {
-          "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-        };
-      }
-
-      const response = await fetch(url, request);
-
-      const isJson = response.headers
-        .get("content-type")
-        ?.includes("application/json");
-      const result = isJson ? await response.json() : {};
-
-      if (!response.ok) {
-        throw result.Message;
-      } else {
-        console.log(result.data)
-      }
-
-      return method === "GET" ? result.data : {};
-
-    },
-    [logRequest]
-  );
-
   const refreshDataGrid = useCallback(() => {
     dataGridRef.current.instance.refresh();
     console.log("Reloaded")
   }, []);
-
-  // const handleSearchButtonClick = async () => {
-  //   // Trigger a reload of the data with the new search value
-  //   refreshDataGrid();
-  //   await contentData.load({ searchValue });
-  // };
-
-  // const handleSearchInputChange = (e) => {
-  //   setSearchValue(e.target.value);
-  //   console.log((e.target.value))
-  // };
-
-  const onCityValueChanged = useCallback(({ value }) => {
-    const dataGrid = dataGridRef.current.instance;
-
-    if (value === '') {
-      // dataGrid.reload();
-      // dataGrid.clearFilter();
-      console.log("hehe")
-    } else {
-      // Apply custom filter
-      dataGrid.filter(['TEN_HUYEN', '=', value]);
-      setTenXaSearch(value);
-      contentData.load({ tenXaSearch });
-    }
-  }, [setTenXaSearch, contentData, tenXaSearch]);
 
   const togglePopup = useCallback(() => {
     setPopupVisibility(!isPopupVisible);
@@ -349,20 +258,41 @@ const DanhMucPhuongXaPage = () => {
     setFilterCityStatus(value);
   }, []);
 
+  const onTenXaValueChanged = useCallback(({ value }) => {
+    const dataGrid = dataGridRef.current.instance;
+
+    if (value === '') {
+      dataGrid.reload();
+      // dataGrid.clearFilter();
+      console.log(value)
+    } else {
+      console.log("tenXaSearch value: - " + value);
+      console.log("tenXaSearch: - " + tenXaSearch);
+      console.log("setTenXaSearch: - " + setTenXaSearch(value))
+
+      // Apply custom filter
+      dataGrid.filter(['TEN', '=', value]);
+      setTenXaSearch(value);
+      contentData.load({ tenXaSearch });
+
+
+    }
+  }, [setTenXaSearch, contentData, tenXaSearch]);
+
+  const handleSearchInputChange = (e) => {
+    setSearchValue(e.target.value);
+    console.log(("Search text: " + (e.target.value)))
+  };
+
+  const handleSearchButtonClick = async () => {
+    // Trigger a reload of the data with the new search value
+    // refreshDataGrid();
+    await contentData.load({ searchValue });
+    console.log("searchValue: " + searchValue);
+  };
+
   return (
     <>
-      {/* <div className="search-container responsive-paddings">
-        <button icon='refresh' widget="dxButton" onClick={refreshDataGrid} text="Tải lại" > Reload </button>
-
-        <input
-          type="text"
-          placeholder="Search by TEN"
-          value={searchValue}
-          onChange={handleSearchInputChange}
-        />
-        <button onClick={handleSearchButtonClick}>Tên xã</button>
-      </div> */}
-
       <div className="item-filter-wrapper responsive-paddings">
         <div className='item-filter'>
           <label className='items-filter-label'>Tên tỉnh</label>
@@ -385,21 +315,35 @@ const DanhMucPhuongXaPage = () => {
         </div>
 
         <div className='item-filter'>
-          <label className='items-filter-label'>Tên xã</label>
+          <label className='items-filter-label'>Tìm Xã onChange</label>
 
           <div className='input-wrapper'>
             <input
               className='ship-country-filter search-input'
               type='text'
               value={tenXaSearch}
-
-              // shipCityTerm 
-              onChange={onCityValueChanged}
+              onChange={onTenXaValueChanged}
               placeholder='Search...'
             />
           </div>
         </div>
+
+        <div className="item-filter">
+          <label className='items-filter-label'>Tìm xã onClick</label>
+
+          <div className="input-wrapper">
+            <input
+              type="text"
+              placeholder="Tìm xã onClick"
+              value={searchValue}
+              onChange={handleSearchInputChange}
+
+            />
+          </div>
+        </div>
       </div>
+
+      <button icon='refresh' widget="dxButton" onClick={refreshDataGrid} text="Tải lại" > Reload </button>
 
       <div className="responsive-paddings">
         <DataGrid
@@ -411,7 +355,7 @@ const DanhMucPhuongXaPage = () => {
           height="100%"
           showBorders={true}
           focusedRowEnabled={true}
-          // remoteOperations={true}
+          remoteOperations={false}
           repaintChangesOnly={true}
           allowColumnReordering={false}
           onExporting={onExporting}
@@ -419,9 +363,7 @@ const DanhMucPhuongXaPage = () => {
           onSelectionChanged={onSelectionChanged}
           onPageChanged={onPageChanged}
         >
-          <Editing
-            refreshMode={refreshMode}
-            mode="row"
+          <Editing mode="popup"
             allowAdding={true}
             allowDeleting={false}
             allowUpdating={true}
@@ -515,19 +457,16 @@ const DanhMucPhuongXaPage = () => {
               />
             </Item>
 
+            <Item location="after" showText="always" widget="dxButton" >
+              <Button widget="dxButton" onClick={handleSearchButtonClick} text="Tìm xã"></Button>
+            </Item>
+
             <Item location='after' name='exportButton' />
           </Toolbar>
 
           <Grouping autoExpandAll={false} />
           <ColumnFixing enabled={false} />
           <Selection mode="multiple" />
-          <SearchPanel
-            visible={true}
-            width={240}
-            highlightSearchText={true}
-            searchVisibleColumnsOnly={true}
-            placeholder="Tìm kiếm"
-          />
           <FilterRow visible={false} allowFiltering={false} showResetValues={false} />
           <HeaderFilter enabled={false} visible={false} />
           <GroupPanel visible={false} />
@@ -564,31 +503,6 @@ const DanhMucPhuongXaPage = () => {
             options={getCloseButtonOptions()}
           />
         </Popup>
-
-        <br />
-        <div className="options" >
-          {/* <div className="caption">Options</div>
-          <div className="option">
-            <span>Refresh Mode: </span>
-            <SelectBox
-              value={refreshMode}
-              inputAttr={refreshModeLabel}
-              items={REFRESH_MODES}
-              onValueChanged={handleRefreshModeChange}
-            />
-          </div> */}
-          <div id="requests">
-            <div>
-              <div className="caption">Network Requests</div>
-              <Button id="clear" text="Clear" onClick={clearRequests} />
-            </div>
-            <ul>
-              {requests.map((request, index) => (
-                <li key={index}>{request}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
       </div>
     </>
   );

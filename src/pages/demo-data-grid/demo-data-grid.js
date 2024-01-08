@@ -44,9 +44,9 @@ function handleErrors(response) {
 }
 
 const dataSource = new CustomStore({
-  key: 'ID',
+  key: 'OrderID',
   load: (loadOptions) => {
-    return fetch(`${baseURL}/DanhMuc/GetDMPhuongXa`, {
+    return fetch(`${baseURL}/Order`, {
       // method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -55,36 +55,7 @@ const dataSource = new CustomStore({
       .then(handleErrors)
       .then(response => response.json())
       .catch((error) => { throw 'Network error' + error });
-  },
-  // insert: (values) => {
-  //   return fetch('https://mydomain.com/MyDataService', {
-  //     method: 'POST',
-  //     body: JSON.stringify(values),
-  //     headers: {
-  //       'Content-Type': 'application/json'
-  //     }
-  //   })
-  //     .then(handleErrors)
-  //     .catch(() => { throw 'Network error' });
-  // },
-  // remove: (key) => {
-  //   return fetch(`https://mydomain.com/MyDataService/${encodeURIComponent(key)}`, {
-  //     method: 'DELETE'
-  //   })
-  //     .then(handleErrors)
-  //     .catch(() => { throw 'Network error' });
-  // },
-  // update: (key, values) => {
-  //   return fetch(`https://mydomain.com/MyDataService/${encodeURIComponent(key)}`, {
-  //     method: 'PUT',
-  //     body: JSON.stringify(values),
-  //     headers: {
-  //       'Content-Type': 'application/json'
-  //     }
-  //   })
-  //     .then(handleErrors)
-  //     .catch(() => { throw 'Network error' });
-  // }
+  }
 });
 
 async function sendBatchRequest(url, changes) {
@@ -204,7 +175,7 @@ const DemoDataGrid = () => {
           id="gridContainer"
           dataSource={dataSource}
           showBorders={true}
-          remoteOperations={true}
+          remoteOperations={false}
           repaintChangesOnly={true}
           onSaving={onSaving}
           // onSelectionChanged={onSelectionChanged}
