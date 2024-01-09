@@ -24,7 +24,7 @@
     "jspdf": "^2.5.1",
     "jszip": "^3.10.1",
     "react": "^18.2.0",
-    "react-app-polyfill": "^1.0.0",
+    "react-app-polyfill": "^1.0.6",
     "react-auth-kit": "^3.0.0-alpha.44",
     "react-bootstrap-v5": "^1.4.0",
     "react-dom": "^18.2.0",

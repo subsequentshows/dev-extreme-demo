@@ -3,6 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
+import "react-app-polyfill/stable";
 import { AuthProvider } from "./contexts/authProvider";
 import "./index.scss";
 

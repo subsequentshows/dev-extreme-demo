@@ -10,7 +10,7 @@ import {
   DanhMucPhuongXaPage,
   ErrorPagePage,
   DanhSachNhomQuyenPage,
-  DanhSachNhomQuyen2Page,
+  RowEditPage,
 } from "./pages";
 import { withNavigationWatcher } from "./contexts/navigation";
 
@@ -60,8 +60,8 @@ const routes = [
     element: ErrorPagePage,
   },
   {
-    path: "/danh-sach-nhom-quyen-2",
-    element: DanhSachNhomQuyen2Page,
+    path: "/row-edit",
+    element: RowEditPage,
   },
 ];
 

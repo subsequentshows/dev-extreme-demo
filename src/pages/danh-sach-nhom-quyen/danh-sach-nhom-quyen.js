@@ -357,6 +357,7 @@ const DanhSachNhomQuyenPage = () => {
           remoteOperations={false}
           onExporting={onExporting}
           selectedRowKeys={selectedItemKeys}
+          edi
           onSelectionChanged={onSelectionChanged}
           onPageChanged={onPageChanged}
         >

@@ -81,16 +81,18 @@ const renderContent = () => {
   )
 }
 
-const DanhSachNhomQuyen2Page = () => {
+const RowEdit = () => {
   const dataGridRef = useRef(null);
   const allowedPageSizes = [20, 50, 100, 150, 200];
   const exportFormats = ['xlsx', 'pdf'];
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
-  const [isPopupVisible, setPopupVisibility] = useState(false);
   const [isEditAllPopupVisible, setEditAllPopupVisibility] = useState(false);
+  const [isPopupVisible, setPopupVisibility] = useState(false);
   const [isImportExcelPopupVisible, setImportExcelPopupVisibility] = useState(false);
   const [selectedItemKeys, setSelectedItemKeys] = useState([]);
+  const [editedItemKeys, setEditedItemKeys] = useState([]);
+
 
   const [uploadMode, setUploadMode] = useState('instantly');
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -151,54 +153,54 @@ const DanhSachNhomQuyen2Page = () => {
           throw error;
         }
       },
-      update: async (key, values) => {
-        try {
-          const requestBody = {
-            MenuId: key,
-            ParentId: values.ParentId,
-            MenuCode: values.MenuCode,
-            LevelItem: values.LevelItem,
-            MenuName: values.MenuName,
-            Link: values.Link,
-            Order: values.Order,
-            IsView: values.IsView,
-            Status: values.Status,
-            MenuNameEg: values.MenuNameEg,
-          };
+      // update: async (key, values) => {
+      //   try {
+      //     const requestBody = {
+      //       MenuId: key,
+      //       ParentId: values.ParentId,
+      //       MenuCode: values.MenuCode,
+      //       LevelItem: values.LevelItem,
+      //       MenuName: values.MenuName,
+      //       Link: values.Link,
+      //       Order: values.Order,
+      //       IsView: values.IsView,
+      //       Status: values.Status,
+      //       MenuNameEg: values.MenuNameEg,
+      //     };
 
-          const response = await fetch(
-            `${baseURL}/Manager/Menu/UpdateMenu`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${api_token}`
-              },
-              body: JSON.stringify([requestBody]),
-            }
-          );
+      //     const response = await fetch(
+      //       `${baseURL}/Manager/Menu/UpdateMenu`,
+      //       {
+      //         method: "POST",
+      //         headers: {
+      //           "Content-Type": "application/json",
+      //           Authorization: `Bearer ${api_token}`
+      //         },
+      //         body: JSON.stringify([requestBody]),
+      //       }
+      //     );
 
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
+      //     if (!response.ok) {
+      //       throw new Error(`HTTP error! Status: ${response.status}`);
+      //     }
 
-          const updatedData = await response.json();
+      //     const updatedData = await response.json();
 
-          if (updatedData.Success) {
-            console.log("Update successful:", updatedData);
-            // Additional logic can be added here if needed
+      //     if (updatedData.Success) {
+      //       console.log("Update successful:", updatedData);
+      //       // Additional logic can be added here if needed
 
-            // Return the updated data if needed
-            return updatedData;
-          } else {
-            console.error(`Error updating item. ErrorCode: ${updatedData.ErrorCode}, ErrorMessage: ${updatedData.ErrorMessage}`);
-            throw new Error("Update failed");
-          }
-        } catch (error) {
-          console.error("Error updating data:", error);
-          throw error;
-        }
-      }
+      //       // Return the updated data if needed
+      //       return updatedData;
+      //     } else {
+      //       console.error(`Error updating item. ErrorCode: ${updatedData.ErrorCode}, ErrorMessage: ${updatedData.ErrorMessage}`);
+      //       throw new Error("Update failed");
+      //     }
+      //   } catch (error) {
+      //     console.error("Error updating data:", error);
+      //     throw error;
+      //   }
+      // }
     })
   );
 
@@ -242,13 +244,13 @@ const DanhSachNhomQuyen2Page = () => {
     };
   }
 
-  const togglePopup = useCallback(() => {
-    setPopupVisibility(!isPopupVisible);
-  }, [isPopupVisible]);
-
   const toggleEditAllPopup = useCallback(() => {
     setEditAllPopupVisibility(!isEditAllPopupVisible);
   }, [isEditAllPopupVisible]);
+
+  const togglePopup = useCallback(() => {
+    setPopupVisibility(!isPopupVisible);
+  }, [isPopupVisible]);
 
   const toggleImportExcelPopup = useCallback(() => {
     setImportExcelPopupVisibility(!isImportExcelPopupVisible);
@@ -259,56 +261,100 @@ const DanhSachNhomQuyen2Page = () => {
     console.log("Reloaded")
   }, []);
 
-  const editRecords = useCallback(async () => {
-    try {
-      const response = await axios.delete(
-        `${baseURL}/Manager/Menu/DeleteMenu`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${api_token}`,
-          },
-          data: selectedItemKeys.map(menuId => ({ menuId })),
+  const editRecords = useCallback(
+    async (key, values) => {
+      try {
+        // console.log(requestBody)
+
+
+        const response = await axios.post(
+          `${baseURL}/Manager/Menu/UpdateMenu`,
+
+          [
+            {
+              menuId: '1',
+              menuName: '1. Danh mục 123',
+              link: 'johndoe@example.com'
+            }
+          ],
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${api_token}`
+            }
+          });
+
+        console.log(response.data)
+
+        if (response.data.Success) {
+          toggleEditAllPopup();
+          refreshDataGrid();
+
+          const selectedAndDeletedItems = selectedItemKeys.length;
+          const message = `Xóa thành công ${selectedAndDeletedItems} mục`;
+          notify(
+            {
+              message,
+              position: {
+                my: 'after bottom',
+                at: 'after bottom',
+              },
+            },
+            'success',
+            3000,
+          );
+        } else {
+          console.error(`Xảy ra lỗi khi cập nhật dữ liệu. ErrorCode: 
+              ${response.data.ErrorCode}, ErrorMessage: ${response.data.ErrorMessage}`);
         }
-      );
-
-      if (response.data.Success) {
-        togglePopup();
-        refreshDataGrid();
-
-        const selectedAndDeletedItems = selectedItemKeys.length;
-        const message = `Xóa thành công ${selectedAndDeletedItems} mục`;
+      } catch (error) {
+        console.error("Xảy ra lỗi khi cập nhật dữ liệu: - ", error);
         notify(
           {
-            message,
+            error,
             position: {
               my: 'after bottom',
               at: 'after bottom',
             },
           },
-          'success',
-          3000,
+          `error: ${error.message}`,
+          5000,
         );
-      } else {
-        console.error(`Error deleting items. ErrorCode: ${response.data.ErrorCode}, ErrorMessage: ${response.data.ErrorMessage}`);
       }
-    } catch (error) {
-      console.error("Error deleting data:", error);
-      notify(
-        {
-          error,
-          position: {
-            my: 'after bottom',
-            at: 'after bottom',
-          },
-        },
-        `error: ${error.message}`,
-        5000,
-      );
-    } finally {
-      setSelectedItemKeys([]);
-    }
-  }, [selectedItemKeys, togglePopup, refreshDataGrid]);
+    }, [selectedItemKeys, toggleEditAllPopup, refreshDataGrid]);
+
+  // const editRecords = useCallback(
+  //   async () => {
+  //     axios.post(
+  //       `${baseURL}/Manager/Menu/UpdateMenu`,
+  //       [{
+  //         menuId: '1',
+  //         menuName: '1. Danh mục 123',
+  //         link: 'johndoe@example.com'
+  //       }],
+  //       {
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           Authorization: `Bearer ${api_token}`
+  //         }
+  //       })
+  //       .then(response => console.log(response.data))
+  //       .catch(error => console.error(error));
+  //   }
+  // )
+
+  const getEditAllButtonOptions = useCallback(() => ({
+    text: 'Đồng ý',
+    stylingMode: 'contained',
+    onClick: editRecords,
+  }), [editRecords]);
+
+  const getEditAllCloseButtonOptions = useCallback(() => ({
+    text: 'Đóng',
+    stylingMode: 'outlined',
+    type: 'normal',
+    onClick: toggleEditAllPopup,
+  }), [toggleEditAllPopup]);
 
   const deleteRecords = useCallback(async () => {
     try {
@@ -360,19 +406,6 @@ const DanhSachNhomQuyen2Page = () => {
       setSelectedItemKeys([]);
     }
   }, [selectedItemKeys, togglePopup, refreshDataGrid]);
-
-  const getEditAllButtonOptions = useCallback(() => ({
-    text: 'Đồng ý',
-    stylingMode: 'contained',
-    onClick: editRecords,
-  }), [editRecords]);
-
-  const getEditAllCloseButtonOptions = useCallback(() => ({
-    text: 'Đóng',
-    stylingMode: 'outlined',
-    type: 'normal',
-    onClick: toggleEditAllPopup,
-  }), [toggleEditAllPopup]);
 
   const getDeleteButtonOptions = useCallback(() => ({
     text: 'Đồng ý',
@@ -527,6 +560,7 @@ const DanhSachNhomQuyen2Page = () => {
               <Button
                 onClick={togglePopup}
                 widget="dxButton"
+                icon="trash"
                 disabled={!selectedItemKeys.length}
                 text="Xóa mục đã chọn"
               />
@@ -663,4 +697,4 @@ const DanhSachNhomQuyen2Page = () => {
   );
 };
 
-export default DanhSachNhomQuyen2Page;
+export default RowEdit;
