@@ -6,10 +6,11 @@ import {
   AccessDeniedPage,
   PhanQuyenPage,
   UsersPage,
-  DemoDataGridPage,
+  HoSoXaDetailPage,
   DanhMucPhuongXaPage,
   ErrorPagePage,
   DanhSachNhomQuyenPage,
+  DanhSachNhomQuyen2Page,
 } from "./pages";
 import { withNavigationWatcher } from "./contexts/navigation";
 
@@ -47,8 +48,8 @@ const routes = [
     element: UsersPage,
   },
   {
-    path: "/demo-data-grid",
-    element: DemoDataGridPage,
+    path: "/ho-so-xa-detail",
+    element: HoSoXaDetailPage,
   },
   {
     path: "/danh-muc-phuong-xa",
@@ -57,6 +58,10 @@ const routes = [
   {
     path: "/error-page",
     element: ErrorPagePage,
+  },
+  {
+    path: "/danh-sach-nhom-quyen-2",
+    element: DanhSachNhomQuyen2Page,
   },
 ];
 

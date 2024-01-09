@@ -6,7 +6,7 @@ export { default as DanhSachNhomQuyenPage } from "./danh-sach-nhom-quyen/danh-sa
 export { default as AccessDeniedPage } from "./access-denied/access-denied";
 export { default as PhanQuyenPage } from "./phan-quyen/phan-quyen";
 export { default as UsersPage } from "./users/users";
-export { default as DemoDataGridPage } from "./demo-data-grid/demo-data-grid";
+export { default as HoSoXaDetailPage } from "./ho-so-xa-detail/ho-so-xa-detail";
 export { default as DanhMucPhuongXaPage } from "./danh-muc-phuong-xa/danh-muc-phuong-xa";
 export { default as ErrorPagePage } from "./error-page/error-page";
-export { default as ViewNamePage } from "./view-name/view-name";
+export { default as DanhSachNhomQuyen2Page } from './danh-sach-nhom-quyen-2/danh-sach-nhom-quyen-2';

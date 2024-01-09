@@ -81,13 +81,14 @@ const renderContent = () => {
   )
 }
 
-const DanhSachNhomQuyenPage = () => {
+const DanhSachNhomQuyen2Page = () => {
   const dataGridRef = useRef(null);
   const allowedPageSizes = [20, 50, 100, 150, 200];
   const exportFormats = ['xlsx', 'pdf'];
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [isPopupVisible, setPopupVisibility] = useState(false);
+  const [isEditAllPopupVisible, setEditAllPopupVisibility] = useState(false);
   const [isImportExcelPopupVisible, setImportExcelPopupVisibility] = useState(false);
   const [selectedItemKeys, setSelectedItemKeys] = useState([]);
 
@@ -245,6 +246,10 @@ const DanhSachNhomQuyenPage = () => {
     setPopupVisibility(!isPopupVisible);
   }, [isPopupVisible]);
 
+  const toggleEditAllPopup = useCallback(() => {
+    setEditAllPopupVisibility(!isEditAllPopupVisible);
+  }, [isEditAllPopupVisible]);
+
   const toggleImportExcelPopup = useCallback(() => {
     setImportExcelPopupVisibility(!isImportExcelPopupVisible);
   }, [isImportExcelPopupVisible]);
@@ -253,6 +258,57 @@ const DanhSachNhomQuyenPage = () => {
     dataGridRef.current.instance.refresh();
     console.log("Reloaded")
   }, []);
+
+  const editRecords = useCallback(async () => {
+    try {
+      const response = await axios.delete(
+        `${baseURL}/Manager/Menu/DeleteMenu`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${api_token}`,
+          },
+          data: selectedItemKeys.map(menuId => ({ menuId })),
+        }
+      );
+
+      if (response.data.Success) {
+        togglePopup();
+        refreshDataGrid();
+
+        const selectedAndDeletedItems = selectedItemKeys.length;
+        const message = `Xóa thành công ${selectedAndDeletedItems} mục`;
+        notify(
+          {
+            message,
+            position: {
+              my: 'after bottom',
+              at: 'after bottom',
+            },
+          },
+          'success',
+          3000,
+        );
+      } else {
+        console.error(`Error deleting items. ErrorCode: ${response.data.ErrorCode}, ErrorMessage: ${response.data.ErrorMessage}`);
+      }
+    } catch (error) {
+      console.error("Error deleting data:", error);
+      notify(
+        {
+          error,
+          position: {
+            my: 'after bottom',
+            at: 'after bottom',
+          },
+        },
+        `error: ${error.message}`,
+        5000,
+      );
+    } finally {
+      setSelectedItemKeys([]);
+    }
+  }, [selectedItemKeys, togglePopup, refreshDataGrid]);
 
   const deleteRecords = useCallback(async () => {
     try {
@@ -305,6 +361,19 @@ const DanhSachNhomQuyenPage = () => {
     }
   }, [selectedItemKeys, togglePopup, refreshDataGrid]);
 
+  const getEditAllButtonOptions = useCallback(() => ({
+    text: 'Đồng ý',
+    stylingMode: 'contained',
+    onClick: editRecords,
+  }), [editRecords]);
+
+  const getEditAllCloseButtonOptions = useCallback(() => ({
+    text: 'Đóng',
+    stylingMode: 'outlined',
+    type: 'normal',
+    onClick: toggleEditAllPopup,
+  }), [toggleEditAllPopup]);
+
   const getDeleteButtonOptions = useCallback(() => ({
     text: 'Đồng ý',
     stylingMode: 'contained',
@@ -342,7 +411,6 @@ const DanhSachNhomQuyenPage = () => {
   return (
     <>
       <div className="responsive-paddings">
-
         <DataGrid
           id="grid-container"
           className='master-detail-grid'
@@ -360,7 +428,7 @@ const DanhSachNhomQuyenPage = () => {
           onSelectionChanged={onSelectionChanged}
           onPageChanged={onPageChanged}
         >
-          <Editing mode="popup"
+          <Editing mode="batch"
             allowAdding={true}
             allowDeleting={false}
             allowUpdating={true}
@@ -446,11 +514,19 @@ const DanhSachNhomQuyenPage = () => {
             <Item location="left" locateInMenu="never" render={renderLabel} />
 
             <Item location="after" name="addRowButton" caption="Thêm" />
+
+            <Item location="after" showText="always" name='mutiple-update' widget="dxButton">
+              <Button
+                onClick={toggleEditAllPopup}
+                widget="dxButton"
+                text="Ghi"
+              />
+            </Item>
+
             <Item location="after" showText="always" name='mutiple-delete' widget="dxButton">
               <Button
                 onClick={togglePopup}
                 widget="dxButton"
-                icon="trash"
                 disabled={!selectedItemKeys.length}
                 text="Xóa mục đã chọn"
               />
@@ -474,6 +550,41 @@ const DanhSachNhomQuyenPage = () => {
           <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} />
 
         </DataGrid>
+
+        {/* Update all confirm popup */}
+        <Popup
+          id="popup"
+          visible={isEditAllPopupVisible}
+          hideOnOutsideClick={true}
+          onHiding={toggleEditAllPopup}
+          dragEnabled={false}
+          showCloseButton={true}
+          showTitle={true}
+          title="Thông báo"
+          container=".dx-viewport"
+          width={500}
+          height={300}
+        >
+          <div className="">
+            <div className='warning-icon'>
+              <img src={WarningIcon} alt='icon-canh-bao' />
+            </div>
+            <p>Bạn có chắc chắn là muốn thực hiện thao tác này!</p>
+          </div>
+
+          <ToolbarItem
+            widget="dxButton"
+            toolbar="bottom"
+            location="center"
+            options={getEditAllButtonOptions()}
+          />
+          <ToolbarItem
+            widget="dxButton"
+            toolbar="bottom"
+            location="center"
+            options={getEditAllCloseButtonOptions()}
+          />
+        </Popup>
 
         {/* Delete confirm popup */}
         <Popup
@@ -552,4 +663,4 @@ const DanhSachNhomQuyenPage = () => {
   );
 };
 
-export default DanhSachNhomQuyenPage;
+export default DanhSachNhomQuyen2Page;

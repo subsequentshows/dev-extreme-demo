@@ -12,6 +12,11 @@ export const navigation = [
     icon: "folder",
   },
   {
+    text: "Danh sách nhóm quyền 2",
+    path: "/danh-sach-nhom-quyen-2",
+    icon: "folder",
+  },
+  {
     text: "Danh mục phường xã",
     path: "/danh-muc-phuong-xa",
     icon: "folder",
@@ -32,8 +37,8 @@ export const navigation = [
     icon: "globe",
   },
   {
-    text: "Demo Data Grid",
-    path: "/demo-data-grid",
+    text: "Hồ sơ xã detail",
+    path: "/ho-so-xa-detail",
     icon: "globe",
   },
   {

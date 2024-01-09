@@ -60,7 +60,7 @@ const statuses = ['Chọn', 'Tỉnh Sóc Trăng', 'Thành phố Hà Nội', 'T�
 const cityStatuses = ['Chọn', 'Huyện Gò Quao', 'Huyện Sóc Sơn', 'Quận Bắc Từ Liêm', 'Huyện Đồng Văn'];
 const statusLabel = { 'aria-label': 'Status' };
 
-$('.dx-datagrid-addrow-button .dx-button-text').text('Thêm 2');
+$('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
 
 const renderContent = () => {
   return (
@@ -337,7 +337,6 @@ const DanhMucPhuongXaPage = () => {
               placeholder="Tìm xã onClick"
               value={searchValue}
               onChange={handleSearchInputChange}
-
             />
           </div>
         </div>
@@ -366,7 +365,7 @@ const DanhMucPhuongXaPage = () => {
           <Editing mode="popup"
             allowAdding={true}
             allowDeleting={false}
-            allowUpdating={true}
+            allowUpdating={false}
           />
 
           <Column caption="STT"
@@ -397,14 +396,14 @@ const DanhMucPhuongXaPage = () => {
             fixedPosition="left"
           />
 
-          <Column caption="Sửa"
+          {/* <Column caption="Sửa"
             type="buttons"
             width={80}
             fixed={true}
             fixedPosition="left"
           >
             <Button name="edit" />
-          </Column>
+          </Column> */}
 
           <Column caption="Tên"
             dataField="TEN"
@@ -458,7 +457,7 @@ const DanhMucPhuongXaPage = () => {
             </Item>
 
             <Item location="after" showText="always" widget="dxButton" >
-              <Button widget="dxButton" onClick={handleSearchButtonClick} text="Tìm xã"></Button>
+              <Button widget="dxButton" onClick={handleSearchButtonClick} text="Tìm kiếm"></Button>
             </Item>
 
             <Item location='after' name='exportButton' />

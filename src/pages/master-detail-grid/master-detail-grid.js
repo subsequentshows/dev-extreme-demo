@@ -112,7 +112,7 @@ const statusLabel = { 'aria-label': 'Status' };
 //   },
 // });
 
-const MasterDetailGrid = () => {
+const MasterDetailGridPage = () => {
   const [data, setData] = useState([]);
 
   const allowedPageSizes = [50, 100, 150, 200];
@@ -146,7 +146,7 @@ const MasterDetailGrid = () => {
   const customizeColumnDate = (itemInfo) => `${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
   const customizeDate = (itemInfo) => `First: ${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
   const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
-  $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm 2');
+  $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
 
   // Custom filter function for ShipCountry
   // const shipCountryFilter = useCallback((data) => {
@@ -723,4 +723,4 @@ const MasterDetailGrid = () => {
   );
 }
 
-export default MasterDetailGrid;
+export default MasterDetailGridPage;
