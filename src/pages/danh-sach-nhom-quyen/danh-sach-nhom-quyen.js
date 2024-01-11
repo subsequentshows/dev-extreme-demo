@@ -277,8 +277,8 @@ const DanhSachNhomQuyenPage = () => {
           {
             message,
             position: {
-              my: 'after bottom',
-              at: 'after bottom',
+              my: 'bottom right',
+              at: 'bottom right',
             },
           },
           'success',
@@ -293,8 +293,8 @@ const DanhSachNhomQuyenPage = () => {
         {
           error,
           position: {
-            my: 'after bottom',
-            at: 'after bottom',
+            my: 'bottom right',
+            at: 'bottom right',
           },
         },
         `error: ${error.message}`,

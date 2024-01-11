@@ -125,38 +125,6 @@ const RowEdit = () => {
           return [];
         }
       },
-      // insert: async (values) => {
-      //   try {
-      //     const response = await fetch(
-      //       `${baseURL}/Manager/Menu/AddMenu`,
-      //       {
-      //         method: "POST",
-      //         headers: {
-      //           "Content-Type": "application/json",
-      //           Authorization: `Bearer ${api_token}`,
-      //         },
-      //         body: JSON.stringify([values]),
-      //       }
-      //     );
-
-      //     if (!response.ok) {
-      //       throw new Error(`HTTP error! Status: ${response.status}`);
-      //     }
-
-      //     const insertedData = await response.json();
-
-      //     if (insertedData.Success) {
-      //       console.log("Insertion successful:", insertedData);
-      //       return insertedData;
-      //     } else {
-      //       console.error(`Error inserting item. ErrorCode: ${insertedData.ErrorCode}, ErrorMessage: ${insertedData.ErrorMessage}`);
-      //       throw new Error("Insertion failed");
-      //     }
-      //   } catch (error) {
-      //     console.error("Error inserting data:", error);
-      //     throw error;
-      //   }
-      // }
     })
   );
 
@@ -250,9 +218,7 @@ const RowEdit = () => {
     console.log(`Edited row: ${MenuId}, Column: ${columnName}, Value: ${e.value}`);
   }, []);
 
-
-
-  const editRecords = useCallback(
+  const editOrAddRecords = useCallback(
     async (key, values) => {
       try {
         const updatedData = await dataSource.load();
@@ -294,11 +260,9 @@ const RowEdit = () => {
           const keyMenuName = `${item.MenuId}-MenuName`;
           const keyLink = `${item.MenuId}-Link`;
 
-
           if (
             editedRows.includes(item.MenuId) &&
-            (editedValues[keyMenuName] !== undefined || editedValues[keyLink] !== undefined)
-
+            (editedValues[keyMenuName] || editedValues[keyLink])
 
           ) {
             console.log(keyMenuName)
@@ -308,16 +272,27 @@ const RowEdit = () => {
 
             return {
               ...item,
-              MenuName: editedValues[keyMenuName] !== undefined ? editedValues[keyMenuName] : item.MenuName,
-              Link: editedValues[keyLink] !== undefined ? editedValues[keyLink] : item.Link,
+              MenuName: editedValues[keyMenuName] ? editedValues[keyMenuName] : item.MenuName,
+              Link: editedValues[keyLink] ? editedValues[keyLink] : item.Link,
             };
           }
           return item;
         });
         // console.log("Edited Columns and Values:", editedColumns.map(column => ({ column, value: editedValues[column] })));
 
-        // Assuming there's an endpoint for updating multiple records
-        const response = await axios.post(
+        // Check if add or update
+        // const addResponse = await axios.post(
+        //   `${baseURL}/Manager/Menu/UpdateMenu`,
+        //   updatedItems,
+        //   {
+        //     headers: {
+        //       'Content-Type': 'application/json',
+        //       Authorization: `Bearer ${api_token}`,
+        //     },
+        //   }
+        // );
+
+        const updateResponse = await axios.post(
           `${baseURL}/Manager/Menu/UpdateMenu`,
           updatedItems,
           {
@@ -328,7 +303,7 @@ const RowEdit = () => {
           }
         );
 
-        if (response.data.Success) {
+        if (updateResponse.data.Success) {
           toggleEditAllPopup();
           refreshDataGrid();
 
@@ -337,7 +312,8 @@ const RowEdit = () => {
           setEditedRows([]);
           setEditedColumns([]);
         } else {
-          console.error(`Error deleting items. ErrorCode: ${response.data.ErrorCode}, ErrorMessage: ${response.data.ErrorMessage}`);
+          console.error(`Error deleting items. ErrorCode: 
+          ${updateResponse.data.ErrorCode}, ErrorMessage: ${updateResponse.data.ErrorMessage}`);
         }
       } catch (error) {
         console.error("Xảy ra lỗi khi cập nhật dữ liệu: - ", error);
@@ -353,13 +329,13 @@ const RowEdit = () => {
           5000,
         );
       }
-    }, [toggleEditAllPopup, refreshDataGrid, dataSource, editedValues, editedColumns, editedRows]);
+    }, [toggleEditAllPopup, refreshDataGrid, dataSource, editedValues, editedRows]);
 
   const getEditAllButtonOptions = useCallback(() => ({
     text: 'Đồng ý',
     stylingMode: 'contained',
-    onClick: editRecords,
-  }), [editRecords]);
+    onClick: editOrAddRecords,
+  }), [editOrAddRecords]);
 
   const getEditAllCloseButtonOptions = useCallback(() => ({
     text: 'Đóng',
@@ -584,7 +560,7 @@ const RowEdit = () => {
               <Button
                 onClick={toggleEditAllPopup}
                 widget="dxButton"
-                text="Ghi"
+                text="Ghi&add"
               />
             </Item>
 
