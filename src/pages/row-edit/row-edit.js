@@ -216,7 +216,6 @@ const RowEdit = () => {
 
   const refreshDataGrid = useCallback(() => {
     dataGridRef.current.instance.refresh();
-    console.log("Reloaded")
   }, []);
 
   // const onEditValueChanged = useCallback((e) => {
@@ -239,8 +238,6 @@ const RowEdit = () => {
       [key]: e.value,
     }));
 
-
-
     // Track the edited row
     // if (!editedRows.includes(MenuId)) {
     //   setEditedRows([...editedRows, MenuId]);
@@ -258,7 +255,7 @@ const RowEdit = () => {
   const editRecords = useCallback(
     async (key, values) => {
       try {
-        // const updatedData = await dataSource.load();
+        const updatedData = await dataSource.load();
 
         // const updatedItems = updatedData.map((item) => {
         //   const keyMenuName = `${item.MenuId}-MenuName`;
@@ -276,8 +273,6 @@ const RowEdit = () => {
         //   }
         //   return item;
         // });
-
-        const updatedData = await dataSource.load();
 
         // const updatedItems = updatedData.map((item) => {
         //   const keyMenuName = `${item.MenuId}-MenuName`;
@@ -299,10 +294,18 @@ const RowEdit = () => {
           const keyMenuName = `${item.MenuId}-MenuName`;
           const keyLink = `${item.MenuId}-Link`;
 
+
           if (
             editedRows.includes(item.MenuId) &&
             (editedValues[keyMenuName] !== undefined || editedValues[keyLink] !== undefined)
+
+
           ) {
+            console.log(keyMenuName)
+            console.log(keyLink)
+            console.log(editedValues[keyMenuName])
+            console.log(editedValues[keyLink])
+
             return {
               ...item,
               MenuName: editedValues[keyMenuName] !== undefined ? editedValues[keyMenuName] : item.MenuName,
@@ -311,7 +314,7 @@ const RowEdit = () => {
           }
           return item;
         });
-        console.log("Edited Columns and Values:", editedColumns.map(column => ({ column, value: editedValues[column] })));
+        // console.log("Edited Columns and Values:", editedColumns.map(column => ({ column, value: editedValues[column] })));
 
         // Assuming there's an endpoint for updating multiple records
         const response = await axios.post(

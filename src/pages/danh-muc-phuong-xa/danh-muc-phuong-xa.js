@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef } from "react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
 import {
   Column,
   DataGrid,
@@ -110,54 +110,43 @@ const DanhMucPhuongXaPage = () => {
 
   const [tenXaSearch, setTenXaSearch] = useState("");
   const [tenHuyenSearch, setTenHuyenSearch] = useState('');
-  // const [searchValue, setSearchValue] = useState("");
 
   const [filterStatus, setFilterStatus] = useState(statuses[0]);
   const [filterCityStatus, setFilterCityStatus] = useState(statuses[0]);
+  const [showFilterRow, setShowFilterRow] = useState(true);
 
-  //
-  const [contentData, setContentData] = useState(
-    new CustomStore({
-      key: "ID",
-      load: async (options) => {
-        try {
-          const response = await fetch(
-            `${baseURL}/DanhMuc/GetDMPhuongXa`
-          );
+  const [dataSource, setDataSource] = useState([]);
+  useEffect(() => {
+    var fetchData = async () => {
+      try {
+        const response = await fetch(
+          `${baseURL}/DanhMuc/GetDMPhuongXa`
+        );
 
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-
-          const data = await response.json();
-
-          // Apply search filter
-          if (tenXaSearch) {
-            return data.Data.filter((item) =>
-              item.TEN.toLowerCase().includes(tenXaSearch.toLowerCase())
-            );
-          }
-
-          // Apply search filter
-          // if (options.tenXaSearch) {
-          //   return data.Data.filter((item) =>
-          //     item.TEN.toLowerCase().includes(options.tenXaSearch.toLowerCase())
-          //   );
-          // }
-
-          return data.Data;
-          // Assuming the API response is an array of objects
-        } catch (error) {
-          console.error("Error fetching data:", error);
-          return [];
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
-      },
-    })
-  );
+
+        const data = await response.json();
+        return data.Data;
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        return [];
+      }
+    }
+    console.log(fetchData)
+    fetchData().then(data => { setContentData(data); setDataSource(data) })
+  }, []);
+
+  const [contentData, setContentData] = useState();
 
   const refreshDataGrid = useCallback(() => {
     dataGridRef.current.instance.refresh();
     console.log("Reloaded")
+  }, []);
+
+  const clearFilter = useCallback(() => {
+    dataGridRef.current.instance.clearFilter();
   }, []);
 
   const togglePopup = useCallback(() => {
@@ -262,38 +251,26 @@ const DanhMucPhuongXaPage = () => {
     setFilterCityStatus(value);
   }, []);
 
-  const onTenXaValueChanged = useCallback(({ target: { value } }) => {
-    const dataGrid = dataGridRef.current.instance;
-    console.log("Current tenXaSearch value:", tenXaSearch);
-    console.log("New value from input:", value);
+  const onTenXaValueChanged = useCallback(
+    (e) => {
+      const dataGrid = dataGridRef.current.instance;
+      if (e.target.value === '') {
+        setTenXaSearch("")
+        dataGrid.clearFilter();
+      } else {
+        // Load data after filtering
+        var filter = e.target.value;
+        setTenXaSearch(filter);
+      }
+    }, [setTenXaSearch]);
 
-    if (value === '') {
-      setTenXaSearch("")
-      dataGrid.clearFilter();
-      console.log(value);
-    } else {
-      // Apply custom filter
-      dataGrid.filter(['TEN', '=', value]);
-
-      // Update state with the new value
-      setTenXaSearch(value);
-
-      // Load data after filtering
-      contentData.load({ tenXaSearch: value });
-    }
-  }, [setTenXaSearch, contentData, tenXaSearch]);
-
-  // const handleSearchInputChange = (e) => {
-  //   setSearchValue(e.target.value);
-  //   console.log(("Search text: " + (e.target.value)))
-  // };
-
-  // const handleSearchButtonClick = async (value) => {
-  //   // Trigger a reload of the data with the new search value
-  //   // refreshDataGrid();
-  //   await contentData.load({ searchValue: value });
-  //   console.log("searchValue: " + searchValue);
-  // };
+  useEffect(() => {
+    var ds = dataSource.filter(el => {
+      if (el.TEN.toLowerCase().includes(tenXaSearch.toLowerCase()) || el.MA.toLowerCase().includes(tenXaSearch.toLowerCase()))
+        return el;
+    });
+    setContentData(ds);
+  }, [tenXaSearch, dataSource]);
 
   return (
     <>
@@ -332,21 +309,21 @@ const DanhMucPhuongXaPage = () => {
           </div>
         </div>
 
-        {/* <div className="item-filter">
-          <label className='items-filter-label'>Tìm xã onClick</label>
+        {/* 
+          <div className="item-filter">
+            <label className='items-filter-label'>Tìm xã onClick</label>
 
-          <div className="input-wrapper">
-            <input
-              type="text"
-              placeholder="Tìm xã onClick"
-              value={searchValue}
-              onChange={handleSearchInputChange}
-            />
-          </div>
-        </div> */}
+            <div className="input-wrapper">
+              <input
+                type="text"
+                placeholder="Tìm xã onClick"
+                value={searchValue}
+                onChange={handleSearchInputChange}
+              />
+            </div>
+          </div> 
+        */}
       </div>
-
-      <button icon='refresh' widget="dxButton" onClick={refreshDataGrid} text="Tải lại" > Reload </button>
 
       <div className="responsive-paddings">
         <DataGrid
@@ -354,6 +331,7 @@ const DanhMucPhuongXaPage = () => {
           className='master-detail-grid'
           dataSource={contentData}
           ref={dataGridRef}
+          key={"ID"}
           width="100%"
           height="100%"
           showBorders={true}
@@ -416,7 +394,7 @@ const DanhMucPhuongXaPage = () => {
             dataField="TEN"
             width={180}
             allowEditing={false}
-            allowFiltering={false}
+            allowFiltering={true}
             fixed={true}
             fixedPosition="left"
           />
@@ -473,7 +451,7 @@ const DanhMucPhuongXaPage = () => {
           <Grouping autoExpandAll={false} />
           <ColumnFixing enabled={false} />
           <Selection mode="multiple" />
-          <FilterRow visible={false} allowFiltering={false} showResetValues={false} />
+          <FilterRow visible={false} allowFiltering={true} showResetValues={true} />
           <HeaderFilter enabled={false} visible={false} />
           <GroupPanel visible={false} />
           <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
