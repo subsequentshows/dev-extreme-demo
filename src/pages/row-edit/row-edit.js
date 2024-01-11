@@ -32,7 +32,6 @@ import notify from 'devextreme/ui/notify';
 import WarningIcon from "../../asset/image/confirm.png";
 import axios, { isCancel, AxiosError } from 'axios';
 
-
 import { baseURL, localApi } from "../../api/api";
 
 // Export to excel library
@@ -52,8 +51,6 @@ import * as XLSX from "xlsx";
 import * as JSZIP from "jszip";
 import $ from 'jquery';
 import { formatDate } from 'devextreme/localization';
-
-//
 
 const renderLabel = () => <div className="toolbar-label">Danh sách nhóm quyền</div>;
 $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
@@ -98,6 +95,13 @@ const RowEdit = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploadedData, setUploadedData] = useState(null);
 
+  const [editedMenuName, setEditedMenuName] = useState('');
+  const [editedLink, setEditedLink] = useState('');
+
+  const [editedValues, setEditedValues] = useState({});
+  const [editedRows, setEditedRows] = useState([]);
+  const [editedColumns, setEditedColumns] = useState([]);
+
   const formElement = useRef(null);
 
   const [dataSource, setDataSource] = useState(
@@ -121,62 +125,17 @@ const RowEdit = () => {
           return [];
         }
       },
-      insert: async (values) => {
-        try {
-          const response = await fetch(
-            `${baseURL}/Manager/Menu/AddMenu`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${api_token}`,
-              },
-              body: JSON.stringify([values]),
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-
-          const insertedData = await response.json();
-
-          if (insertedData.Success) {
-            console.log("Insertion successful:", insertedData);
-            return insertedData;
-          } else {
-            console.error(`Error inserting item. ErrorCode: ${insertedData.ErrorCode}, ErrorMessage: ${insertedData.ErrorMessage}`);
-            throw new Error("Insertion failed");
-          }
-        } catch (error) {
-          console.error("Error inserting data:", error);
-          throw error;
-        }
-      },
-      // update: async (key, values) => {
+      // insert: async (values) => {
       //   try {
-      //     const requestBody = {
-      //       MenuId: key,
-      //       ParentId: values.ParentId,
-      //       MenuCode: values.MenuCode,
-      //       LevelItem: values.LevelItem,
-      //       MenuName: values.MenuName,
-      //       Link: values.Link,
-      //       Order: values.Order,
-      //       IsView: values.IsView,
-      //       Status: values.Status,
-      //       MenuNameEg: values.MenuNameEg,
-      //     };
-
       //     const response = await fetch(
-      //       `${baseURL}/Manager/Menu/UpdateMenu`,
+      //       `${baseURL}/Manager/Menu/AddMenu`,
       //       {
       //         method: "POST",
       //         headers: {
       //           "Content-Type": "application/json",
-      //           Authorization: `Bearer ${api_token}`
+      //           Authorization: `Bearer ${api_token}`,
       //         },
-      //         body: JSON.stringify([requestBody]),
+      //         body: JSON.stringify([values]),
       //       }
       //     );
 
@@ -184,20 +143,17 @@ const RowEdit = () => {
       //       throw new Error(`HTTP error! Status: ${response.status}`);
       //     }
 
-      //     const updatedData = await response.json();
+      //     const insertedData = await response.json();
 
-      //     if (updatedData.Success) {
-      //       console.log("Update successful:", updatedData);
-      //       // Additional logic can be added here if needed
-
-      //       // Return the updated data if needed
-      //       return updatedData;
+      //     if (insertedData.Success) {
+      //       console.log("Insertion successful:", insertedData);
+      //       return insertedData;
       //     } else {
-      //       console.error(`Error updating item. ErrorCode: ${updatedData.ErrorCode}, ErrorMessage: ${updatedData.ErrorMessage}`);
-      //       throw new Error("Update failed");
+      //       console.error(`Error inserting item. ErrorCode: ${insertedData.ErrorCode}, ErrorMessage: ${insertedData.ErrorMessage}`);
+      //       throw new Error("Insertion failed");
       //     }
       //   } catch (error) {
-      //     console.error("Error updating data:", error);
+      //     console.error("Error inserting data:", error);
       //     throw error;
       //   }
       // }
@@ -206,6 +162,8 @@ const RowEdit = () => {
 
   const onSelectionChanged = useCallback((data) => {
     setSelectedItemKeys(data.selectedRowKeys);
+
+    setEditedValues({});
   }, []);
 
   const onPageChanged = (e) => {
@@ -261,54 +219,125 @@ const RowEdit = () => {
     console.log("Reloaded")
   }, []);
 
+  // const onEditValueChanged = useCallback((e) => {
+  //   // Update the corresponding state variable based on the edited column
+  //   const key = `${e.data.MenuId}-${e.column.dataField}`;
+  //   setEditedValues((prevValues) => ({
+  //     ...prevValues,
+  //     [key]: e.value,
+  //   }));
+  // }, []);
+
+  const onEditValueChanged = useCallback((e) => {
+    const { MenuId } = e.data;
+    const columnName = e.column.dataField;
+    // const key = `${MenuId}-${columnName}`;
+    const { key, value } = e;
+
+    setEditedValues((prevValues) => ({
+      ...prevValues,
+      [key]: e.value,
+    }));
+
+
+
+    // Track the edited row
+    // if (!editedRows.includes(MenuId)) {
+    //   setEditedRows([...editedRows, MenuId]);
+    // }
+
+    // Track the edited column
+    // if (!editedColumns.includes(columnName)) {
+    //   setEditedColumns([...editedColumns, columnName]);
+    // }
+    console.log(`Edited row: ${MenuId}, Column: ${columnName}, Value: ${e.value}`);
+  }, []);
+
+
+
   const editRecords = useCallback(
     async (key, values) => {
       try {
-        // console.log(requestBody)
+        // const updatedData = await dataSource.load();
 
+        // const updatedItems = updatedData.map((item) => {
+        //   const keyMenuName = `${item.MenuId}-MenuName`;
+        //   const keyLink = `${item.MenuId}-Link`;
 
+        //   if (
+        //     editedItemKeys.includes(item.MenuId) &&
+        //     (editedValues[keyMenuName] !== undefined || editedValues[keyLink] !== undefined)
+        //   ) {
+        //     return {
+        //       ...item,
+        //       MenuName: editedValues[keyMenuName] !== undefined ? editedValues[keyMenuName] : item.MenuName,
+        //       Link: editedValues[keyLink] !== undefined ? editedValues[keyLink] : item.Link,
+        //     };
+        //   }
+        //   return item;
+        // });
+
+        const updatedData = await dataSource.load();
+
+        // const updatedItems = updatedData.map((item) => {
+        //   const keyMenuName = `${item.MenuId}-MenuName`;
+        //   const keyLink = `${item.MenuId}-Link`;
+
+        //   console.log(keyMenuName, keyLink)
+
+        //   if (editedRows.includes(item.MenuId)) {
+        //     return {
+        //       ...item,
+        //       MenuName: editedValues[keyMenuName] !== undefined ? editedValues[keyMenuName] : item.MenuName,
+        //       Link: editedValues[keyLink] !== undefined ? editedValues[keyLink] : item.Link,
+        //     };
+        //   }
+        //   return item;
+        // });
+
+        const updatedItems = updatedData.map((item) => {
+          const keyMenuName = `${item.MenuId}-MenuName`;
+          const keyLink = `${item.MenuId}-Link`;
+
+          if (
+            editedRows.includes(item.MenuId) &&
+            (editedValues[keyMenuName] !== undefined || editedValues[keyLink] !== undefined)
+          ) {
+            return {
+              ...item,
+              MenuName: editedValues[keyMenuName] !== undefined ? editedValues[keyMenuName] : item.MenuName,
+              Link: editedValues[keyLink] !== undefined ? editedValues[keyLink] : item.Link,
+            };
+          }
+          return item;
+        });
+        console.log("Edited Columns and Values:", editedColumns.map(column => ({ column, value: editedValues[column] })));
+
+        // Assuming there's an endpoint for updating multiple records
         const response = await axios.post(
           `${baseURL}/Manager/Menu/UpdateMenu`,
-
-          [
-            {
-              menuId: '1',
-              menuName: '1. Danh mục 123',
-              link: 'johndoe@example.com'
-            }
-          ],
+          updatedItems,
           {
             headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${api_token}`
-            }
-          });
-
-        console.log(response.data)
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${api_token}`,
+            },
+          }
+        );
 
         if (response.data.Success) {
           toggleEditAllPopup();
           refreshDataGrid();
 
-          const selectedAndDeletedItems = selectedItemKeys.length;
-          const message = `Xóa thành công ${selectedAndDeletedItems} mục`;
-          notify(
-            {
-              message,
-              position: {
-                my: 'after bottom',
-                at: 'after bottom',
-              },
-            },
-            'success',
-            3000,
-          );
+          // Reset the state variables after the update operation
+          setEditedValues({});
+          setEditedRows([]);
+          setEditedColumns([]);
         } else {
-          console.error(`Xảy ra lỗi khi cập nhật dữ liệu. ErrorCode: 
-              ${response.data.ErrorCode}, ErrorMessage: ${response.data.ErrorMessage}`);
+          console.error(`Error deleting items. ErrorCode: ${response.data.ErrorCode}, ErrorMessage: ${response.data.ErrorMessage}`);
         }
       } catch (error) {
-        console.error("Xảy ra lỗi khi cập nhật dữ liệu: - ", error);
+        console.error("Xảy ra lỗi khi cập nhật dữ liệu: - ", error);
         notify(
           {
             error,
@@ -321,27 +350,7 @@ const RowEdit = () => {
           5000,
         );
       }
-    }, [selectedItemKeys, toggleEditAllPopup, refreshDataGrid]);
-
-  // const editRecords = useCallback(
-  //   async () => {
-  //     axios.post(
-  //       `${baseURL}/Manager/Menu/UpdateMenu`,
-  //       [{
-  //         menuId: '1',
-  //         menuName: '1. Danh mục 123',
-  //         link: 'johndoe@example.com'
-  //       }],
-  //       {
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${api_token}`
-  //         }
-  //       })
-  //       .then(response => console.log(response.data))
-  //       .catch(error => console.error(error));
-  //   }
-  // )
+    }, [toggleEditAllPopup, refreshDataGrid, dataSource, editedValues, editedColumns, editedRows]);
 
   const getEditAllButtonOptions = useCallback(() => ({
     text: 'Đồng ý',
@@ -460,6 +469,7 @@ const RowEdit = () => {
           selectedRowKeys={selectedItemKeys}
           onSelectionChanged={onSelectionChanged}
           onPageChanged={onPageChanged}
+          onEditValueChanged={onEditValueChanged}
         >
           <Editing mode="batch"
             allowAdding={true}
@@ -524,7 +534,17 @@ const RowEdit = () => {
             allowFiltering={false}
             allowExporting={true}
             headerCellTemplate="Tên"
+            // onEditorPreparing={(e) => e.editorOptions.onValueChanged = onEditValueChanged}
+            onEditorPreparing={(e) => {
+              e.editorOptions.onValueChanged = (args) => {
+                onEditValueChanged({
+                  key: `${e.data.MenuId}-MenuName`,
+                  value: args.value,
+                });
+              };
+            }}
           >
+            <StringLengthRule min={1} message="Toi thieu 1 ky tu" />
           </Column>
 
           <Column caption="Đường dẫn"
@@ -540,6 +560,15 @@ const RowEdit = () => {
             allowFiltering={false}
             allowExporting={true}
             headerCellTemplate="Đường dẫn"
+            // onEditorPreparing={(e) => e.editorOptions.onValueChanged = onEditValueChanged}
+            onEditorPreparing={(e) => {
+              e.editorOptions.onValueChanged = (args) => {
+                onEditValueChanged({
+                  key: `${e.data.MenuId}-Link`,
+                  value: args.value,
+                });
+              };
+            }}
           >
           </Column>
 

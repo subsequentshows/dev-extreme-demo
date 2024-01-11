@@ -456,7 +456,7 @@ const MasterDetailGridPage = () => {
       console.log("hehe")
     } else {
       // Apply custom filter
-      dataGrid.filter(['TEN_HUYEN', '=', value]);
+      dataGrid.filter(['TEN', '=', value]);
       setCitySearchTerm(value);
 
     }

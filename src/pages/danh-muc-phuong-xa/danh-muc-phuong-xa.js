@@ -1,4 +1,3 @@
-/* global RequestInit */
 import React, { useCallback, useState, useRef } from "react";
 import {
   Column,
@@ -111,7 +110,7 @@ const DanhMucPhuongXaPage = () => {
 
   const [tenXaSearch, setTenXaSearch] = useState("");
   const [tenHuyenSearch, setTenHuyenSearch] = useState('');
-  const [searchValue, setSearchValue] = useState("");
+  // const [searchValue, setSearchValue] = useState("");
 
   const [filterStatus, setFilterStatus] = useState(statuses[0]);
   const [filterCityStatus, setFilterCityStatus] = useState(statuses[0]);
@@ -120,7 +119,7 @@ const DanhMucPhuongXaPage = () => {
   const [contentData, setContentData] = useState(
     new CustomStore({
       key: "ID",
-      load: async () => {
+      load: async (options) => {
         try {
           const response = await fetch(
             `${baseURL}/DanhMuc/GetDMPhuongXa`
@@ -132,14 +131,19 @@ const DanhMucPhuongXaPage = () => {
 
           const data = await response.json();
 
-          // console.log(data.Data.find(o => o.TEN === "Xá"))
           // Apply search filter
-          if (searchValue) {
-            // console.log(data.Data.filter(o => o.TEN === "Xá"))
+          if (tenXaSearch) {
             return data.Data.filter((item) =>
-              item.TEN.toLowerCase().includes(searchValue.toLowerCase())
+              item.TEN.toLowerCase().includes(tenXaSearch.toLowerCase())
             );
           }
+
+          // Apply search filter
+          // if (options.tenXaSearch) {
+          //   return data.Data.filter((item) =>
+          //     item.TEN.toLowerCase().includes(options.tenXaSearch.toLowerCase())
+          //   );
+          // }
 
           return data.Data;
           // Assuming the API response is an array of objects
@@ -258,38 +262,38 @@ const DanhMucPhuongXaPage = () => {
     setFilterCityStatus(value);
   }, []);
 
-  const onTenXaValueChanged = useCallback(({ value }) => {
+  const onTenXaValueChanged = useCallback(({ target: { value } }) => {
     const dataGrid = dataGridRef.current.instance;
+    console.log("Current tenXaSearch value:", tenXaSearch);
+    console.log("New value from input:", value);
 
     if (value === '') {
-      dataGrid.reload();
-      // dataGrid.clearFilter();
-      console.log(value)
+      setTenXaSearch("")
+      dataGrid.clearFilter();
+      console.log(value);
     } else {
-      console.log("tenXaSearch value: - " + value);
-      console.log("tenXaSearch: - " + tenXaSearch);
-      console.log("setTenXaSearch: - " + setTenXaSearch(value))
-
       // Apply custom filter
       dataGrid.filter(['TEN', '=', value]);
+
+      // Update state with the new value
       setTenXaSearch(value);
-      contentData.load({ tenXaSearch });
 
-
+      // Load data after filtering
+      contentData.load({ tenXaSearch: value });
     }
   }, [setTenXaSearch, contentData, tenXaSearch]);
 
-  const handleSearchInputChange = (e) => {
-    setSearchValue(e.target.value);
-    console.log(("Search text: " + (e.target.value)))
-  };
+  // const handleSearchInputChange = (e) => {
+  //   setSearchValue(e.target.value);
+  //   console.log(("Search text: " + (e.target.value)))
+  // };
 
-  const handleSearchButtonClick = async () => {
-    // Trigger a reload of the data with the new search value
-    // refreshDataGrid();
-    await contentData.load({ searchValue });
-    console.log("searchValue: " + searchValue);
-  };
+  // const handleSearchButtonClick = async (value) => {
+  //   // Trigger a reload of the data with the new search value
+  //   // refreshDataGrid();
+  //   await contentData.load({ searchValue: value });
+  //   console.log("searchValue: " + searchValue);
+  // };
 
   return (
     <>
@@ -328,7 +332,7 @@ const DanhMucPhuongXaPage = () => {
           </div>
         </div>
 
-        <div className="item-filter">
+        {/* <div className="item-filter">
           <label className='items-filter-label'>Tìm xã onClick</label>
 
           <div className="input-wrapper">
@@ -339,7 +343,7 @@ const DanhMucPhuongXaPage = () => {
               onChange={handleSearchInputChange}
             />
           </div>
-        </div>
+        </div> */}
       </div>
 
       <button icon='refresh' widget="dxButton" onClick={refreshDataGrid} text="Tải lại" > Reload </button>
@@ -361,6 +365,9 @@ const DanhMucPhuongXaPage = () => {
           selectedRowKeys={selectedItemKeys}
           onSelectionChanged={onSelectionChanged}
           onPageChanged={onPageChanged}
+          loadOptions={{
+            searchValue: tenXaSearch,
+          }}
         >
           <Editing mode="popup"
             allowAdding={true}
@@ -456,9 +463,9 @@ const DanhMucPhuongXaPage = () => {
               />
             </Item>
 
-            <Item location="after" showText="always" widget="dxButton" >
+            {/* <Item location="after" showText="always" widget="dxButton" >
               <Button widget="dxButton" onClick={handleSearchButtonClick} text="Tìm kiếm"></Button>
-            </Item>
+            </Item> */}
 
             <Item location='after' name='exportButton' />
           </Toolbar>
