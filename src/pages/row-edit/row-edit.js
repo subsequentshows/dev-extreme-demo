@@ -9,6 +9,7 @@ import {
   Grouping,
   Paging,
   Pager,
+  HttpParams,
   SearchPanel,
   Summary,
   RequiredRule,
@@ -33,6 +34,7 @@ import WarningIcon from "../../asset/image/confirm.png";
 import axios, { isCancel, AxiosError } from 'axios';
 
 import { baseURL, localApi } from "../../api/api";
+import { confirm } from 'devextreme/ui/dialog';
 
 // Export to excel library
 import { exportDataGrid as exportDataGridToExcel } from 'devextreme/excel_exporter';
@@ -103,6 +105,17 @@ const RowEdit = () => {
   const [editedColumns, setEditedColumns] = useState([]);
 
   const formElement = useRef(null);
+
+  const [events, setEvents] = useState([]);
+
+  const logEvent = useCallback((e) => {
+    console.log(e);
+    // setEvents((previousEvents) => [e, ...previousEvents]);
+  }, []);
+
+  const clearEvents = useCallback(() => {
+    setEvents([]);
+  }, []);
 
   const [dataSource, setDataSource] = useState(
     new CustomStore({
@@ -312,7 +325,7 @@ const RowEdit = () => {
           setEditedRows([]);
           setEditedColumns([]);
         } else {
-          console.error(`Error deleting items. ErrorCode: 
+          console.error(`Error deleting items. ErrorCode:
           ${updateResponse.data.ErrorCode}, ErrorMessage: ${updateResponse.data.ErrorMessage}`);
         }
       } catch (error) {
@@ -429,6 +442,73 @@ const RowEdit = () => {
     formElement.current.submit();
   }, []);
 
+  function onRowUpdating(e) {
+    this.oldData = Object.assign({}, e.oldData);
+  }
+
+  function onRowUpdated(e) {
+    this.newData = Object.assign({}, e.newData);
+  }
+
+  async function sendBatchRequest(url, changes) {
+    const result = await fetch(url, {
+      method: 'POST',
+      body: JSON.stringify(changes),
+      headers: {
+        'Content-Type': 'application/json;charset=UTF-8',
+      },
+      credentials: 'include',
+    });
+
+    if (!result.ok) {
+      const json = await result.json();
+
+      throw json.Message;
+    }
+  }
+
+  async function processBatchRequest(url, changes, component) {
+    await sendBatchRequest(url, changes);
+    await component.refresh(true);
+    component.cancelEditData();
+  }
+
+  const onSaving = (e) => {
+    e.cancel = true;
+
+    console.log(onSaving)
+    // if (e.changes.length) {
+    //   e.promise = processBatchRequest(`${baseURL}/Manager/Menu/UpdateMenu`, e.changes, e.component);
+    // }
+  };
+
+  function updateRow(e) {
+    const isCanceled = new Promise((resolve, reject) => {
+      const promptPromise = confirm("Are you sure?", "Confirm changes");
+
+      promptPromise.then((dialogResult) => {
+        if (dialogResult) {
+
+          let oldParams = {};
+          let params = {};
+          for (let oldKey in e.oldData) {
+            oldParams = oldParams.set(oldKey, e.oldData[oldKey]);
+            console.log(e.oldData)
+          }
+          for (let key in e.newData) {
+            params = params.set(key, e.newData[key]);
+            console.log(e.newData)
+          }
+          console.log("true")
+
+        } else {
+          return resolve(true);
+        }
+      });
+    });
+    e.cancel = isCanceled;
+  }
+
   return (
     <>
       <div className="responsive-paddings">
@@ -439,6 +519,7 @@ const RowEdit = () => {
           ref={dataGridRef}
           width="100%"
           height="100%"
+          key="ID"
           showBorders={true}
           focusedRowEnabled={true}
           repaintChangesOnly={true}
@@ -449,6 +530,20 @@ const RowEdit = () => {
           onSelectionChanged={onSelectionChanged}
           onPageChanged={onPageChanged}
           onEditValueChanged={onEditValueChanged}
+
+          onEditingStart={logEvent}
+          // onInitNewRow={logEvent}
+          // onRowInserting={logEvent}
+          // onRowInserted={logEvent}
+          // onRowUpdating={logEvent}
+          onRowUpdating={onRowUpdating}
+          onRowUpdated={onRowUpdated}
+          // onRowRemoving={logEvent}
+          // onRowRemoved={logEvent}
+          onSaving={() => logEvent('Saving')}
+          onSaved={() => logEvent('Saved')}
+        // onEditCanceling={logEvent}
+        // onEditCanceled={logEvent}
         >
           <Editing mode="batch"
             allowAdding={true}
@@ -564,6 +659,15 @@ const RowEdit = () => {
               />
             </Item>
 
+            <Item location="after" showText="always" widget="dxButton">
+              <Button
+                // onClick={updateRow}
+                onClick={onSaving}
+                widget="dxButton"
+                text="Ghi 2"
+              />
+            </Item>
+
             <Item location="after" showText="always" name='mutiple-delete' widget="dxButton">
               <Button
                 onClick={togglePopup}
@@ -592,6 +696,16 @@ const RowEdit = () => {
           <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} />
 
         </DataGrid>
+
+        <div id="events">
+          <div>
+            <div className="caption">Fired events</div>
+            <Button id="clear" text="Clear" onClick={clearEvents} />
+          </div>
+          <ul>
+            {events.map((event, index) => <li key={index}>{event}</li>)}
+          </ul>
+        </div>
 
         {/* Update all confirm popup */}
         <Popup
