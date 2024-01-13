@@ -37,19 +37,13 @@ function getConfig(options) {
   return options;
 }
 
-// const dataSource = createStore(getConfig(
-//   {
-//     key: 'MenuId',
-//     loadUrl: `${baseURL}/Manager/Menu`,
-//   }
-// ));
-
 async function sendBatchRequest(url, changes) {
   const result = await fetch(url, {
     method: 'POST',
     body: JSON.stringify(changes),
     headers: {
-      'Content-Type': 'application/json;charset=UTF-8', //'Content-Type': 'multipart/form-data',
+      'Content-Type': 'application/json;charset=UTF-8',
+      //'Content-Type': 'multipart/form-data',
       Authorization: `Bearer ${api_token}`,
     },
     credentials: 'include',
@@ -71,15 +65,48 @@ async function processBatchRequest(url, changes, component) {
   component.cancelEditData();
 }
 
+// const onSaving = (e) => {
+//   e.cancel = true;
+
+//   if (e.changes.length) {
+//     e.promise = processBatchRequest(`${baseURL}/Manager/Menu/UpdateMenu`, e.changes, e.component);
+//     console.log(e.changes)
+//     console.log(e.component)
+//   }
+
+//   const changedMenuIds = e.changes.map(change => change.key);
+//   const changesWithData = e.changes.map(change => {
+//     return {
+//       ...change.data,
+//       MenuId: change.key,
+//     };
+//   });
+//   console.log("Changed MenuIds:", changesWithData);
+
+//   e.promise = processBatchRequest(`${baseURL}/Manager/Menu/UpdateMenu`, changesWithData, e.component);
+// };
+
 const onSaving = (e) => {
   e.cancel = true;
 
   if (e.changes.length) {
-    e.promise = processBatchRequest(`${baseURL}/Manager/Menu/UpdateMenu`, e.changes, e.component);
-    console.log(e.changes)
-    console.log(e.component)
+    const changedMenuIds = e.changes.map(change => change.data.MenuId);
+    console.log("Changed MenuIds:", changedMenuIds);
+
+    // You can also add MenuId to the data object if needed
+    const changesWithData = e.changes.map(change => {
+      return {
+        ...change.data,
+        MenuId: change.key,
+      };
+    });
+
+    e.promise = processBatchRequest(`${baseURL}/Manager/Menu/UpdateMenu`, changesWithData, e.component);
+    console.log(changesWithData);
+    console.log(e.component);
   }
 };
+
 
 const App = () => {
   const [dataSource, setDataSource] = useState(
