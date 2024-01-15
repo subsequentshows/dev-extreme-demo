@@ -700,16 +700,6 @@ const RowEdit = () => {
 
         </DataGrid>
 
-        <div id="events">
-          <div>
-            <div className="caption">Fired events</div>
-            <Button id="clear" text="Clear" onClick={clearEvents} />
-          </div>
-          <ul>
-            {events.map((event, index) => <li key={index}>{event}</li>)}
-          </ul>
-        </div>
-
         {/* Update all confirm popup */}
         <Popup
           id="popup"
