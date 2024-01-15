@@ -357,7 +357,6 @@ const DanhSachNhomQuyenPage = () => {
           remoteOperations={false}
           onExporting={onExporting}
           selectedRowKeys={selectedItemKeys}
-          edi
           onSelectionChanged={onSelectionChanged}
           onPageChanged={onPageChanged}
         >
@@ -375,12 +374,13 @@ const DanhSachNhomQuyenPage = () => {
             width={80}
             allowEditing={false}
             allowSorting={false}
-            allowReordering={false}
+            allowReordering={true}
             allowSearch={false}
             allowFiltering={false}
             allowExporting={true}
             cellRender={rowIndexes}
             headerCellTemplate="STT"
+            hidingPriority={1}
           >
             <StringLengthRule max={3} message="" />
           </Column>
@@ -392,7 +392,7 @@ const DanhSachNhomQuyenPage = () => {
             alignment='center'
             width={100}
             allowEditing={false}
-            allowSorting={false}
+            allowSorting={true}
             allowReordering={false}
             allowSearch={false}
             allowFiltering={false}
@@ -418,7 +418,7 @@ const DanhSachNhomQuyenPage = () => {
             alignment='left'
             width={300}
             allowEditing={true}
-            allowSorting={false}
+            allowSorting={true}
             allowReordering={false}
             allowSearch={false}
             allowFiltering={false}
@@ -434,7 +434,7 @@ const DanhSachNhomQuyenPage = () => {
             alignment='left'
             width={80}
             allowEditing={true}
-            allowSorting={false}
+            allowSorting={true}
             allowReordering={false}
             allowSearch={false}
             allowFiltering={false}
@@ -446,14 +446,14 @@ const DanhSachNhomQuyenPage = () => {
           <Toolbar>
             <Item location="left" locateInMenu="never" render={renderLabel} />
 
-            <Item location="after" name="addRowButton" caption="Thêm" />
-            <Item location="after" showText="always" name='mutiple-delete' widget="dxButton">
+            <Item location="after" name="addRowButton" caption="Thêm" options={addButtonOptions} />
+            <Item location="after" showText="always" name='mutiple-delete' widget="dxButton" >
               <Button
+                text="Xóa mục đã chọn"
                 onClick={togglePopup}
                 widget="dxButton"
                 icon="trash"
                 disabled={!selectedItemKeys.length}
-                text="Xóa mục đã chọn"
               />
             </Item>
 
@@ -461,7 +461,7 @@ const DanhSachNhomQuyenPage = () => {
               <Button text="Nhập từ excel" onClick={toggleImportExcelPopup} />
             </Item>
 
-            <Item location='after' name='exportButton' />
+            <Item location='after' name='exportButton' options={exportButtonOptions} />
           </Toolbar>
 
           <Grouping autoExpandAll={false} />
@@ -473,7 +473,6 @@ const DanhSachNhomQuyenPage = () => {
           <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
           <Paging enabled={true} defaultPageSize={20} defaultPageIndex={0} />
           <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} />
-
         </DataGrid>
 
         {/* Delete confirm popup */}
@@ -554,3 +553,12 @@ const DanhSachNhomQuyenPage = () => {
 };
 
 export default DanhSachNhomQuyenPage;
+
+const addButtonOptions = {
+  // type: 'back',
+  text: 'Thêm'
+};
+
+const exportButtonOptions = {
+  text: 'Xuất file'
+};

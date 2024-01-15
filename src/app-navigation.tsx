@@ -21,26 +21,26 @@ export const navigation = [
     path: "/danh-muc-phuong-xa",
     icon: "folder",
   },
-  {
-    text: "Phan Quyen",
-    path: "/phan-quyen",
-    icon: "folder",
-  },
-  {
-    text: "Master Detail Grid",
-    path: "/master-detail-grid",
-    icon: "folder",
-  },
-  {
-    text: "Users Page",
-    path: "/users",
-    icon: "globe",
-  },
-  {
-    text: "Hồ sơ xã detail",
-    path: "/ho-so-xa-detail",
-    icon: "globe",
-  },
+  // {
+  //   text: "Phan Quyen",
+  //   path: "/phan-quyen",
+  //   icon: "folder",
+  // },
+  // {
+  //   text: "Master Detail Grid",
+  //   path: "/master-detail-grid",
+  //   icon: "folder",
+  // },
+  // {
+  //   text: "Users Page",
+  //   path: "/users",
+  //   icon: "globe",
+  // },
+  // {
+  //   text: "Hồ sơ xã detail",
+  //   path: "/ho-so-xa-detail",
+  //   icon: "globe",
+  // },
   {
     text: "Error Page",
     path: "/error-page",
@@ -50,19 +50,5 @@ export const navigation = [
     text: "Access Denied",
     path: "/access-denied",
     icon: "folder",
-  },
-  {
-    text: "Examples",
-    icon: "folder",
-    items: [
-      {
-        text: "Profile",
-        path: "/profile",
-      },
-      {
-        text: "Tasks",
-        path: "/tasks",
-      },
-    ],
   },
 ];

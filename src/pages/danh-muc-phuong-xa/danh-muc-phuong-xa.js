@@ -116,6 +116,8 @@ const DanhMucPhuongXaPage = () => {
   const [showFilterRow, setShowFilterRow] = useState(true);
 
   const [dataSource, setDataSource] = useState([]);
+  const [contentData, setContentData] = useState();
+
   useEffect(() => {
     var fetchData = async () => {
       try {
@@ -134,11 +136,9 @@ const DanhMucPhuongXaPage = () => {
         return [];
       }
     }
-    console.log(fetchData)
+
     fetchData().then(data => { setContentData(data); setDataSource(data) })
   }, []);
-
-  const [contentData, setContentData] = useState();
 
   const refreshDataGrid = useCallback(() => {
     dataGridRef.current.instance.refresh();
@@ -258,9 +258,11 @@ const DanhMucPhuongXaPage = () => {
         setTenXaSearch("")
         dataGrid.clearFilter();
       } else {
-        // Load data after filtering
         var filter = e.target.value;
+
+        // Load data after filtering
         setTenXaSearch(filter);
+
       }
     }, [setTenXaSearch]);
 
@@ -331,27 +333,26 @@ const DanhMucPhuongXaPage = () => {
           className='master-detail-grid'
           dataSource={contentData}
           ref={dataGridRef}
-          key={"ID"}
+          key="ID"
           width="100%"
           height="100%"
           showBorders={true}
-          focusedRowEnabled={true}
+          focusedRowEnabled={false}
           remoteOperations={false}
           repaintChangesOnly={true}
           allowColumnReordering={false}
           onExporting={onExporting}
-          selectedRowKeys={selectedItemKeys}
           onSelectionChanged={onSelectionChanged}
           onPageChanged={onPageChanged}
           loadOptions={{
             searchValue: tenXaSearch,
           }}
         >
-          <Editing mode="popup"
+          {/* <Editing mode="popup"
             allowAdding={true}
             allowDeleting={false}
             allowUpdating={false}
-          />
+          /> */}
 
           <Column caption="STT"
             dataField="STT"
@@ -430,27 +431,15 @@ const DanhMucPhuongXaPage = () => {
           <Toolbar>
             <Item location="left" locateInMenu="never" render={renderLabel} />
 
-            <Item location="after" name="addRowButton" />
-            <Item location="after" showText="always" name='mutiple-delete' widget="dxButton">
-              <Button
-                onClick={togglePopup}
-                widget="dxButton"
-                icon="trash"
-                disabled={!selectedItemKeys.length}
-                text="Xóa mục đã chọn"
-              />
-            </Item>
-
             {/* <Item location="after" showText="always" widget="dxButton" >
               <Button widget="dxButton" onClick={handleSearchButtonClick} text="Tìm kiếm"></Button>
             </Item> */}
 
-            <Item location='after' name='exportButton' />
+            <Item location='after' name='exportButton' options={exportButtonOptions} />
           </Toolbar>
 
           <Grouping autoExpandAll={false} />
           <ColumnFixing enabled={false} />
-          <Selection mode="multiple" />
           <FilterRow visible={false} allowFiltering={true} showResetValues={true} />
           <HeaderFilter enabled={false} visible={false} />
           <GroupPanel visible={false} />
@@ -493,3 +482,7 @@ const DanhMucPhuongXaPage = () => {
 };
 
 export default DanhMucPhuongXaPage;
+
+const exportButtonOptions = {
+  text: 'Xuất file'
+};

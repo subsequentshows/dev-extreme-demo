@@ -13,7 +13,7 @@ code {
 }
 
 .dx-pager {
-  padding: 13px 16px 0;
+  padding: 15px 0 0;
 }
 
 .dx-row .dx-header-row,
@@ -35,8 +35,16 @@ code {
   line-height: 1.2;
 }
 
+.screen-large .responsive-paddings {
+  padding: 15px 15px 0 !important;
+}
+
 .dx-datagrid-header-panel {
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0 !important;
   padding: 0;
+  background-color: #fff;
+  margin-bottom: 15px;
 }
 
 .dx-dropdownbutton.dx-dropdownbutton-has-arrow .dx-button-has-icon.dx-buttongroup-last-item .dx-button-content {
@@ -46,10 +54,28 @@ code {
   & i {
     color: #fff;
   }
+
+  .dx-icon-export {
+    display: none !important;
+  }
+
+  .dx-icon-spindown {
+    width: 16px !important;
+    margin-right: 0;
+    margin-left: 0;
+  }
 }
 
 #data-grid-demo {
   min-height: 700px;
+}
+
+.side-navigation-menu .menu-container .dx-treeview .dx-treeview-node-container .dx-treeview-node.dx-state-selected>.dx-treeview-item {
+  background-color: #0071a6 !important;
+}
+
+.side-navigation-menu .menu-container .dx-treeview .dx-treeview-node-container .dx-treeview-node.dx-state-selected>.dx-treeview-item * {
+  color: #fff;
 }
 
 #gridDeleteSelected {
@@ -228,7 +254,7 @@ code {
 
   .items-filter-label {
     display: block;
-    width: 130px;
+    width: 140px;
     text-align: right;
     padding-right: 10px;
   }
@@ -271,6 +297,7 @@ code {
 
 .dx-pager .dx-page-sizes .dx-selection {
   background-color: #0071a6;
+  border-radius: 0;
 }
 
 .dx-header-row {

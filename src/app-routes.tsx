@@ -1,7 +1,5 @@
 import {
   HomePage,
-  TasksPage,
-  ProfilePage,
   MasterDetailGridPage,
   AccessDeniedPage,
   PhanQuyenPage,
@@ -15,14 +13,6 @@ import {
 import { withNavigationWatcher } from "./contexts/navigation";
 
 const routes = [
-  {
-    path: "/tasks",
-    element: TasksPage,
-  },
-  {
-    path: "/profile",
-    element: ProfilePage,
-  },
   {
     path: "/home",
     element: HomePage,
