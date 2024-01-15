@@ -278,11 +278,6 @@ const RowEdit = () => {
             (editedValues[keyMenuName] || editedValues[keyLink])
 
           ) {
-            console.log(keyMenuName)
-            console.log(keyLink)
-            console.log(editedValues[keyMenuName])
-            console.log(editedValues[keyLink])
-
             return {
               ...item,
               MenuName: editedValues[keyMenuName] ? editedValues[keyMenuName] : item.MenuName,
@@ -442,13 +437,7 @@ const RowEdit = () => {
     formElement.current.submit();
   }, []);
 
-  function onRowUpdating(e) {
-    this.oldData = Object.assign({}, e.oldData);
-  }
 
-  function onRowUpdated(e) {
-    this.newData = Object.assign({}, e.newData);
-  }
 
   async function sendBatchRequest(url, changes) {
     const result = await fetch(url, {
@@ -456,58 +445,85 @@ const RowEdit = () => {
       body: JSON.stringify(changes),
       headers: {
         'Content-Type': 'application/json;charset=UTF-8',
+        //'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${api_token}`,
       },
       credentials: 'include',
     });
 
     if (!result.ok) {
-      const json = await result.json();
-
-      throw json.Message;
+      throw new Error(`HTTP error! Status: ${result.status}`);
+      // throw result.Message;
     }
+
+    const data = await result.json();
+    return data.Data;
   }
 
   async function processBatchRequest(url, changes, component) {
     await sendBatchRequest(url, changes);
     await component.refresh(true);
+
     component.cancelEditData();
   }
 
   const onSaving = (e) => {
     e.cancel = true;
 
-    console.log(onSaving)
-    // if (e.changes.length) {
-    //   e.promise = processBatchRequest(`${baseURL}/Manager/Menu/UpdateMenu`, e.changes, e.component);
-    // }
+    if (e.changes.length) {
+      const addedRows = e.changes.filter(change => change.type === 'insert');
+      const updatedRows = e.changes.filter(change => change.type === 'update');
+
+      const handleAddedRows = (changes) => {
+        const changesWithData = changes.map(change => {
+          // For added rows, you may want to handle the default values or other logic
+          // For example, here, I'm setting MenuId to 0 and using the current timestamp as order
+          return {
+            ...change.data,
+            MenuId: 0,
+            order: new Date().getTime().toString(),
+          };
+        });
+
+        // Send the changes to the server
+        return processBatchRequest(`${baseURL}/Manager/Menu/AddMenu`, changesWithData, e.component);
+      };
+
+      const handleUpdatedRows = (changes) => {
+        const changesWithData = changes.map(change => {
+          const changedData = {
+            ...change.data,
+            MenuId: change.key,
+          };
+
+          // Get the current item from the data source
+          const currentItem = e.component.getDataSource().items().find(item => item.MenuId === changedData.MenuId);
+
+          // Include all current values in the request body
+          Object.keys(currentItem).forEach(key => {
+            if (!(key in changedData)) {
+              changedData[key] = currentItem[key];
+            }
+          });
+
+          return changedData;
+        });
+
+        // Send the changes to the server
+        return processBatchRequest(`${baseURL}/Manager/Menu/UpdateMenu`, changesWithData, e.component);
+      };
+
+      // Process added rows
+      if (addedRows.length) {
+        handleAddedRows(addedRows);
+      }
+
+      // Process updated rows
+      if (updatedRows.length) {
+        handleUpdatedRows(updatedRows);
+      }
+    }
   };
-
-  function updateRow(e) {
-    const isCanceled = new Promise((resolve, reject) => {
-      const promptPromise = confirm("Are you sure?", "Confirm changes");
-
-      promptPromise.then((dialogResult) => {
-        if (dialogResult) {
-
-          let oldParams = {};
-          let params = {};
-          for (let oldKey in e.oldData) {
-            oldParams = oldParams.set(oldKey, e.oldData[oldKey]);
-            console.log(e.oldData)
-          }
-          for (let key in e.newData) {
-            params = params.set(key, e.newData[key]);
-            console.log(e.newData)
-          }
-          console.log("true")
-
-        } else {
-          return resolve(true);
-        }
-      });
-    });
-    e.cancel = isCanceled;
-  }
 
   return (
     <>
@@ -536,11 +552,11 @@ const RowEdit = () => {
           // onRowInserting={logEvent}
           // onRowInserted={logEvent}
           // onRowUpdating={logEvent}
-          onRowUpdating={onRowUpdating}
-          onRowUpdated={onRowUpdated}
+          onRowUpdating={logEvent}
+          onRowUpdated={logEvent}
           // onRowRemoving={logEvent}
           // onRowRemoved={logEvent}
-          onSaving={() => logEvent('Saving')}
+          onSaving={onSaving}
           onSaved={() => logEvent('Saved')}
         // onEditCanceling={logEvent}
         // onEditCanceled={logEvent}
@@ -649,24 +665,11 @@ const RowEdit = () => {
           <Toolbar>
             <Item location="left" locateInMenu="never" render={renderLabel} />
 
-            <Item location="after" name="addRowButton" caption="Thêm" />
-
-            <Item location="after" showText="always" name='mutiple-update' widget="dxButton">
-              <Button
-                onClick={toggleEditAllPopup}
-                widget="dxButton"
-                text="Ghi&add"
-              />
+            <Item location="after" name="addRowButton" caption="Thêm" >
             </Item>
 
-            <Item location="after" showText="always" widget="dxButton">
-              <Button
-                // onClick={updateRow}
-                onClick={onSaving}
-                widget="dxButton"
-                text="Ghi 2"
-              />
-            </Item>
+            <Item location="after" name="saveButton" showText="always" widget="dxButton"></Item>
+            <Item location="after" name="revertButton" showText="always" widget="dxButton"></Item>
 
             <Item location="after" showText="always" name='mutiple-delete' widget="dxButton">
               <Button
