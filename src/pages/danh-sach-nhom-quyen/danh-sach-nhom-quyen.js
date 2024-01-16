@@ -114,7 +114,18 @@ const DanhSachNhomQuyenPage = () => {
           const data = await response.json();
           return data.Data;
         } catch (error) {
-          console.error("Error fetching data:", error);
+          const ErrorMessage = `Đã xảy ra lỗi khi tải dữ liệu: `;
+          notify(
+            {
+              ErrorMessage,
+              position: {
+                my: 'bottom right',
+                at: 'bottom right',
+              },
+            },
+            `error: ${error.message}`,
+            5000,
+          );
           return [];
         }
       },
@@ -139,14 +150,52 @@ const DanhSachNhomQuyenPage = () => {
           const insertedData = await response.json();
 
           if (insertedData.Success) {
-            console.log("Insertion successful:", insertedData);
+            console.log("Thêm thành công:", insertedData);
+            const message = `Thêm thành công ${insertedData.Data.length} mục`;
+
+            notify(
+              {
+                message,
+                position: {
+                  my: 'bottom right',
+                  at: 'bottom right',
+                },
+              },
+              'success',
+              3000,
+            );
             return insertedData;
           } else {
             console.error(`Error inserting item. ErrorCode: ${insertedData.ErrorCode}, ErrorMessage: ${insertedData.ErrorMessage}`);
+            const error = `Xảy ra lỗi khi cập nhật dữ liệu: `;
+
+            notify(
+              {
+                error,
+                position: {
+                  my: 'bottom right',
+                  at: 'bottom right',
+                },
+              },
+              `error: `,
+              5000,
+            );
             throw new Error("Insertion failed");
           }
         } catch (error) {
-          console.error("Error inserting data:", error);
+          console.error("Xảy ra lỗi khi cập nhật dữ liệu: ", error);
+
+          notify(
+            {
+              error,
+              position: {
+                my: 'bottom right',
+                at: 'bottom right',
+              },
+            },
+            `error: ${error.message}`,
+            5000,
+          );
           throw error;
         }
       },
@@ -184,10 +233,20 @@ const DanhSachNhomQuyenPage = () => {
           const updatedData = await response.json();
 
           if (updatedData.Success) {
-            console.log("Update successful:", updatedData);
-            // Additional logic can be added here if needed
+            const message = `Cập nhật thành công ${updatedData.Data.length} mục`;
 
-            // Return the updated data if needed
+            notify(
+              {
+                message,
+                position: {
+                  my: 'bottom right',
+                  at: 'bottom right',
+                },
+              },
+              'success',
+              5000,
+            );
+
             return updatedData;
           } else {
             console.error(`Error updating item. ErrorCode: ${updatedData.ErrorCode}, ErrorMessage: ${updatedData.ErrorMessage}`);
@@ -342,7 +401,6 @@ const DanhSachNhomQuyenPage = () => {
   return (
     <>
       <div className="responsive-paddings">
-
         <DataGrid
           id="grid-container"
           className='master-detail-grid'
@@ -417,6 +475,7 @@ const DanhSachNhomQuyenPage = () => {
             fixedPosition="left"
             alignment='left'
             width={300}
+            hidingPriority={2}
             allowEditing={true}
             allowSorting={true}
             allowReordering={false}
@@ -433,6 +492,7 @@ const DanhSachNhomQuyenPage = () => {
             fixedPosition="left"
             alignment='left'
             width={80}
+            hidingPriority={1}
             allowEditing={true}
             allowSorting={true}
             allowReordering={false}

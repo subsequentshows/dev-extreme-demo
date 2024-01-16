@@ -356,7 +356,7 @@ const DanhMucPhuongXaPage = () => {
 
           <Column caption="STT"
             dataField="STT"
-            fixed={true}
+            fixed={false}
             fixedPosition="left"
             alignment='center'
             width={80}
@@ -376,9 +376,10 @@ const DanhMucPhuongXaPage = () => {
             dataField="MA"
             alignment='left'
             width={80}
+            hidingPriority={3}
             allowEditing={false}
             allowFiltering={false}
-            fixed={true}
+            fixed={false}
             fixedPosition="left"
           />
 
@@ -396,7 +397,7 @@ const DanhMucPhuongXaPage = () => {
             width={180}
             allowEditing={false}
             allowFiltering={true}
-            fixed={true}
+            fixed={false}
             fixedPosition="left"
           />
 
@@ -405,6 +406,7 @@ const DanhMucPhuongXaPage = () => {
             alignment='left'
             allowSearch={false}
             width={180}
+            hidingPriority={2}
             filterOperations={['custom']}
             calculateFilterExpression={() => {
               return ['contains', 'TEN_TINH', tenTinhThanhPhoFilter, tenXaSearch];
@@ -416,6 +418,7 @@ const DanhMucPhuongXaPage = () => {
             dataField="TEN_HUYEN"
             alignment="left"
             width={120}
+            hidingPriority={1}
             allowSearch={false}
             filterOperations={['custom']}
             calculateFilterExpression={() => {
@@ -445,7 +448,7 @@ const DanhMucPhuongXaPage = () => {
           <GroupPanel visible={false} />
           <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
           <Paging enabled={true} defaultPageSize={50} defaultPageIndex={0} />
-          <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} />
+          <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} displayMode="compact" />
         </DataGrid>
 
         {/* Delete confirm popup */}

@@ -133,7 +133,18 @@ const RowEdit = () => {
           const data = await response.json();
           return data.Data;
         } catch (error) {
-          console.error("Error fetching data:", error);
+          const ErrorMessage = `Đã xảy ra lỗi khi tải dữ liệu: `;
+          notify(
+            {
+              ErrorMessage,
+              position: {
+                my: 'bottom right',
+                at: 'bottom right',
+              },
+            },
+            `error: ${error.message}`,
+            5000,
+          );
           return [];
         }
       },
@@ -156,77 +167,6 @@ const RowEdit = () => {
     const rowIndex = pageIndex * pageSize + data.rowIndex + 1;
     return <span> {rowIndex} </span>;
   }
-
-  // function onExporting(e) {
-  //   if (e.format === 'xlsx') {
-  //     const workbook = new Workbook();
-  //     const worksheet = workbook.addWorksheet("Danh sách");
-
-  //     worksheet.columns = [
-  //       { width: 20 },
-  //       { width: 40 },
-  //       { width: 20 },
-  //       { width: 20 },
-  //       { width: 20 },
-  //       { width: 20 },
-  //     ];
-
-  //     exportDataGridToExcel({
-  //       component: e.component,
-  //       worksheet,
-  //       autoFilterEnabled: true,
-  //       topLeftCell: { row: 4, column: 1 },
-  //       keepColumnWidths: false,
-  //       exportDataFieldHeaders,
-  //       exportRowFieldHeaders,
-  //       exportColumnFieldHeaders,
-  //       exportFilterFieldHeaders,
-  //     })
-  //       .then((cellRange) => {
-  //         // Header
-  //         const headerRow = worksheet.getRow(2);
-  //         const worksheetViews = worksheet.views;
-
-  //         headerRow.height = 30;
-
-  //         const columnFromIndex = worksheetViews[0].xSplit + 1;
-  //         const columnToIndex = columnFromIndex + 3;
-  //         worksheet.mergeCells(2, columnFromIndex, 2, columnToIndex);
-
-  //         const headerCell = headerRow.getCell(columnFromIndex);
-  //         headerCell.value = "Demo header";
-  //         headerCell.font = { name: "Roboto", size: 22, bold: true };
-  //         headerCell.alignment = {
-  //           horizontal: "left",
-  //           vertical: "middle",
-  //           wrapText: true,
-  //         };
-
-  //         // Footer
-  //         const footerRowIndex = cellRange.to.row + 2;
-  //         const footerCell = worksheet.getRow(footerRowIndex).getCell(cellRange.to.column);
-
-  //         footerCell.value = "Demo footer";
-  //         footerCell.font = { color: { argb: "BFBFBF" }, italic: true };
-  //         footerCell.alignment = { horizontal: "right" };
-  //       })
-
-  //       .then(() => {
-  //         workbook.xlsx.writeBuffer().then((buffer) => {
-  //           saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh sách.xlsx');
-  //         });
-  //       });
-  //   }
-  //   else if (e.format === 'pdf') {
-  //     const doc = new jsPDF();
-  //     exportDataGridToPdf({
-  //       jsPDFDocument: doc,
-  //       component: e.component
-  //     }).then(() => {
-  //       doc.save('Companies.pdf');
-  //     })
-  //   }
-  // }
 
   const onExporting = useCallback(
     (e) => {
@@ -279,6 +219,10 @@ const RowEdit = () => {
       else if (e.format === 'pdf') {
         const doc = new jsPDF();
 
+        // doc.addFileToVFS('Roboto-Regular-normal.ttf');
+        // doc.addFont('Roboto-Regular-normal.ttf', 'Roboto-Regular', 'normal');
+        doc.setFont("Arial");
+
         const firstPoint = { x: -300, y: -300 };
         const lastPoint = { x: 0, y: 0 };
 
@@ -286,7 +230,7 @@ const RowEdit = () => {
           jsPDFDocument: doc,
           component: e.component,
           topLeft: { x: 1, y: 15 },
-          columnWidths: [15, 15, 50, 50],
+          columnWidths: [15, 15, 60, 60],
 
           customDrawCell({ rect }) {
             if (lastPoint.x < rect.x + rect.w) {
@@ -299,10 +243,11 @@ const RowEdit = () => {
         }).then(() => {
           // header
           const header = 'Danh sách';
-          const pageWidth = doc.internal.pageSize.getWidth();
           const headerWidth = doc.getTextDimensions(header).w;
+          // const pageHeight = doc.internal.pageSize.getHeight();
+          const pageWidth = doc.internal.pageSize.getWidth();
 
-          doc.setFontSize(15);
+          doc.setFontSize(10);
           // doc.text(header, (pageWidth - headerWidth) / 2, 20);
           doc.text(header, firstPoint.x - headerWidth, -50);
 
@@ -330,7 +275,7 @@ const RowEdit = () => {
     setEditAllPopupVisibility(!isEditAllPopupVisible);
   }, [isEditAllPopupVisible]);
 
-  const togglePopup = useCallback(() => {
+  const toggleDeletePopup = useCallback(() => {
     setPopupVisibility(!isPopupVisible);
   }, [isPopupVisible]);
 
@@ -341,15 +286,6 @@ const RowEdit = () => {
   const refreshDataGrid = useCallback(() => {
     dataGridRef.current.instance.refresh();
   }, []);
-
-  // const onEditValueChanged = useCallback((e) => {
-  //   // Update the corresponding state variable based on the edited column
-  //   const key = `${e.data.MenuId}-${e.column.dataField}`;
-  //   setEditedValues((prevValues) => ({
-  //     ...prevValues,
-  //     [key]: e.value,
-  //   }));
-  // }, []);
 
   const onEditValueChanged = useCallback((e) => {
     const { MenuId } = e.data;
@@ -362,15 +298,6 @@ const RowEdit = () => {
       [key]: e.value,
     }));
 
-    // Track the edited row
-    // if (!editedRows.includes(MenuId)) {
-    //   setEditedRows([...editedRows, MenuId]);
-    // }
-
-    // Track the edited column
-    // if (!editedColumns.includes(columnName)) {
-    //   setEditedColumns([...editedColumns, columnName]);
-    // }
     console.log(`Edited row: ${MenuId}, Column: ${columnName}, Value: ${e.value}`);
   }, []);
 
@@ -378,39 +305,6 @@ const RowEdit = () => {
     async (key, values) => {
       try {
         const updatedData = await dataSource.load();
-
-        // const updatedItems = updatedData.map((item) => {
-        //   const keyMenuName = `${item.MenuId}-MenuName`;
-        //   const keyLink = `${item.MenuId}-Link`;
-
-        //   if (
-        //     editedItemKeys.includes(item.MenuId) &&
-        //     (editedValues[keyMenuName] !== undefined || editedValues[keyLink] !== undefined)
-        //   ) {
-        //     return {
-        //       ...item,
-        //       MenuName: editedValues[keyMenuName] !== undefined ? editedValues[keyMenuName] : item.MenuName,
-        //       Link: editedValues[keyLink] !== undefined ? editedValues[keyLink] : item.Link,
-        //     };
-        //   }
-        //   return item;
-        // });
-
-        // const updatedItems = updatedData.map((item) => {
-        //   const keyMenuName = `${item.MenuId}-MenuName`;
-        //   const keyLink = `${item.MenuId}-Link`;
-
-        //   console.log(keyMenuName, keyLink)
-
-        //   if (editedRows.includes(item.MenuId)) {
-        //     return {
-        //       ...item,
-        //       MenuName: editedValues[keyMenuName] !== undefined ? editedValues[keyMenuName] : item.MenuName,
-        //       Link: editedValues[keyLink] !== undefined ? editedValues[keyLink] : item.Link,
-        //     };
-        //   }
-        //   return item;
-        // });
 
         const updatedItems = updatedData.map((item) => {
           const keyMenuName = `${item.MenuId}-MenuName`;
@@ -429,19 +323,6 @@ const RowEdit = () => {
           }
           return item;
         });
-        // console.log("Edited Columns and Values:", editedColumns.map(column => ({ column, value: editedValues[column] })));
-
-        // Check if add or update
-        // const addResponse = await axios.post(
-        //   `${baseURL}/Manager/Menu/UpdateMenu`,
-        //   updatedItems,
-        //   {
-        //     headers: {
-        //       'Content-Type': 'application/json',
-        //       Authorization: `Bearer ${api_token}`,
-        //     },
-        //   }
-        // );
 
         const updateResponse = await axios.post(
           `${baseURL}/Manager/Menu/UpdateMenu`,
@@ -472,8 +353,8 @@ const RowEdit = () => {
           {
             error,
             position: {
-              my: 'after bottom',
-              at: 'after bottom',
+              my: 'bottom right',
+              at: 'bottom right',
             },
           },
           `error: ${error.message}`,
@@ -481,13 +362,6 @@ const RowEdit = () => {
         );
       }
     }, [toggleEditAllPopup, refreshDataGrid, dataSource, editedValues, editedRows]);
-
-  const getEditAllCloseButtonOptions = useCallback(() => ({
-    text: 'Đóng',
-    stylingMode: 'outlined',
-    type: 'normal',
-    onClick: toggleEditAllPopup,
-  }), [toggleEditAllPopup]);
 
   const deleteRecords = useCallback(async () => {
     try {
@@ -503,7 +377,7 @@ const RowEdit = () => {
       );
 
       if (response.data.Success) {
-        togglePopup();
+        toggleDeletePopup();
         refreshDataGrid();
 
         const selectedAndDeletedItems = selectedItemKeys.length;
@@ -512,8 +386,8 @@ const RowEdit = () => {
           {
             message,
             position: {
-              my: 'after bottom',
-              at: 'after bottom',
+              my: 'bottom right',
+              at: 'bottom right',
             },
           },
           'success',
@@ -523,22 +397,23 @@ const RowEdit = () => {
         console.error(`Error deleting items. ErrorCode: ${response.data.ErrorCode}, ErrorMessage: ${response.data.ErrorMessage}`);
       }
     } catch (error) {
-      console.error("Error deleting data:", error);
+      console.error("Đã xảy ra lỗi khi xóa dữ liệu:", error);
       notify(
         {
           error,
           position: {
-            my: 'after bottom',
-            at: 'after bottom',
+            my: 'bottom right',
+            at: 'bottom right',
           },
         },
-        `error: ${error.message}`,
+        // `error: ${error.message}`,
+        `Đã xảy ra lỗi khi xóa dữ liệu.`,
         5000,
       );
     } finally {
       setSelectedItemKeys([]);
     }
-  }, [selectedItemKeys, togglePopup, refreshDataGrid]);
+  }, [selectedItemKeys, toggleDeletePopup, refreshDataGrid]);
 
   const getDeleteButtonOptions = useCallback(() => ({
     text: 'Đồng ý',
@@ -550,8 +425,8 @@ const RowEdit = () => {
     text: 'Đóng',
     stylingMode: 'outlined',
     type: 'normal',
-    onClick: togglePopup,
-  }), [togglePopup]);
+    onClick: toggleDeletePopup,
+  }), [toggleDeletePopup]);
 
   const onSelectedFilesChanged = useCallback((e) => {
     setSelectedFiles(e.value);
@@ -588,9 +463,34 @@ const RowEdit = () => {
       });
 
       if (!result.ok) {
+        const ErrorMessage = `Đã xảy ra lỗi : `;
+        notify(
+          {
+            ErrorMessage,
+            position: {
+              my: 'bottom right',
+              at: 'bottom right',
+            },
+          },
+          `error`,
+          5000,
+        );
         throw new Error(`HTTP error! Status: ${result.status}`);
         // throw result.Message;
       }
+
+      const message = `Cập nhật thành công`;
+      notify(
+        {
+          message,
+          position: {
+            my: 'bottom right',
+            at: 'bottom right',
+          },
+        },
+        `success`,
+        5000,
+      );
 
       const data = await result.json();
       return data.Data;
@@ -604,69 +504,6 @@ const RowEdit = () => {
       component.cancelEditData();
     }, [sendBatchRequest]);
 
-  // const editOrAddRecords = useCallback(
-  //   async (key, values) => {
-  //     try {
-  //       const updatedData = await dataSource.load();
-
-  //       const updatedItems = updatedData.map((item) => {
-  //         const keyMenuName = `${item.MenuId}-MenuName`;
-  //         const keyLink = `${item.MenuId}-Link`;
-
-  //         if (
-  //           editedRows.includes(item.MenuId) &&
-  //           (editedValues[keyMenuName] || editedValues[keyLink])
-
-  //         ) {
-  //           return {
-  //             ...item,
-  //             MenuName: editedValues[keyMenuName] ? editedValues[keyMenuName] : item.MenuName,
-  //             Link: editedValues[keyLink] ? editedValues[keyLink] : item.Link,
-  //           };
-  //         }
-  //         return item;
-  //       });
-  //       // console.log("Edited Columns and Values:", editedColumns.map(column => ({ column, value: editedValues[column] })));
-
-  //       const updateResponse = await axios.post(
-  //         `${baseURL}/Manager/Menu/UpdateMenu`,
-  //         updatedItems,
-  //         {
-  //           headers: {
-  //             'Content-Type': 'application/json',
-  //             Authorization: `Bearer ${api_token}`,
-  //           },
-  //         }
-  //       );
-
-  //       if (updateResponse.data.Success) {
-  //         toggleEditAllPopup();
-  //         refreshDataGrid();
-
-  //         // Reset the state variables after the update operation
-  //         setEditedValues({});
-  //         setEditedRows([]);
-  //         setEditedColumns([]);
-  //       } else {
-  //         console.error(`Error deleting items. ErrorCode:
-  //         ${updateResponse.data.ErrorCode}, ErrorMessage: ${updateResponse.data.ErrorMessage}`);
-  //       }
-  //     } catch (error) {
-  //       console.error("Xảy ra lỗi khi cập nhật dữ liệu: - ", error);
-  //       notify(
-  //         {
-  //           error,
-  //           position: {
-  //             my: 'after bottom',
-  //             at: 'after bottom',
-  //           },
-  //         },
-  //         `error: ${error.message}`,
-  //         5000,
-  //       );
-  //     }
-  //   }, [toggleEditAllPopup, refreshDataGrid, dataSource, editedValues, editedRows]);
-
   const onSaving = useCallback(
     (e) => {
       e.cancel = true;
@@ -677,12 +514,14 @@ const RowEdit = () => {
 
         const handleAddedRows = (changes) => {
           const changesWithData = changes.map(change => {
-            // For added rows, you may want to handle the default values or other logic
-            // For example, here, I'm setting MenuId to 0 and using the current timestamp as order
+            // handle the default values or other logic
             return {
               ...change.data,
               MenuId: 0,
-              order: new Date().getTime().toString(),
+              order: "",
+              status: 0,
+              IsView: 0,
+              MenuNameEg: ""
             };
           });
 
@@ -732,6 +571,13 @@ const RowEdit = () => {
     onClick: onSaving,
   }), [onSaving]);
 
+  const getEditAllCloseButtonOptions = useCallback(() => ({
+    text: 'Đóng',
+    stylingMode: 'outlined',
+    type: 'normal',
+    onClick: toggleEditAllPopup,
+  }), [toggleEditAllPopup]);
+
   return (
     <>
       <div className="responsive-paddings">
@@ -753,20 +599,7 @@ const RowEdit = () => {
           onSelectionChanged={onSelectionChanged}
           onPageChanged={onPageChanged}
           onEditValueChanged={onEditValueChanged}
-
-          onEditingStart={logEvent}
-          // onInitNewRow={logEvent}
-          // onRowInserting={logEvent}
-          // onRowInserted={logEvent}
-          // onRowUpdating={logEvent}
-          onRowUpdating={logEvent}
-          onRowUpdated={logEvent}
-          // onRowRemoving={logEvent}
-          // onRowRemoved={logEvent}
           onSaving={onSaving}
-          onSaved={() => logEvent('Saved')}
-        // onEditCanceling={logEvent}
-        // onEditCanceled={logEvent}
         >
           <Editing mode="batch"
             allowAdding={true}
@@ -798,6 +631,7 @@ const RowEdit = () => {
             fixedPosition="left"
             alignment='center'
             width={100}
+            hidingPriority={2}
             allowEditing={false}
             allowSorting={true}
             allowReordering={false}
@@ -850,6 +684,7 @@ const RowEdit = () => {
             fixedPosition="left"
             alignment='left'
             width={80}
+            hidingPriority={1}
             allowEditing={true}
             allowSorting={true}
             allowReordering={false}
@@ -872,14 +707,14 @@ const RowEdit = () => {
           <Toolbar>
             <Item location="left" locateInMenu="never" render={renderLabel} />
 
-            <Item location="after" name="addRowButton" caption="Thêm" options={addButtonOptions}></Item>
+            <Item location="after" name="addRowButton" caption="Thêm" options={addButtonOptions} locateInMenu="auto"></Item>
 
-            <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions}></Item>
-            <Item location="after" name="revertButton" showText="always" widget="dxButton" options={cancelButtonOptions}></Item>
+            <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions} locateInMenu="never"></Item>
+            <Item location="after" name="revertButton" showText="always" widget="dxButton" options={cancelButtonOptions} locateInMenu="never"></Item>
 
-            <Item location="after" showText="always" name='mutiple-delete' widget="dxButton">
+            <Item location="after" showText="always" name='mutiple-delete' widget="dxButton" locateInMenu="never">
               <Button
-                onClick={togglePopup}
+                onClick={toggleDeletePopup}
                 widget="dxButton"
                 icon="trash"
                 disabled={!selectedItemKeys.length}
@@ -887,11 +722,11 @@ const RowEdit = () => {
               />
             </Item>
 
-            <Item location="after" widget="dxButton" >
+            <Item location="after" widget="dxButton" locateInMenu="auto">
               <Button text="Nhập từ excel" onClick={toggleImportExcelPopup} />
             </Item>
 
-            <Item location='after' name='exportButton' options={exportButtonOptions} />
+            <Item location='after' name='exportButton' options={exportButtonOptions} locateInMenu="auto" />
           </Toolbar>
 
           <Grouping autoExpandAll={false} />
@@ -947,7 +782,7 @@ const RowEdit = () => {
           contentRender={renderContent}
           visible={isPopupVisible}
           hideOnOutsideClick={true}
-          onHiding={togglePopup}
+          onHiding={toggleDeletePopup}
           dragEnabled={false}
           showCloseButton={true}
           showTitle={true}

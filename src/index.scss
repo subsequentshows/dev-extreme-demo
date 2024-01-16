@@ -14,6 +14,12 @@ code {
 
 .dx-pager {
   padding: 15px 0 0;
+
+  .dx-page-size {
+    &:hover {
+      border-radius: 0;
+    }
+  }
 }
 
 .dx-row .dx-header-row,
@@ -320,39 +326,42 @@ code {
   right: 0;
 }
 
-@media (min-width: 320px) and (max-width: 1024px) {
-  .dx-datagrid-header-panel {
-    margin-bottom: 15px;
-    padding-bottom: 15px;
-  }
-
-  .dx-toolbar-items-container {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: column;
-
-    .dx-toolbar-before,
-    .dx-toolbar-center,
-    .dx-toolbar-after {
-      width: 100%;
-      padding: 0;
-      position: relative;
-      display: block;
+@media (min-width: 320px) and (max-width: 768px) {
+  .dx-drawer {
+    .toolbar-label {
+      font-size: 22px;
     }
 
-    .dx-toolbar-before {
-      margin-bottom: 15px;
-    }
-
-    .dx-toolbar-after {
+    .dx-datagrid-header-panel {
       display: flex;
       flex-wrap: wrap;
-      justify-content: flex-end;
-      top: unset;
-      right: unset;
-      background-color: #2c2b2b;
+
+      .dx-toolbar-items-container {
+
+        .dx-toolbar-after,
+        .dx-toolbar-before,
+        .dx-toolbar-center {
+          position: unset;
+          height: unset;
+          width: 100%;
+        }
+
+        .dx-toolbar-before {
+          margin-top: 15px;
+        }
+
+        .dx-toolbar-after {
+          margin-left: auto;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: flex-end;
+          margin-top: 15px;
+          margin-bottom: 15px;
+        }
+      }
     }
   }
+
 
 }
 
