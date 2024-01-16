@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
-
 import "./modal.scss";
 import 'devextreme/data/odata/store';
 import {
@@ -11,14 +10,9 @@ import {
   Editing,
   Grouping,
   Paging,
-  Form,
   Pager,
-  CheckBox,
-  SelectBox,
   SearchPanel,
-  Lookup,
   Summary,
-  RangeRule,
   RequiredRule,
   StringLengthRule,
   GroupItem,
@@ -30,17 +24,18 @@ import {
   Toolbar,
   Item,
 } from 'devextreme-react/data-grid';
-import {
-  Popup, Position, ToolbarItem
-} from 'devextreme-react/popup';
+import { Popup, Position, ToolbarItem } from 'devextreme-react/popup';
+import SelectBox from 'devextreme-react/select-box';
 import { Button } from "devextreme-react/button";
 import "./master-detail-grid.scss";
 import notify from 'devextreme/ui/notify';
+import { baseURL } from '../../api/api';
 import WarningIcon from "../../asset/image/confirm.png";
 
 import DataSource from 'devextreme/data/data_source';
 import ArrayStore from 'devextreme/data/array_store';
 import { createStore } from 'devextreme-aspnet-data-nojquery';
+import CustomStore from 'devextreme/data/custom_store';
 
 // Export to excel library
 import { exportDataGrid as exportDataGridToExcel } from 'devextreme/excel_exporter';
@@ -57,38 +52,10 @@ import * as JSZIP from "jszip";
 import $ from 'jquery';
 import { Modal } from "react-bootstrap-v5";
 
-import readXlsxFile from 'read-excel-file';
+// import readXlsxFile from 'read-excel-file';
 import { formatDate } from 'devextreme/localization';
 
 const url = 'https://js.devexpress.com/Demos/Mvc/api/DataGridWebApi';
-
-const dataSource = createStore({
-  key: 'OrderID',
-  loadUrl: `${url}/Orders`,
-  insertUrl: `${url}/InsertOrder`,
-  updateUrl: `${url}/UpdateOrder`,
-  deleteUrl: `${url}/DeleteOrder`,
-
-  onBeforeSend: (method, ajaxOptions) => {
-    ajaxOptions.xhrFields = { withCredentials: true };
-  },
-});
-
-const customersData = createStore({
-  key: 'Value',
-  loadUrl: `${url}/CustomersLookup`,
-  onBeforeSend: (method, ajaxOptions) => {
-    ajaxOptions.xhrFields = { withCredentials: true };
-  },
-});
-
-const shippersData = createStore({
-  key: 'Value',
-  loadUrl: `${url}/ShippersLookup`,
-  onBeforeSend: (method, ajaxOptions) => {
-    ajaxOptions.xhrFields = { withCredentials: true };
-  },
-});
 
 // Export files
 const exportFormats = ['xlsx', 'pdf'];
@@ -117,47 +84,6 @@ function onExporting(e) {
   };
 }
 
-// Import
-// const ExcelToJSON = function () {
-//   this.parseExcel = function (file) {
-//     let reader = new FileReader();
-
-//     reader.onload = function (e) {
-//       let data = e.target.result;
-//       let workbook = XLSX.read(data, {
-//         type: 'binary'
-//       });
-//       workbook.SheetNames.forEach(function (sheetName) {
-//         // Here is your object
-//         let XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
-//         let json_object = JSON.stringify(XL_row_object);
-//         console.log(JSON.parse(json_object));
-//         $('#xlx_json').val(json_object);
-//       })
-//     };
-
-//     reader.onerror = function (ex) {
-//       console.log(ex);
-//     };
-
-//     reader.readAsBinaryString(file);
-//   };
-// };
-
-// function handleFileSelect(evt) {
-//   let files = evt.target.files; // FileList object
-//   let xl2json = new ExcelToJSON();
-//   xl2json.parseExcel(files[0]);
-// }
-
-// const input = document.getElementById('input')
-// input.addEventListener('change', () => {
-//   readXlsxFile(input.files[0]).then((rows) => {
-//     // `rows` is an array of rows
-//     // each row being an array of cells.
-//   })
-// })
-
 const renderContent = () => {
   return (
     <>
@@ -169,7 +95,24 @@ const renderContent = () => {
   )
 }
 
-const MasterDetailGrid = () => {
+const statuses = ['All', 'France', 'Germany', 'Brazil', 'Belgium'];
+const cityStatuses = ['All', 'Reims', 'Rio de Janeiro', 'Lyon', 'Charleroi'];
+
+const statusLabel = { 'aria-label': 'Status' };
+
+// const dataSource = createStore({
+//   key: 'OrderID',
+//   loadUrl: `${url}/Orders`,
+//   insertUrl: `${url}/InsertOrder`,
+//   updateUrl: `${url}/UpdateOrder`,
+//   deleteUrl: `${url}/DeleteOrder`,
+
+//   onBeforeSend: (method, ajaxOptions) => {
+//     ajaxOptions.xhrFields = { withCredentials: true };
+//   },
+// });
+
+const MasterDetailGridPage = () => {
   const [data, setData] = useState([]);
 
   const allowedPageSizes = [50, 100, 150, 200];
@@ -182,52 +125,112 @@ const MasterDetailGrid = () => {
   const [fileContent, setFileContent] = useState('');
 
   // Delete
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [editedItems, setEditedItems] = useState({});
+  // const dataGridRef = useRef < DataGrid > (null);
+  const dataGridRef = useRef(null);
+  const [selectedItemKeys, setSelectedItemKeys] = useState([]);
 
   // Popup confirm
   const [isPopupVisible, setPopupVisibility] = useState(false);
+
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(50);
+
+  const [filterStatus, setFilterStatus] = useState(statuses[0]);
+  const [filterCityStatus, setFilterCityStatus] = useState(statuses[0]);
+  const [shipCountryFilter, setShipCountryFilter] = useState('');
+  const [shipCityFilter, setShipCityFilter] = useState("");
+
+  const [citySearchTerm, setCitySearchTerm] = useState('');
+  const [searchValue, setSearchValue] = useState("");
 
   const customizeColumnDate = (itemInfo) => `${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
   const customizeDate = (itemInfo) => `First: ${formatDate(itemInfo.value, 'dd/MM/yyyy')}`;
   const renderLabel = () => <div className="toolbar-label">1.1. Quản lý thu phí</div>;
   $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
 
-  // const readExcel = (file) => {
-  //   const promise = new Promise((resolve, reject) => {
-  //     const fileReader = new FileReader();
-  //     fileReader.readAsArrayBuffer(file);
+  // Custom filter function for ShipCountry
+  // const shipCountryFilter = useCallback((data) => {
+  //   const lowerCaseSearchTerm = searchTerm.toLowerCase();
+  //   return data.ShipCountry.toLowerCase().includes(lowerCaseSearchTerm);
+  // }, [searchTerm]);
 
-  //     fileReader.onload = (e) => {
-  //       const bufferArray = e.target.result;
+  const shipCityTerm = useCallback((data) => {
+    const lowerCaseSearchTerm = citySearchTerm.toLowerCase();
+    return data.ShipCity.toLowerCase().includes(lowerCaseSearchTerm);
+  }, [citySearchTerm]);
 
-  //       const wb = XLSX.read(bufferArray, { type: "buffer" });
+  const handleSearchTermChange = (event) => {
+    setCitySearchTerm(event.target.value);
+    shipCityTerm();
+  };
 
-  //       const wsname = wb.SheetNames[0];
+  const [phuongXaData, setPhuongXaData] = useState(
+    new CustomStore({
+      key: "ID",
+      load: async () => {
+        try {
+          const response = await fetch(
+            `${baseURL}/DanhMuc/GetDMPhuongXa`
+          );
 
-  //       const ws = wb.Sheets[wsname];
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const data = await response.json();
+          console.log(data.Data.find(o => o.TEN === "xá"))
 
-  //       const data = XLSX.utils.sheet_to_json(ws);
+          // Apply search filter
+          if (searchValue) {
+            return data.Data.filter((item) =>
+              item.TEN.toLowerCase().includes(searchValue.toLowerCase())
+            );
+          }
 
-  //       resolve(data);
-  //     };
+          return data.Data;
+          // return {
+          //   data: data.Data,
+          //   totalCount: true,
+          //   // summary: false,
+          //   // groupCount: false
+          // };
+          // Assuming the API response is an array of objects
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          return [];
+        }
+      },
 
-  //     fileReader.onerror = (error) => {
-  //       reject(error);
-  //     };
+      onBeforeSend: (method, ajaxOptions) => {
+        ajaxOptions.xhrFields = { withCredentials: true };
+      },
+
+      //     // // filter for ShipCountry
+      //     // // byKey: (key) => {
+      //     // //   return dataSource.byKey(key);
+      //     // // },
+      //     // // Implement the custom filter function for ShipCountry
+      //     // // filter: [shipCityFilter],
+      //     // filter: [],
+    })
+  );
+
+  // Custom store for handling data and filtering
+  // const customStore = useMemo(() => {
+  //   return new CustomStore({
+  //     key: 'OrderID',
+  //     load: (loadOptions) => {
+  //       // Import data loading fromdataSource
+  //       return dataSource.load(loadOptions);
+  //     },
+  //     // filter for ShipCountry
+  //     // byKey: (key) => {
+  //     //   return dataSource.byKey(key);
+  //     // },
+  //     // Implement the custom filter function for ShipCountry
+  //     // filter: [shipCityFilter],
+  //     filter: [],
   //   });
-
-  //   promise.then((d) => {
-  //     setItems(d);
-  //   });
-  // };
-
-  // document.getElementById('file').addEventListener('change', handleFileSelect, false);
-
-  // $("#file").on("change", function (e) {
-  //   e.preventDefault();
-  //   handleFileSelect();
-  // });
+  // }, []);
 
   var ExcelToJSON = function () {
 
@@ -274,7 +277,7 @@ const MasterDetailGrid = () => {
 
       if (getExtension() === "xls" || getExtension() === "xlsx") {
         try {
-          const result = await fetch("https://localhost:44300/upload", {
+          const result = await fetch(`${baseURL}/upload`, {
             method: "POST",
             body: formData,
             success: function (fileData) {
@@ -325,9 +328,6 @@ const MasterDetailGrid = () => {
   };
   // End of upload
 
-  const dataGridRef = useRef(null);
-  const [selectedItemKeys, setSelectedItemKeys] = useState([]);
-
   const togglePopup = useCallback(() => {
     setPopupVisibility(!isPopupVisible);
   }, [isPopupVisible]);
@@ -336,43 +336,10 @@ const MasterDetailGrid = () => {
     dataGridRef.current.instance.refresh();
   }, []);
 
-  function refreshDataGrid2() {
-    let refreshmMessage = `reload`;
-
-    dataGridRef.current.instance.refresh()
-      .then(function () {
-        notify(
-          {
-            refreshmMessage,
-            error,
-            position: {
-              my: 'right bottom',
-              at: 'right bottom',
-            },
-          },
-          'success' + refreshmMessage,
-          3000,
-        );
-      })
-      .catch(function (error) {
-        notify(
-          {
-            error,
-            position: {
-              my: 'center top',
-              at: 'center top',
-            },
-          },
-          'error',
-          3000,
-        );
-      });
-  }
-
   const deleteRecords = useCallback(() => {
     try {
       selectedItemKeys.forEach((key) => {
-        dataSource.remove(key);
+        // dataSource.remove(key);
       });
       togglePopup();
       refreshDataGrid();
@@ -417,22 +384,6 @@ const MasterDetailGrid = () => {
     setSelectedItemKeys(data.selectedRowKeys);
   }, []);
 
-  const sendEmail = React.useCallback(() => {
-    // const message = `Email is sent to ${currentEmployee.FirstName} ${currentEmployee.LastName}`;
-    const message = `Email is sent to`;
-    notify(
-      {
-        message,
-        position: {
-          my: 'center top',
-          at: 'center top',
-        },
-      },
-      'success',
-      3000,
-    );
-  }, []);
-
   const getDeleteButtonOptions = useCallback(() => ({
     text: 'Đồng ý',
     stylingMode: 'contained',
@@ -446,8 +397,111 @@ const MasterDetailGrid = () => {
     onClick: togglePopup,
   }), [togglePopup]);
 
+  const onPageChanged = (e) => {
+    setCurrentPageIndex(e.component.pageIndex());
+  };
+
+  const rowIndexes = (data) => {
+    const pageIndex = data.component.pageIndex();
+    const pageSize = data.component.pageSize();
+    const rowIndex = pageIndex * pageSize + data.rowIndex + 1;
+    return <span> {rowIndex} </span>;
+  }
+
+  const onFilterValueChanged = useCallback(({ value }) => {
+    const dataGrid = dataGridRef.current.instance;
+
+    if (value === 'All') {
+      dataGrid.clearFilter();
+    } else {
+      setFilterCityStatus("All");
+      dataGrid.filter(['TEN_TINH', '=', value]);
+    }
+
+    setFilterStatus(value);
+  }, []);
+
+  const onCityFilterValueChanged = useCallback(({ value }) => {
+    const dataGrid = dataGridRef.current.instance;
+
+    if (value === 'All') {
+      dataGrid.clearFilter();
+    } else {
+      setFilterStatus("All");
+      dataGrid.filter(['ShipCity', '=', value]);
+    }
+
+    setFilterCityStatus(value);
+  }, []);
+
+  // const onFilterValueChanged = useCallback(({ value }) => {
+  //   const dataGrid = dataGridRef.current.instance;
+
+  //   if (value === 'All') {
+  //     dataGrid.clearFilter();
+  //   } else {
+  //     // Update shipCountryFilter state
+
+  //     // Apply custom filter
+  //     dataGrid.filter(['ShipCountry', '=', value]);
+  //   }
+  // }, []);
+
+  const onCityValueChanged = useCallback(({ value }) => {
+    const dataGrid = dataGridRef.current.instance;
+
+    if (value === '') {
+      // dataGrid.reload();
+      // dataGrid.clearFilter();
+      console.log("hehe")
+    } else {
+      // Apply custom filter
+      dataGrid.filter(['TEN', '=', value]);
+      setCitySearchTerm(value);
+
+    }
+  }, [setCitySearchTerm]);
+
   return (
     <>
+      <div className="item-filter-wrapper responsive-paddings">
+        <div className='item-filter'>
+          <label className='items-filter-label'>Nước đặt hàng</label>
+          <SelectBox
+            items={statuses}
+            inputAttr={statusLabel}
+            value={filterStatus}
+            onValueChanged={onFilterValueChanged}
+          />
+        </div>
+
+        <div className='item-filter'>
+          <label className='items-filter-label'>TP đặt hàng</label>
+          <SelectBox
+            items={cityStatuses}
+            inputAttr={statusLabel}
+            value={filterCityStatus}
+            onValueChanged={onCityFilterValueChanged}
+          />
+        </div>
+
+        <div className='item-filter'>
+          <label className='items-filter-label'>Ship City Filter</label>
+
+          <div className='input-wrapper'>
+            <input
+              className='ship-country-filter search-input'
+              type='text'
+              value={citySearchTerm}
+              // shipCityTerm 
+              onChange={onCityValueChanged}
+              placeholder='Search...'
+            />
+          </div>
+        </div>
+
+      </div>
+
       <DataGrid
         id="gridContainer"
         className='responsive-paddings master-detail-grid'
@@ -456,16 +510,15 @@ const MasterDetailGrid = () => {
         ref={dataGridRef}
         width="100%"
         height="100%"
-        dataSource={dataSource}
+        dataSource={phuongXaData}
         onExporting={onExporting}
         showBorders={true}
-        remoteOperations={true}
+        remoteOperations={false}
         repaintChangesOnly={true}
         selectedRowKeys={selectedItemKeys}
         onSelectionChanged={onSelectionChanged}
+        onPageChanged={onPageChanged}
       >
-
-
         <Editing
           mode="popup"
           location="center"
@@ -477,7 +530,6 @@ const MasterDetailGrid = () => {
 
         <Column caption="STT"
           dataField="STT"
-
           fixed={true}
           fixedPosition="left"
           alignment='center'
@@ -488,9 +540,9 @@ const MasterDetailGrid = () => {
           allowSearch={false}
           allowFiltering={false}
           allowExporting={true}
-          cellRender={(data) => {
-            return <span>{data.rowIndex + 1}</span>;
-          }}>
+          cellRender={rowIndexes}
+          headerCellTemplate="STT"
+        >
           <StringLengthRule max={3} message="" />
         </Column>
 
@@ -504,44 +556,83 @@ const MasterDetailGrid = () => {
         </Column>
 
         <Column caption="ID"
-          dataField="OrderID"
+          dataField="ID"
           alignment='left'
           width={100}
           allowEditing={false}
+          allowFiltering={false}
           fixed={true}
-          fixedPosition="left">
-          <StringLengthRule max={5} message="The field OrderID must be a string with a maximum length of 5." />
+          fixedPosition="left"
+        >
+          <StringLengthRule max={5} message="The field ID must be a string with a maximum length of 5." />
         </Column>
 
-        <Column caption="Họ tên"
-          dataField="ShipName"
-
+        <Column caption="Tên"
+          dataField="TEN"
+          allowHeaderFiltering={true}
           fixed={true}
           fixedPosition="left"
           alignment='left'
           dataType="string"
           width={200}
           allowSearch={true}
-          allowReordering={false}>
+          allowReordering={false}
+          selectedFilterOperation="contains"
+          filterOperations={['contains']}
+        >
           <StringLengthRule max={15} message="The field ShipName must be a string with a maximum length of 15." />
         </Column>
 
-        <Column caption="Tổng tiền" dataField="Freight" dataType="number" width={120}></Column>
-        <Column caption="TP đặt hàng" dataField="ShipCountry" alignment='left' width={120}></Column>
-        <Column caption="TP giao hàng" dataField="ShipCity" alignment='left' width={150} ></Column>
-        <Column caption="Địa chỉ giao hàng" dataField="ShipAddress" alignment='left' width={150}></Column>
+        {/* <Column caption="Tổng tiền"
+          allowHeaderFiltering={false}
+          filterType='numberic'
+          selectedFilterOperation="contains"
+          allowFiltering={false}
+          dataField="Freight" dataType="number" width={150}
+          filterOperations={['contains']}>
+        </Column> */}
 
-        <Column caption="Ngày đặt hàng"
-          dataField="OrderDate"
-
+        <Column caption="Tên tỉnh"
+          dataField="TEN_TINH"
           alignment='left'
-          dataType="date"
-          width={110}
-          customizeText={customizeColumnDate} >
-          <RequiredRule message="The OrderDate field is required." />
+          allowSearch={false}
+          filterOperations={['custom']}
+          calculateFilterExpression={() => {
+            return ['contains', 'TEN_TINH', shipCityFilter, citySearchTerm];
+          }}
+        />
+
+        <Column
+          caption="Tên huyện"
+          dataField="TEN_HUYEN"
+          alignment="left"
+          width={120}
+          allowSearch={false}
+          filterOperations={['custom']}
+          calculateFilterExpression={() => {
+            return ['contains', 'TEN_HUYEN', shipCountryFilter];
+          }}
+        // calculateFilterExpression={() => {
+        //   return ['custom', shipCountryFilter];
+        // }}
+        // calculateFilterExpression={() => ['contains', 'ShipCountry', shipCountryFilter]}
+        >
         </Column>
 
-        <Summary>
+        {/* <Column caption="Ngày đặt hàng"
+          dataField="OrderDate"
+          alignment='left'
+          // dataType="date"
+          width={150}
+          customizeText={customizeColumnDate}
+          selectedFilterOperation="contains"
+          filterOperations={['contains']}
+        >
+          <RequiredRule message="The OrderDate field is required." />
+        </Column> */}
+
+
+        {/* <Summary>
           <TotalItem
             name="SelectedRowsSummary"
             column="Freight"
@@ -559,7 +650,7 @@ const MasterDetailGrid = () => {
 
           <GroupItem summaryType="count" >
           </GroupItem>
-        </Summary>
+        </Summary> */}
 
         <Toolbar>
           <Item location="left" locateInMenu="never" render={renderLabel} />
@@ -580,7 +671,6 @@ const MasterDetailGrid = () => {
           </Item>
 
           <Item location='after' name='exportButton' />
-          {/* <Item location='after' name='searchPanel' /> */}
         </Toolbar>
 
         <Grouping autoExpandAll={false} />
@@ -593,13 +683,15 @@ const MasterDetailGrid = () => {
           searchVisibleColumnsOnly={true}
           placeholder="Tìm kiếm"
         />
-        <FilterRow visible={false} />
+        <FilterRow visible={false} allowFiltering={false} showResetValues={false} />
         <HeaderFilter enabled={false} visible={false} />
         <GroupPanel visible={false} />
         <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
-        <Paging enabled={true} defaultPageSize={50} defaultPageIndex={1} />
+        <Paging enabled={true} defaultPageSize={50} defaultPageIndex={0} />
+        <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} />
       </DataGrid>
 
+      {/* Delete confirm popup */}
       <Popup
         id="popup"
         contentRender={renderContent}
@@ -631,4 +723,4 @@ const MasterDetailGrid = () => {
   );
 }
 
-export default MasterDetailGrid;
+export default MasterDetailGridPage;

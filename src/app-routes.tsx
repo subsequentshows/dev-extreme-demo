@@ -1,24 +1,18 @@
 import {
   HomePage,
-  TasksPage,
-  ProfilePage,
   MasterDetailGridPage,
   AccessDeniedPage,
   PhanQuyenPage,
   UsersPage,
-  DemoDataGridPage,
+  HoSoXaDetailPage,
+  DanhMucPhuongXaPage,
+  ErrorPagePage,
+  DanhSachNhomQuyenPage,
+  RowEditPage,
 } from "./pages";
 import { withNavigationWatcher } from "./contexts/navigation";
 
 const routes = [
-  {
-    path: "/tasks",
-    element: TasksPage,
-  },
-  {
-    path: "/profile",
-    element: ProfilePage,
-  },
   {
     path: "/home",
     element: HomePage,
@@ -36,12 +30,28 @@ const routes = [
     element: PhanQuyenPage,
   },
   {
+    path: "/danh-sach-nhom-quyen",
+    element: DanhSachNhomQuyenPage,
+  },
+  {
     path: "/users",
     element: UsersPage,
   },
   {
-    path: "/demo-data-grid",
-    element: DemoDataGridPage,
+    path: "/ho-so-xa-detail",
+    element: HoSoXaDetailPage,
+  },
+  {
+    path: "/danh-muc-phuong-xa",
+    element: DanhMucPhuongXaPage,
+  },
+  {
+    path: "/error-page",
+    element: ErrorPagePage,
+  },
+  {
+    path: "/row-edit",
+    element: RowEditPage,
   },
 ];
 

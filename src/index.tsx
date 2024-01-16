@@ -3,6 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
+import "react-app-polyfill/stable";
 import { AuthProvider } from "./contexts/authProvider";
 import "./index.scss";
 
@@ -10,10 +11,15 @@ const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
+  // <AuthProvider>
+  //   <App />
+  // </AuthProvider>
+
+  // React strict mode render compoments twice
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
+    {/* <AuthProvider> */}
+    <App />
+    {/* </AuthProvider> */}
   </React.StrictMode>
 );
 

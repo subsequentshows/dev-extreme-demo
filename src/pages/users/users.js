@@ -41,7 +41,7 @@ const Users = () => {
       isMounted = false;
       controller.abort();
     }
-  }, [])
+  }, [privateLocalApi])
 
   return (
     <article>
