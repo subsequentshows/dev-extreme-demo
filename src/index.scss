@@ -326,6 +326,11 @@ code {
   right: 0;
 }
 
+.dx-texteditor-input,
+.dx-widget {
+  font-size: 13px;
+}
+
 @media (min-width: 320px) and (max-width: 768px) {
   .dx-drawer {
     .toolbar-label {

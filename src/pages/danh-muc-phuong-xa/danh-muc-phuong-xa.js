@@ -20,11 +20,13 @@ import {
   Export,
   Selection,
   Toolbar,
-  Item,
+  Item
 } from 'devextreme-react/data-grid';
 import { Popup, Position, ToolbarItem } from 'devextreme-react/popup';
 import { Button } from "devextreme-react/button";
 import { SelectBox, SelectBoxTypes } from "devextreme-react/select-box";
+import { TextBox } from "devextreme-react";
+
 
 import CustomStore from "devextreme/data/custom_store";
 import { formatDate } from "devextreme/localization";
@@ -258,8 +260,9 @@ const DanhMucPhuongXaPage = () => {
         setTenXaSearch("")
         dataGrid.clearFilter();
       } else {
-        var filter = e.target.value;
-
+        let filter = e.target.value;
+        dataGrid.refresh();
+        console.log("Reloaded")
         // Load data after filtering
         setTenXaSearch(filter);
 
@@ -301,13 +304,24 @@ const DanhMucPhuongXaPage = () => {
           <label className='items-filter-label'>Tìm Xã onChange</label>
 
           <div className='input-wrapper'>
-            <input
+            <TextBox
+              className='ship-country-filter search-input'
+              type='text'
+              value={tenXaSearch}
+              onValueChanged={onCityFilterValueChanged}
+              // onChange={onCityFilterValueChanged}
+              placeholder="Search..."
+            >
+
+            </TextBox>
+            {/* <input
               className='ship-country-filter search-input'
               type='text'
               value={tenXaSearch}
               onChange={onTenXaValueChanged}
+              // onValueChanged={onTenXaValueChanged}
               placeholder='Search...'
-            />
+            /> */}
           </div>
         </div>
 
