@@ -308,6 +308,7 @@ const DanhMucPhuongXaPage = () => {
               className='ship-country-filter search-input'
               type='text'
               value={tenXaSearch}
+              valueChangeEvent="keyup"
               onValueChanged={onCityFilterValueChanged}
               // onChange={onCityFilterValueChanged}
               placeholder="Search..."
