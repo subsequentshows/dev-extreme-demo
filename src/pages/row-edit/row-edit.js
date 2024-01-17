@@ -717,6 +717,7 @@ const RowEdit = () => {
           const data = await dataSource.load();
           const updatedData = data.map((item) => {
             const changedData = item.data || {};
+            console.log(changedData)
 
             return {
               menuId: item.MenuId,
@@ -736,8 +737,10 @@ const RowEdit = () => {
             };
           });
 
+          console.log(updatedData)
+
           // Call your custom update function or modify as needed
-          await handleUpdate(updatedData);
+          // await handleUpdate(updatedData);
         } catch (error) {
           console.error("Xảy ra lỗi khi cập nhật dữ liệu: - ", error);
           notify(
@@ -754,7 +757,7 @@ const RowEdit = () => {
         }
       }
     });
-  }, [dataSource, handleUpdate]);
+  }, [dataSource]);
 
 
   return (

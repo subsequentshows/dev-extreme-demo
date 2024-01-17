@@ -254,6 +254,7 @@ const DanhMucPhuongXaPage = () => {
   }, []);
 
   const onTenXaValueChanged = useCallback(
+    // Bật sẵn unicode dựng sẵn của unikey
     (e) => {
       const dataGrid = dataGridRef.current.instance;
       if (e.target.value === '') {
