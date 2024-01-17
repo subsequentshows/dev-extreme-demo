@@ -9,10 +9,7 @@ import {
   Grouping,
   Paging,
   Pager,
-  SearchPanel,
   Summary,
-  RequiredRule,
-  StringLengthRule,
   GroupItem,
   TotalItem,
   ValueFormat,
@@ -23,6 +20,17 @@ import {
   Item,
   RemoteOperations
 } from 'devextreme-react/data-grid';
+import {
+  Validator,
+  RequiredRule,
+  CompareRule,
+  EmailRule,
+  PatternRule,
+  StringLengthRule,
+  RangeRule,
+  AsyncRule,
+  CustomRule,
+} from 'devextreme-react/validator';
 import { Popup, Position, ToolbarItem } from 'devextreme-react/popup';
 import FileUploader, { FileUploaderTypes } from 'devextreme-react/file-uploader';
 import { Button } from "devextreme-react/button";
@@ -31,7 +39,6 @@ import CustomStore from "devextreme/data/custom_store";
 import notify from 'devextreme/ui/notify';
 import WarningIcon from "../../asset/image/confirm.png";
 import axios, { isCancel, AxiosError } from 'axios';
-
 
 import { baseURL, localApi } from "../../api/api";
 
@@ -85,6 +92,8 @@ const DanhSachNhomQuyenPage = () => {
   const dataGridRef = useRef(null);
   const allowedPageSizes = [20, 50, 100, 150, 200];
   const exportFormats = ['xlsx', 'pdf'];
+
+  const namePattern = /^[^0-9]+$/;
 
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [isPopupVisible, setPopupVisibility] = useState(false);
@@ -485,6 +494,9 @@ const DanhSachNhomQuyenPage = () => {
             allowExporting={true}
             headerCellTemplate="Tên"
           >
+            <RequiredRule message="Bạn chưa nhập vào tên" />
+            {/* <PatternRule message="Tên thư mục không được để trống" pattern={namePattern} /> */}
+            <StringLengthRule message="Tên thư mục phải chứa tối thiểu 2 ký tự" min={2} max={50} />
           </Column>
 
           <Column caption="Đường dẫn"
@@ -502,6 +514,7 @@ const DanhSachNhomQuyenPage = () => {
             allowExporting={true}
             headerCellTemplate="Đường dẫn"
           >
+            <StringLengthRule message="Tên đường dẫn phải chứa tối thiểu 2 ký tự" min={2} max={50} />
           </Column>
 
           <Toolbar>

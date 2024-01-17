@@ -5,31 +5,19 @@ import {
   FilterRow,
   HeaderFilter,
   GroupPanel,
-  Editing,
   Grouping,
   Paging,
   Pager,
-  SearchPanel,
-  Summary,
   RequiredRule,
   StringLengthRule,
-  GroupItem,
-  TotalItem,
-  ValueFormat,
   ColumnFixing,
   Export,
-  Selection,
   Toolbar,
   Item
 } from 'devextreme-react/data-grid';
-import { Popup, Position, ToolbarItem } from 'devextreme-react/popup';
-import { Button } from "devextreme-react/button";
-import { SelectBox, SelectBoxTypes } from "devextreme-react/select-box";
-import { TextBox } from "devextreme-react";
-
-
-import CustomStore from "devextreme/data/custom_store";
-import { formatDate } from "devextreme/localization";
+import { Popup, ToolbarItem } from 'devextreme-react/popup';
+import { SelectBox } from "devextreme-react/select-box";
+import $ from 'jquery';
 import "whatwg-fetch";
 import { baseURL } from "../../api/api";
 import WarningIcon from "../../asset/image/confirm.png";
@@ -45,15 +33,6 @@ import { exportDataGrid as exportDataGridToPdf } from 'devextreme/pdf_exporter';
 import { jsPDF } from "jspdf";
 // Default export is a4 paper, portrait, using millimeters for units
 
-import * as XLSX from "xlsx";
-import * as JSZIP from "jszip";
-import $ from 'jquery';
-import { Modal } from "react-bootstrap-v5";
-
-// import readXlsxFile from 'read-excel-file';
-
-const refreshModeLabel = { "aria-label": "Refresh Mode" };
-const REFRESH_MODES = ["full", "reshape", "repaint"];
 const renderLabel = () => <div className="toolbar-label">Danh mục phường xã</div>;
 const exportFormats = ['xlsx', 'pdf'];
 
@@ -111,11 +90,9 @@ const DanhMucPhuongXaPage = () => {
   const [tenTinhThanhPhoFilter, setTenTinhThanhPhoFilter] = useState("");
 
   const [tenXaSearch, setTenXaSearch] = useState("");
-  const [tenHuyenSearch, setTenHuyenSearch] = useState('');
 
   const [filterStatus, setFilterStatus] = useState(statuses[0]);
   const [filterCityStatus, setFilterCityStatus] = useState(statuses[0]);
-  const [showFilterRow, setShowFilterRow] = useState(true);
 
   const [dataSource, setDataSource] = useState([]);
   const [contentData, setContentData] = useState();
@@ -271,10 +248,10 @@ const DanhMucPhuongXaPage = () => {
     }, [setTenXaSearch]);
 
   useEffect(() => {
-    var ds = dataSource.filter(el => {
-      // if (el.TEN.toLowerCase().includes(tenXaSearch.toLowerCase()) || el.MA.toLowerCase().includes(tenXaSearch.toLowerCase()))
-      if (el.TEN.toLowerCase().includes(tenXaSearch.toLowerCase()))
+    let ds = dataSource.filter(el => {
+      if (el.TEN.toLowerCase().includes(tenXaSearch.toLowerCase())) {
         return el;
+      }
     });
     setContentData(ds);
   }, [tenXaSearch, dataSource]);

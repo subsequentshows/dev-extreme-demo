@@ -757,9 +757,6 @@ const RowEdit = () => {
             console.log(changedData)
             console.log(item.MenuId)
 
-
-
-
             // return {
             //   menuId: item.MenuId,
             //   parentId: item.ParentId,
@@ -799,7 +796,6 @@ const RowEdit = () => {
       }
     });
   }, [dataSource]);
-
 
   return (
     <>
@@ -845,7 +841,7 @@ const RowEdit = () => {
             cellRender={rowIndexes}
             headerCellTemplate="STT"
           >
-            <StringLengthRule max={3} message="" />
+            <StringLengthRule min={1} max={6} message="" />
           </Column>
 
           <Column caption="MenuID"
@@ -863,7 +859,7 @@ const RowEdit = () => {
             allowExporting={true}
             headerCellTemplate="MenuID"
           >
-            <StringLengthRule max={3} message="" />
+            <StringLengthRule min={1} max={6} message="" />
           </Column>
 
           <Column caption="Sửa"
@@ -897,7 +893,9 @@ const RowEdit = () => {
               };
             }}
           >
-            <StringLengthRule min={1} message="Toi thieu 1 ky tu" />
+            <RequiredRule message="Bạn chưa nhập vào tên" />
+            {/* <PatternRule message="Tên thư mục không được để trống" pattern={namePattern} /> */}
+            <StringLengthRule message="Tên thư mục phải chứa tối thiểu 2 ký tự" min={2} max={50} />
           </Column>
 
           <Column caption="Đường dẫn"
@@ -924,6 +922,7 @@ const RowEdit = () => {
               };
             }}
           >
+            <StringLengthRule message="Tên đường dẫn phải chứa tối thiểu 2 ký tự" min={2} max={50} />
           </Column>
 
           <Toolbar>
