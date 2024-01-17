@@ -227,26 +227,26 @@ const DanhMucPhuongXaPage = () => {
     setCurrentPageIndex(e.component.pageIndex());
   };
 
-  const onFilterValueChanged = useCallback(({ value }) => {
+  const onTenTinhFilterValueChanged = useCallback(({ value }) => {
     const dataGrid = dataGridRef.current.instance;
 
     if (value === 'Chọn') {
       dataGrid.clearFilter();
     } else {
-      setFilterCityStatus("Chọn");
+      dataGrid.clearFilter();
       dataGrid.filter(['TEN_TINH', '=', value]);
     }
 
     setFilterStatus(value);
   }, []);
 
-  const onCityFilterValueChanged = useCallback(({ value }) => {
+  const onTenHuyenFilterValueChanged = useCallback(({ value }) => {
     const dataGrid = dataGridRef.current.instance;
 
     if (value === 'Chọn') {
       dataGrid.clearFilter();
     } else {
-      setFilterStatus("Chọn");
+      dataGrid.clearFilter();
       dataGrid.filter(['TEN_HUYEN', '=', value]);
     }
 
@@ -288,7 +288,7 @@ const DanhMucPhuongXaPage = () => {
             items={statuses}
             inputAttr={statusLabel}
             value={filterStatus}
-            onValueChanged={onFilterValueChanged}
+            onValueChanged={onTenTinhFilterValueChanged}
           />
         </div>
 
@@ -298,7 +298,7 @@ const DanhMucPhuongXaPage = () => {
             items={cityStatuses}
             inputAttr={statusLabel}
             value={filterCityStatus}
-            onValueChanged={onCityFilterValueChanged}
+            onValueChanged={onTenHuyenFilterValueChanged}
           />
         </div>
 
@@ -311,8 +311,8 @@ const DanhMucPhuongXaPage = () => {
               type='text'
               value={tenXaSearch}
               valueChangeEvent="keyup"
-              // onValueChanged={onCityFilterValueChanged}
-              onChange={onCityFilterValueChanged}
+              // onValueChanged={onTenHuyenFilterValueChanged}
+              onChange={onTenHuyenFilterValueChanged}
               placeholder="Search..."
             >
 

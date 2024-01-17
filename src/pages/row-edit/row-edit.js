@@ -505,105 +505,105 @@ const RowEdit = () => {
       component.cancelEditData();
     }, [sendBatchRequest]);
 
-  // const onSaving = useCallback(
-  //   (e) => {
-  //     e.cancel = true;
+  const onSaving = useCallback(
+    (e) => {
+      e.cancel = true;
 
-  //     if (e.changes.length) {
-  //       const addedRows = e.changes.filter(change => change.type === 'insert');
-  //       const updatedRows = e.changes.filter(change => change.type === 'update');
+      if (e.changes.length) {
+        const addedRows = e.changes.filter(change => change.type === 'insert');
+        const updatedRows = e.changes.filter(change => change.type === 'update');
 
-  //       const handleAddedRows = (changes) => {
-  //         const changesWithData = changes.map(change => {
-  //           // handle the default values or other logic
-  //           return {
-  //             ...change.data,
-  //             MenuId: 0,
-  //             order: "",
-  //             status: 0,
-  //             IsView: 0,
-  //             MenuNameEg: ""
-  //           };
-  //         });
+        const handleAddedRows = (changes) => {
+          const changesWithData = changes.map(change => {
+            // handle the default values or other logic
+            return {
+              ...change.data,
+              MenuId: 0,
+              order: "",
+              status: 0,
+              IsView: 0,
+              MenuNameEg: ""
+            };
+          });
 
-  //         // Send the changes to the server
-  //         return processBatchRequest(`${baseURL}/Manager/Menu/AddMenu`, changesWithData, e.component);
-  //       };
+          // Send the changes to the server
+          return processBatchRequest(`${baseURL}/Manager/Menu/AddMenu`, changesWithData, e.component);
+        };
 
-  //       const handleUpdatedRows = (changes) => {
-  //         const changesWithData = changes.map(change => {
-  //           const changedData = {
-  //             ...change.data,
-  //             MenuId: change.key,
-  //           };
+        const handleUpdatedRows = (changes) => {
+          const changesWithData = changes.map(change => {
+            const changedData = {
+              ...change.data,
+              MenuId: change.key,
+            };
 
-  //           // Get the current item from the data source
-  //           const currentItem = e.component.getDataSource().items().find(item => item.MenuId === changedData.MenuId);
+            // Get the current item from the data source
+            const currentItem = e.component.getDataSource().items().find(item => item.MenuId === changedData.MenuId);
 
-  //           // Include all current values in the request body
-  //           Object.keys(currentItem).forEach(key => {
-  //             if (!(key in changedData)) {
-  //               changedData[key] = currentItem[key];
-  //             }
-  //           });
+            // Include all current values in the request body
+            Object.keys(currentItem).forEach(key => {
+              if (!(key in changedData)) {
+                changedData[key] = currentItem[key];
+              }
+            });
 
-  //           return changedData;
-  //         });
+            return changedData;
+          });
 
-  //         // Send the changes to the server
-  //         return processBatchRequest(`${baseURL}/Manager/Menu/UpdateMenu`, changesWithData, e.component);
-  //       };
+          // Send the changes to the server
+          return processBatchRequest(`${baseURL}/Manager/Menu/UpdateMenu`, changesWithData, e.component);
+        };
 
-  //       // Process added rows
-  //       if (addedRows.length) {
-  //         handleAddedRows(addedRows);
-  //       }
+        // Process added rows
+        if (addedRows.length) {
+          handleAddedRows(addedRows);
+        }
 
-  //       // Process updated rows
-  //       if (updatedRows.length) {
-  //         handleUpdatedRows(updatedRows);
-  //       }
+        // Process updated rows
+        if (updatedRows.length) {
+          handleUpdatedRows(updatedRows);
+        }
+      }
+    }, [processBatchRequest]);
+
+  // const onSaving = useCallback(async (e) => {
+  //   // e.cancel = true;
+
+  //   if (e.changes && e.changes.length) {
+  //     const addedRows = e.changes.filter(change => change.type === 'insert');
+  //     const updatedRows = e.changes.filter(change => change.type === 'update');
+
+  //     // Process added rows
+  //     if (addedRows.length) {
+  //       const changesWithData = addedRows.map(change => {
+  //         return {
+  //           ...change.data,
+  //           MenuId: 0,
+  //           order: "",
+  //           status: 0,
+  //           IsView: 0,
+  //           MenuNameEg: ""
+  //         };
+  //       });
+
+  //       // Send the changes to the server
+  //       await processBatchRequest(`${baseURL}/Manager/Menu/AddMenu`, changesWithData, e.component);
   //     }
-  //   }, [processBatchRequest]);
 
-  const onSaving = useCallback(async (e) => {
-    // e.cancel = true;
+  //     // Process updated rows
+  //     if (updatedRows.length) {
+  //       const changesWithData = updatedRows.map(change => {
+  //         return {
+  //           ...change.data,
+  //           MenuId: change.key,
+  //         };
+  //       });
 
-    if (e.changes && e.changes.length) {
-      const addedRows = e.changes.filter(change => change.type === 'insert');
-      const updatedRows = e.changes.filter(change => change.type === 'update');
-
-      // Process added rows
-      if (addedRows.length) {
-        const changesWithData = addedRows.map(change => {
-          return {
-            ...change.data,
-            MenuId: 0,
-            order: "",
-            status: 0,
-            IsView: 0,
-            MenuNameEg: ""
-          };
-        });
-
-        // Send the changes to the server
-        await processBatchRequest(`${baseURL}/Manager/Menu/AddMenu`, changesWithData, e.component);
-      }
-
-      // Process updated rows
-      if (updatedRows.length) {
-        const changesWithData = updatedRows.map(change => {
-          return {
-            ...change.data,
-            MenuId: change.key,
-          };
-        });
-
-        // Send the changes to the server
-        await processBatchRequest(`${baseURL}/Manager/Menu/UpdateMenu`, changesWithData, e.component);
-      }
-    }
-  }, [processBatchRequest]);
+  //       // Send the changes to the server
+  //       await processBatchRequest(`${baseURL}/Manager/Menu/UpdateMenu`, changesWithData, e.component);
+  //     }
+  //   }
+  // }, [processBatchRequest]);
 
   const getEditAllButtonOptions = useCallback(() => ({
     text: 'Đồng ý',
@@ -713,31 +713,72 @@ const RowEdit = () => {
     ).then(async (result) => {
       if (result) {
         try {
+          // const updatedData = dataSource.load().then((data) => {
+          //   return data.map((item) => {
+          //     const changedData = item.data;
+          //     console.log(item.MenuName + "c")
+
+          //     if (changedData) {
+          //     Convert data to the desired format
+          //     return {
+          //       menuId: item.MenuId,
+          //       parentId: item.ParentId,
+          //       MenuName: changedData.MenuName || item.menuName,
+          //       menuCode: changedData.menuCode || item.MenuCode,
+          //       levelItem: changedData.levelItem || item.LevelItem,
+
+          //       icon: changedData.icon || item.Icon,
+          //       link: changedData.link || item.Link,
+          //       typeHelp: changedData.typeHelp || item.TypeHelp,
+          //       desHelp: changedData.desHelp || item.DesHelp,
+          //       linkYoutube: changedData.linkYoutube || item.LinkYoutube,
+          //       order: changedData.order || item.Order,
+          //       isView: changedData.isView || item.IsView,
+          //       status: changedData.status || item.Status,
+          //       menuNameEg: changedData.menuNameEg || item.MenuNameEg,
+          //     };
+          //     }
+
+          //     return item;
+          //   });
+          // });
+
           // Handle updating changed and current values
           const data = await dataSource.load();
           const updatedData = data.map((item) => {
-            const changedData = item.data || {};
-            console.log(changedData)
 
-            return {
-              menuId: item.MenuId,
-              parentId: item.ParentId,
-              menuCode: changedData.menuCode || item.MenuCode,
-              levelItem: changedData.levelItem || item.LevelItem,
-              MenuName: changedData.MenuName || item.MenuName,
-              icon: changedData.icon || item.Icon,
-              link: changedData.link || item.Link,
-              typeHelp: changedData.typeHelp || item.TypeHelp,
-              desHelp: changedData.desHelp || item.DesHelp,
-              linkYoutube: changedData.linkYoutube || item.LinkYoutube,
-              order: changedData.order || item.Order,
-              isView: changedData.isView || item.IsView,
-              status: changedData.status || item.Status,
-              menuNameEg: changedData.menuNameEg || item.MenuNameEg,
+            // const changedData = item.data || {};
+            const changedData = {
+              ...item.data,
+              MenuId: item.key,
             };
+
+            // console.log(changedData.Data.menuName + "c")
+            console.log(changedData)
+            console.log(item.MenuId)
+
+
+
+
+            // return {
+            //   menuId: item.MenuId,
+            //   parentId: item.ParentId,
+            //   menuCode: changedData.menuCode || item.MenuCode,
+            //   levelItem: changedData.levelItem || item.LevelItem,
+            //   MenuName: changedData.MenuName || item.MenuName,
+            //   icon: changedData.icon || item.Icon,
+            //   link: changedData.link || item.Link,
+            //   typeHelp: changedData.typeHelp || item.TypeHelp,
+            //   desHelp: changedData.desHelp || item.DesHelp,
+            //   linkYoutube: changedData.linkYoutube || item.LinkYoutube,
+            //   order: changedData.order || item.Order,
+            //   isView: changedData.isView || item.IsView,
+            //   status: changedData.status || item.Status,
+            //   menuNameEg: changedData.menuNameEg || item.MenuNameEg,
+            // };
           });
 
-          console.log(updatedData)
+          console.log(updatedData + "updateData")
 
           // Call your custom update function or modify as needed
           // await handleUpdate(updatedData);
@@ -847,7 +888,6 @@ const RowEdit = () => {
             allowFiltering={false}
             allowExporting={true}
             headerCellTemplate="Tên"
-            // onEditorPreparing={(e) => e.editorOptions.onValueChanged = onEditValueChanged}
             onEditorPreparing={(e) => {
               e.editorOptions.onValueChanged = (args) => {
                 onEditValueChanged({
@@ -891,23 +931,23 @@ const RowEdit = () => {
 
             <Item location="after" name="addRowButton" caption="Thêm" options={addButtonOptions} locateInMenu="auto"></Item>
 
-            {/* <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions} locateInMenu="never"></Item> */}
-            <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions} locateInMenu="never">
+            <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions} locateInMenu="never"></Item>
+            {/* <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions} locateInMenu="never">
               <Button
                 onClick={toggleEditAllPopup}
                 widget="dxButton"
                 text="Ghi"
               />
-            </Item>
+            </Item> */}
 
-            <Item
+            {/* <Item
               widget="dxButton"
               location="after"
               options={{
                 text: 'Xác nhận',
                 onClick: () => handleConfirmation(),
               }}
-            />
+            /> */}
 
             <Item location="after" name="revertButton" showText="always" widget="dxButton" options={cancelButtonOptions} locateInMenu="never"></Item>
 
