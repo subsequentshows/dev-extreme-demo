@@ -273,6 +273,7 @@ const RowEdit = () => {
 
   const toggleEditAllPopup = useCallback(() => {
     setEditAllPopupVisibility(!isEditAllPopupVisible);
+
   }, [isEditAllPopupVisible]);
 
   const toggleDeletePopup = useCallback(() => {
@@ -504,72 +505,115 @@ const RowEdit = () => {
       component.cancelEditData();
     }, [sendBatchRequest]);
 
-  const onSaving = useCallback(
-    (e) => {
-      e.cancel = true;
+  // const onSaving = useCallback(
+  //   (e) => {
+  //     e.cancel = true;
 
-      if (e.changes.length) {
-        const addedRows = e.changes.filter(change => change.type === 'insert');
-        const updatedRows = e.changes.filter(change => change.type === 'update');
+  //     if (e.changes.length) {
+  //       const addedRows = e.changes.filter(change => change.type === 'insert');
+  //       const updatedRows = e.changes.filter(change => change.type === 'update');
 
-        const handleAddedRows = (changes) => {
-          const changesWithData = changes.map(change => {
-            // handle the default values or other logic
-            return {
-              ...change.data,
-              MenuId: 0,
-              order: "",
-              status: 0,
-              IsView: 0,
-              MenuNameEg: ""
-            };
-          });
+  //       const handleAddedRows = (changes) => {
+  //         const changesWithData = changes.map(change => {
+  //           // handle the default values or other logic
+  //           return {
+  //             ...change.data,
+  //             MenuId: 0,
+  //             order: "",
+  //             status: 0,
+  //             IsView: 0,
+  //             MenuNameEg: ""
+  //           };
+  //         });
 
-          // Send the changes to the server
-          return processBatchRequest(`${baseURL}/Manager/Menu/AddMenu`, changesWithData, e.component);
-        };
+  //         // Send the changes to the server
+  //         return processBatchRequest(`${baseURL}/Manager/Menu/AddMenu`, changesWithData, e.component);
+  //       };
 
-        const handleUpdatedRows = (changes) => {
-          const changesWithData = changes.map(change => {
-            const changedData = {
-              ...change.data,
-              MenuId: change.key,
-            };
+  //       const handleUpdatedRows = (changes) => {
+  //         const changesWithData = changes.map(change => {
+  //           const changedData = {
+  //             ...change.data,
+  //             MenuId: change.key,
+  //           };
 
-            // Get the current item from the data source
-            const currentItem = e.component.getDataSource().items().find(item => item.MenuId === changedData.MenuId);
+  //           // Get the current item from the data source
+  //           const currentItem = e.component.getDataSource().items().find(item => item.MenuId === changedData.MenuId);
 
-            // Include all current values in the request body
-            Object.keys(currentItem).forEach(key => {
-              if (!(key in changedData)) {
-                changedData[key] = currentItem[key];
-              }
-            });
+  //           // Include all current values in the request body
+  //           Object.keys(currentItem).forEach(key => {
+  //             if (!(key in changedData)) {
+  //               changedData[key] = currentItem[key];
+  //             }
+  //           });
 
-            return changedData;
-          });
+  //           return changedData;
+  //         });
 
-          // Send the changes to the server
-          return processBatchRequest(`${baseURL}/Manager/Menu/UpdateMenu`, changesWithData, e.component);
-        };
+  //         // Send the changes to the server
+  //         return processBatchRequest(`${baseURL}/Manager/Menu/UpdateMenu`, changesWithData, e.component);
+  //       };
 
-        // Process added rows
-        if (addedRows.length) {
-          handleAddedRows(addedRows);
-        }
+  //       // Process added rows
+  //       if (addedRows.length) {
+  //         handleAddedRows(addedRows);
+  //       }
 
-        // Process updated rows
-        if (updatedRows.length) {
-          handleUpdatedRows(updatedRows);
-        }
+  //       // Process updated rows
+  //       if (updatedRows.length) {
+  //         handleUpdatedRows(updatedRows);
+  //       }
+  //     }
+  //   }, [processBatchRequest]);
+
+  const onSaving = useCallback(async (e) => {
+    // e.cancel = true;
+
+    if (e.changes && e.changes.length) {
+      const addedRows = e.changes.filter(change => change.type === 'insert');
+      const updatedRows = e.changes.filter(change => change.type === 'update');
+
+      // Process added rows
+      if (addedRows.length) {
+        const changesWithData = addedRows.map(change => {
+          return {
+            ...change.data,
+            MenuId: 0,
+            order: "",
+            status: 0,
+            IsView: 0,
+            MenuNameEg: ""
+          };
+        });
+
+        // Send the changes to the server
+        await processBatchRequest(`${baseURL}/Manager/Menu/AddMenu`, changesWithData, e.component);
       }
-    }, [processBatchRequest]);
+
+      // Process updated rows
+      if (updatedRows.length) {
+        const changesWithData = updatedRows.map(change => {
+          return {
+            ...change.data,
+            MenuId: change.key,
+          };
+        });
+
+        // Send the changes to the server
+        await processBatchRequest(`${baseURL}/Manager/Menu/UpdateMenu`, changesWithData, e.component);
+      }
+    }
+  }, [processBatchRequest]);
 
   const getEditAllButtonOptions = useCallback(() => ({
     text: 'Đồng ý',
     stylingMode: 'contained',
-    onClick: onSaving,
-  }), [onSaving]);
+    onClick: () => {
+      toggleEditAllPopup();
+
+      onSaving();
+    },
+  }), [toggleEditAllPopup, onSaving]);
 
   const getEditAllCloseButtonOptions = useCallback(() => ({
     text: 'Đóng',
@@ -577,6 +621,92 @@ const RowEdit = () => {
     type: 'normal',
     onClick: toggleEditAllPopup,
   }), [toggleEditAllPopup]);
+
+
+  const handleUpdate = useCallback(async (updatedData) => {
+    try {
+      // Ensure that updatedData is an array
+      const dataArray = Array.isArray(updatedData) ? updatedData : [updatedData];
+
+      const updateResponse = await axios.post(
+        `${baseURL}/Manager/Menu/UpdateMenu`,
+        dataArray,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${api_token}`,
+          },
+        }
+      );
+
+      if (updateResponse.data.Success) {
+        toggleEditAllPopup();
+        refreshDataGrid();
+
+        // Reset the state variables after the update operation
+        setEditedValues({});
+        setEditedRows([]);
+        setEditedColumns([]);
+      } else {
+        console.error(`Error updating items. ErrorCode: ${updateResponse.data.ErrorCode}, ErrorMessage: ${updateResponse.data.ErrorMessage}`);
+      }
+    } catch (error) {
+      console.error("Xảy ra lỗi khi cập nhật dữ liệu: - ", error);
+      notify(
+        {
+          error,
+          position: {
+            my: 'bottom right',
+            at: 'bottom right',
+          },
+        },
+        `error: ${error.message}`,
+        5000,
+      );
+    }
+  }, [toggleEditAllPopup, refreshDataGrid]);
+
+  const handleConfirmation = useCallback(() => {
+    confirm(
+      'Xác nhận',
+      'Bạn có chắc chắn muốn thực hiện thao tác này?',
+      'warning'
+    ).then((result) => {
+      if (result) {
+        // Handle updating changed and current values
+        const updatedData = dataSource.load().then((data) => {
+          return data.map((item) => {
+            const changedData = item.data;
+
+            if (changedData) {
+              // Convert data to the desired format
+              return {
+                menuId: item.MenuId,
+                parentId: item.ParentId,
+                menuCode: changedData.menuCode || item.MenuCode,
+                levelItem: changedData.levelItem || item.LevelItem,
+                MenuName: changedData.MenuName || item.MenuName,
+                icon: changedData.icon || item.Icon,
+                link: changedData.link || item.Link,
+                typeHelp: changedData.typeHelp || item.TypeHelp,
+                desHelp: changedData.desHelp || item.DesHelp,
+                linkYoutube: changedData.linkYoutube || item.LinkYoutube,
+                order: changedData.order || item.Order,
+                isView: changedData.isView || item.IsView,
+                status: changedData.status || item.Status,
+                menuNameEg: changedData.menuNameEg || item.MenuNameEg,
+              };
+            }
+
+            return item;
+          });
+        });
+
+        // await this if it's asynchronous
+        handleUpdate(updatedData);
+      }
+    });
+  }, [dataSource, handleUpdate]);
 
   return (
     <>
@@ -709,7 +839,24 @@ const RowEdit = () => {
 
             <Item location="after" name="addRowButton" caption="Thêm" options={addButtonOptions} locateInMenu="auto"></Item>
 
-            <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions} locateInMenu="never"></Item>
+            {/* <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions} locateInMenu="never"></Item> */}
+            <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions} locateInMenu="never">
+              <Button
+                onClick={toggleEditAllPopup}
+                widget="dxButton"
+                text="Ghi"
+              />
+            </Item>
+
+            <Item
+              widget="dxButton"
+              location="after"
+              options={{
+                text: 'Xác nhận',
+                onClick: () => handleConfirmation(),
+              }}
+            />
+
             <Item location="after" name="revertButton" showText="always" widget="dxButton" options={cancelButtonOptions} locateInMenu="never"></Item>
 
             <Item location="after" showText="always" name='mutiple-delete' widget="dxButton" locateInMenu="never">

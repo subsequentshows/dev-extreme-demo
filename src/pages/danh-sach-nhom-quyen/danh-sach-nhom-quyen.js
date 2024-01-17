@@ -96,7 +96,6 @@ const DanhSachNhomQuyenPage = () => {
   const [uploadedData, setUploadedData] = useState(null);
 
   const formElement = useRef(null);
-
   const [dataSource, setDataSource] = useState(
     new CustomStore({
       key: "MenuId",
@@ -200,18 +199,20 @@ const DanhSachNhomQuyenPage = () => {
         }
       },
       update: async (key, values) => {
+        const currentData = await dataGridRef.current.instance.byKey(key);
+
         try {
           const requestBody = {
             MenuId: key,
-            ParentId: values.ParentId,
-            MenuCode: values.MenuCode,
-            LevelItem: values.LevelItem,
-            MenuName: values.MenuName,
-            Link: values.Link,
-            Order: values.Order,
-            IsView: values.IsView,
-            Status: values.Status,
-            MenuNameEg: values.MenuNameEg,
+            ParentId: values.ParentId || currentData.ParentId,
+            MenuCode: values.MenuCode || currentData.MenuCode,
+            LevelItem: values.LevelItem || currentData.LevelItem,
+            MenuName: values.MenuName || currentData.MenuName,
+            Link: values.Link || currentData.Link,
+            Order: values.Order || currentData.Order,
+            IsView: values.IsView || currentData.IsView,
+            Status: values.Status || currentData.Status,
+            MenuNameEg: values.MenuNameEg || currentData.MenuNameEg,
           };
 
           const response = await fetch(
@@ -622,3 +623,4 @@ const addButtonOptions = {
 const exportButtonOptions = {
   text: 'Xuất file'
 };
+

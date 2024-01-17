@@ -262,7 +262,7 @@ const DanhMucPhuongXaPage = () => {
       } else {
         let filter = e.target.value;
         dataGrid.refresh();
-        console.log("Reloaded")
+
         // Load data after filtering
         setTenXaSearch(filter);
 
@@ -271,7 +271,8 @@ const DanhMucPhuongXaPage = () => {
 
   useEffect(() => {
     var ds = dataSource.filter(el => {
-      if (el.TEN.toLowerCase().includes(tenXaSearch.toLowerCase()) || el.MA.toLowerCase().includes(tenXaSearch.toLowerCase()))
+      // if (el.TEN.toLowerCase().includes(tenXaSearch.toLowerCase()) || el.MA.toLowerCase().includes(tenXaSearch.toLowerCase()))
+      if (el.TEN.toLowerCase().includes(tenXaSearch.toLowerCase()))
         return el;
     });
     setContentData(ds);
@@ -304,25 +305,25 @@ const DanhMucPhuongXaPage = () => {
           <label className='items-filter-label'>Tìm Xã onChange</label>
 
           <div className='input-wrapper'>
-            <TextBox
+            {/* <TextBox
               className='ship-country-filter search-input'
               type='text'
               value={tenXaSearch}
               valueChangeEvent="keyup"
-              onValueChanged={onCityFilterValueChanged}
-              // onChange={onCityFilterValueChanged}
+              // onValueChanged={onCityFilterValueChanged}
+              onChange={onCityFilterValueChanged}
               placeholder="Search..."
             >
 
-            </TextBox>
-            {/* <input
+            </TextBox> */}
+            <input
               className='ship-country-filter search-input'
               type='text'
               value={tenXaSearch}
               onChange={onTenXaValueChanged}
               // onValueChanged={onTenXaValueChanged}
               placeholder='Search...'
-            /> */}
+            />
           </div>
         </div>
 
