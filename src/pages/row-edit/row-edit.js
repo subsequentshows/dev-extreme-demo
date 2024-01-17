@@ -81,6 +81,7 @@ const renderContent = () => {
 }
 
 const RowEdit = () => {
+  //#region Property
   const dataGridRef = useRef(null);
   const allowedPageSizes = [20, 50, 100, 150, 200];
 
@@ -110,7 +111,9 @@ const RowEdit = () => {
   const [editedColumns, setEditedColumns] = useState([]);
 
   const formElement = useRef(null);
+  //#endregion
 
+  //#region Action
   const logEvent = useCallback((e) => {
     console.log(e);
     // setEvents((previousEvents) => [e, ...previousEvents]);
@@ -622,7 +625,6 @@ const RowEdit = () => {
     onClick: toggleEditAllPopup,
   }), [toggleEditAllPopup]);
 
-
   const handleUpdate = useCallback(async (updatedData) => {
     try {
       // Ensure that updatedData is an array
@@ -796,6 +798,7 @@ const RowEdit = () => {
       }
     });
   }, [dataSource]);
+  //#endregion
 
   return (
     <>
@@ -841,7 +844,6 @@ const RowEdit = () => {
             cellRender={rowIndexes}
             headerCellTemplate="STT"
           >
-            <StringLengthRule min={1} max={6} message="" />
           </Column>
 
           <Column caption="MenuID"
@@ -862,14 +864,14 @@ const RowEdit = () => {
             <StringLengthRule min={1} max={6} message="" />
           </Column>
 
-          <Column caption="Sửa"
+          {/* <Column caption="Sửa"
             type="buttons"
             width={80}
             fixed={true}
             fixedPosition="left"
           >
             <Button name="edit" />
-          </Column>
+          </Column> */}
 
           <Column caption="Tên"
             dataField="MenuName"
@@ -926,11 +928,28 @@ const RowEdit = () => {
           </Column>
 
           <Toolbar>
-            <Item location="left" locateInMenu="never" render={renderLabel} />
+            <Item
+              location="left"
+              locateInMenu="never"
+              render={renderLabel}
+            />
 
-            <Item location="after" name="addRowButton" caption="Thêm" options={addButtonOptions} locateInMenu="auto"></Item>
+            <Item location="after"
+              name="addRowButton"
+              caption="Thêm"
+              options={addButtonOptions}
+              locateInMenu="auto"
+            />
 
-            <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions} locateInMenu="never"></Item>
+            <Item
+              location="after"
+              name="saveButton"
+              showText="always"
+              widget="dxButton"
+              options={saveButtonOptions}
+              locateInMenu="never"
+            />
+
             {/* <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions} locateInMenu="never">
               <Button
                 onClick={toggleEditAllPopup}
@@ -948,9 +967,21 @@ const RowEdit = () => {
               }}
             /> */}
 
-            <Item location="after" name="revertButton" showText="always" widget="dxButton" options={cancelButtonOptions} locateInMenu="never"></Item>
+            <Item
+              location="after"
+              name="revertButton"
+              showText="always"
+              widget="dxButton"
+              options={cancelButtonOptions}
+              locateInMenu="never"
+            />
 
-            <Item location="after" showText="always" name='mutiple-delete' widget="dxButton" locateInMenu="never">
+            <Item
+              location="after"
+              showText="always"
+              name='mutiple-delete'
+              widget="dxButton"
+              locateInMenu="never">
               <Button
                 onClick={toggleDeletePopup}
                 widget="dxButton"

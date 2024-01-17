@@ -15,7 +15,7 @@ export default function Content() {
           <Route path="*" element={<Navigate to="/error-page" />} />
         </Routes>
 
-        <Footer />
+        {/* <Footer /> */}
       </SideNavBarLayout>
     </>
   );
