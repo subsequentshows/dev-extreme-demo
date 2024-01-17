@@ -666,47 +666,96 @@ const RowEdit = () => {
     }
   }, [toggleEditAllPopup, refreshDataGrid]);
 
+  // const handleConfirmation = useCallback(() => {
+  //   confirm(
+  //     'Xác nhận',
+  //     'Bạn có chắc chắn muốn thực hiện thao tác này?',
+  //     'warning'
+  //   ).then((result) => {
+  //     if (result) {
+  //       // Handle updating changed and current values
+  //       const updatedData = dataSource.load().then((data) => {
+  //         return data.map((item) => {
+  //           const changedData = item.data;
+
+  //           if (changedData) {
+  //             // Convert data to the desired format
+  //             return {
+  //               menuId: item.MenuId,
+  //               parentId: item.ParentId,
+  //               menuCode: changedData.menuCode || item.MenuCode,
+  //               levelItem: changedData.levelItem || item.LevelItem,
+  //               MenuName: changedData.MenuName || item.MenuName,
+  //               icon: changedData.icon || item.Icon,
+  //               link: changedData.link || item.Link,
+  //               typeHelp: changedData.typeHelp || item.TypeHelp,
+  //               desHelp: changedData.desHelp || item.DesHelp,
+  //               linkYoutube: changedData.linkYoutube || item.LinkYoutube,
+  //               order: changedData.order || item.Order,
+  //               isView: changedData.isView || item.IsView,
+  //               status: changedData.status || item.Status,
+  //               menuNameEg: changedData.menuNameEg || item.MenuNameEg,
+  //             };
+  //           }
+
+  //           return item;
+  //         });
+  //       });
+
+  //       // await this if it's asynchronous
+  //       handleUpdate(updatedData);
+
   const handleConfirmation = useCallback(() => {
     confirm(
       'Xác nhận',
       'Bạn có chắc chắn muốn thực hiện thao tác này?',
       'warning'
-    ).then((result) => {
+    ).then(async (result) => {
       if (result) {
-        // Handle updating changed and current values
-        const updatedData = dataSource.load().then((data) => {
-          return data.map((item) => {
-            const changedData = item.data;
+        try {
+          // Handle updating changed and current values
+          const data = await dataSource.load();
+          const updatedData = data.map((item) => {
+            const changedData = item.data || {};
 
-            if (changedData) {
-              // Convert data to the desired format
-              return {
-                menuId: item.MenuId,
-                parentId: item.ParentId,
-                menuCode: changedData.menuCode || item.MenuCode,
-                levelItem: changedData.levelItem || item.LevelItem,
-                MenuName: changedData.MenuName || item.MenuName,
-                icon: changedData.icon || item.Icon,
-                link: changedData.link || item.Link,
-                typeHelp: changedData.typeHelp || item.TypeHelp,
-                desHelp: changedData.desHelp || item.DesHelp,
-                linkYoutube: changedData.linkYoutube || item.LinkYoutube,
-                order: changedData.order || item.Order,
-                isView: changedData.isView || item.IsView,
-                status: changedData.status || item.Status,
-                menuNameEg: changedData.menuNameEg || item.MenuNameEg,
-              };
-            }
-
-            return item;
+            return {
+              menuId: item.MenuId,
+              parentId: item.ParentId,
+              menuCode: changedData.menuCode || item.MenuCode,
+              levelItem: changedData.levelItem || item.LevelItem,
+              MenuName: changedData.MenuName || item.MenuName,
+              icon: changedData.icon || item.Icon,
+              link: changedData.link || item.Link,
+              typeHelp: changedData.typeHelp || item.TypeHelp,
+              desHelp: changedData.desHelp || item.DesHelp,
+              linkYoutube: changedData.linkYoutube || item.LinkYoutube,
+              order: changedData.order || item.Order,
+              isView: changedData.isView || item.IsView,
+              status: changedData.status || item.Status,
+              menuNameEg: changedData.menuNameEg || item.MenuNameEg,
+            };
           });
-        });
 
-        // await this if it's asynchronous
-        handleUpdate(updatedData);
+          // Call your custom update function or modify as needed
+          await handleUpdate(updatedData);
+        } catch (error) {
+          console.error("Xảy ra lỗi khi cập nhật dữ liệu: - ", error);
+          notify(
+            {
+              error,
+              position: {
+                my: 'bottom right',
+                at: 'bottom right',
+              },
+            },
+            `error: ${error.message}`,
+            5000
+          );
+        }
       }
     });
   }, [dataSource, handleUpdate]);
+
 
   return (
     <>
