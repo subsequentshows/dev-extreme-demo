@@ -9,6 +9,7 @@ import {
   ErrorPagePage,
   DanhSachNhomQuyenPage,
   RowEditPage,
+  DanhMucHuyenPage,
 } from "./pages";
 import { withNavigationWatcher } from "./contexts/navigation";
 
@@ -52,6 +53,10 @@ const routes = [
   {
     path: "/row-edit",
     element: RowEditPage,
+  },
+  {
+    path: "/danh-muc-huyen",
+    element: DanhMucHuyenPage,
   },
 ];
 

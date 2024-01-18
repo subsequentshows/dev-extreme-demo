@@ -4,23 +4,17 @@ export const navigation = [
   {
     text: "Home",
     path: "/home",
-    icon: "home",
   },
   {
     text: "Danh sách nhóm quyền",
     path: "/danh-sach-nhom-quyen",
-    icon: "folder",
+    // icon: "folder",
   },
   {
     text: "Row Edit",
     path: "/row-edit",
-    icon: "folder",
   },
-  {
-    text: "Danh mục phường xã",
-    path: "/danh-muc-phuong-xa",
-    icon: "folder",
-  },
+
   // {
   //   text: "Phan Quyen",
   //   path: "/phan-quyen",
@@ -44,11 +38,22 @@ export const navigation = [
   {
     text: "Error Page",
     path: "/error-page",
-    icon: "folder",
   },
   {
     text: "Access Denied",
     path: "/access-denied",
-    icon: "folder",
+  },
+  {
+    text: "Danh mục",
+    items: [
+      {
+        text: "Danh mục huyện",
+        path: "/danh-muc-huyen",
+      },
+      {
+        text: "Danh mục phường xã",
+        path: "/danh-muc-phuong-xa",
+      },
+    ],
   },
 ];
