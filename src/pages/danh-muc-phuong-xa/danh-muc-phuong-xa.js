@@ -119,6 +119,30 @@ const DanhMucPhuongXaPage = () => {
     fetchData().then(data => { setContentData(data); setDataSource(data) })
   }, []);
 
+  function removeVietNameseAccents(str) {
+    var AccentsMap = [
+      "aàảãáạăằẳẵắặâầẩẫấậ",
+      "AÀẢÃÁẠĂẰẲẴẮẶÂẦẨẪẤẬ",
+      "dđ", "DĐ",
+      "eèẻẽéẹêềểễếệ",
+      "EÈẺẼÉẸÊỀỂỄẾỆ",
+      "iìỉĩíị",
+      "IÌỈĨÍỊ",
+      "oòỏõóọôồổỗốộơờởỡớợ",
+      "OÒỎÕÓỌÔỒỔỖỐỘƠỜỞỠỚỢ",
+      "uùủũúụưừửữứự",
+      "UÙỦŨÚỤƯỪỬỮỨỰ",
+      "yỳỷỹýỵ",
+      "YỲỶỸÝỴ"
+    ];
+    for (let i = 0; i < AccentsMap.length; i++) {
+      let re = new RegExp('[' + AccentsMap[i].substr(1) + ']', 'g');
+      let char = AccentsMap[i][0];
+      str = str.replace(re, char);
+    }
+    return str;
+  }
+
   const refreshDataGrid = useCallback(() => {
     dataGridRef.current.instance.refresh();
     console.log("Reloaded")
@@ -249,7 +273,9 @@ const DanhMucPhuongXaPage = () => {
 
   useEffect(() => {
     let ds = dataSource.filter(el => {
-      if (el.TEN.toLowerCase().includes(tenXaSearch.toLowerCase())) {
+      // if (el.TEN.normalize("NFC").toLowerCase().includes(tenXaSearch.normalize("NFC").toLowerCase())) {
+      if (removeVietNameseAccents(el.TEN).toLowerCase()
+        .includes(removeVietNameseAccents(tenXaSearch).toLowerCase())) {
         return el;
       }
     });

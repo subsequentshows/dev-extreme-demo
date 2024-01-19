@@ -43,7 +43,8 @@
 }
 
 .dx-toolbar .dx-toolbar-item.dx-toolbar-button.menu-button {
-  width: $side-panel-min-width;
+  // width: $side-panel-min-width;
+  width: 50px;
   text-align: center;
   padding: 0;
 }
