@@ -89,6 +89,7 @@ const renderContent = () => {
 }
 
 const DanhSachNhomQuyenPage = () => {
+  //#region Property
   const dataGridRef = useRef(null);
   const allowedPageSizes = [20, 50, 100, 150, 200];
   const exportFormats = ['xlsx', 'pdf'];
@@ -269,7 +270,9 @@ const DanhSachNhomQuyenPage = () => {
       }
     })
   );
+  //#endregion
 
+  //#region Action
   const onSelectionChanged = useCallback((data) => {
     setSelectedItemKeys(data.selectedRowKeys);
   }, []);
@@ -407,6 +410,7 @@ const DanhSachNhomQuyenPage = () => {
   const onFormSubmitClick = useCallback(() => {
     formElement.current.submit();
   }, []);
+  //#endregion
 
   return (
     <>

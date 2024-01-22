@@ -36,17 +36,21 @@ import { fetchAllTinh } from "../../api/DmTinh";
 import { fetchHuyenByMaTinh } from "../../api/DmHuyen";
 import { fetchXaByMaHuyenByMaTinh } from "../../api/DmXa";
 
+const statusLabel = { 'aria-label': 'Status' };
+
 const DanhMucHuyenPage = () => {
+  //#region Property
   const [dataSource, setDataSource] = useState([]);
   const [contentData, setContentData] = useState();
   const dataGridRef = useRef(null);
 
+  const [tenXaFilter, setTenXaFilter] = useState('');
   const [tenQuanHuyenFilter, setTenQuanHuyenFilter] = useState('');
   const [tenTinhThanhPhoFilter, setTenTinhThanhPhoFilter] = useState("");
 
-  const [tenXaSearch, setTenXaSearch] = useState("");
+  const [tenHuyenSearch, setTenHuyenSearch] = useState("");
 
-  const [filterStatus, setFilterStatus] = useState();
+  const [filterTenXaStatus, setFilterTenXaStatus] = useState();
   const [filterCityStatus, setFilterCityStatus] = useState();
   const [loading, setLoading] = useState(false);
   const [loadingTinh, setLoadingTinh] = useState(false);
@@ -60,6 +64,18 @@ const DanhMucHuyenPage = () => {
   const [userCaptcha, setUserCaptcha] = useState("");
   const [maXa, setMaXa] = useState("");
 
+  const [filterStatus, setFilterStatus] = useState(dmTinh);
+  //#endregion
+
+  //#region Action
+  const rowIndexes = (data) => {
+    const pageIndex = data.component.pageIndex();
+    const pageSize = data.component.pageSize();
+    const rowIndex = pageIndex * pageSize + data.rowIndex + 1;
+    return <span> {rowIndex} </span>;
+  }
+
+  // Datagrid dataSource
   useEffect(() => {
     var fetchData = async () => {
       try {
@@ -79,7 +95,10 @@ const DanhMucHuyenPage = () => {
       }
     }
 
-    fetchData().then(data => { setContentData(data); setDataSource(data) })
+    fetchData().then(data => {
+      setContentData(data);
+      setDataSource(data)
+    })
   }, []);
 
   useEffect(() => {
@@ -116,6 +135,7 @@ const DanhMucHuyenPage = () => {
 
   const getDmTinh = async () => {
     let res = await fetchAllTinh();
+
     if (res && res.Data) {
       setDmTinh(res.Data);
     }
@@ -149,27 +169,41 @@ const DanhMucHuyenPage = () => {
       dataGrid.clearFilter();
     } else {
       dataGrid.clearFilter();
-      dataGrid.filter(['TEN_HUYEN', '=', value]);
+      dataGrid.filter(['TEN', '=', value]);
     }
 
-    setFilterCityStatus(value);
+    setFilterTenXaStatus(value);
   }, []);
 
-  const onTenXaValueChanged = useCallback(
+  const onTenHuyenValueChanged = useCallback(
     (e) => {
       const dataGrid = dataGridRef.current.instance;
       if (e.target.value === '') {
-        setTenXaSearch("")
+        setTenHuyenSearch("")
         dataGrid.clearFilter();
       } else {
         let filter = e.target.value;
         dataGrid.refresh();
 
         // Load data after filtering
-        setTenXaSearch(filter);
+        setTenHuyenSearch(filter);
 
       }
-    }, [setTenXaSearch]);
+    }, [setTenHuyenSearch]);
+
+  const onTenTinhFilterValueChanged = useCallback(({ value }) => {
+    const dataGrid = dataGridRef.current.instance;
+
+    if (value === 'Chọn') {
+      dataGrid.clearFilter();
+    } else {
+      dataGrid.clearFilter();
+      dataGrid.filter(['TEN_TINH', '=', value]);
+    }
+
+    setFilterStatus(value);
+  }, []);
+  //#endregion
 
   return (
     <>
@@ -177,90 +211,106 @@ const DanhMucHuyenPage = () => {
         {/* Tinh/TP */}
         <div className="item-filter">
           <label className="items-filter-label">Tỉnh/ Thành phố</label>
-          <SelectBox
-            dataSource={dmTinh}
-            displayExpr="TEN"
-            searchEnabled={true}
-            placeholder="Chọn Tỉnh"
-            searchMode="contains"
-            searchExpr="TEN"
-            searchTimeout={200}
-            minSearchLength={0}
-            onValueChanged={(e) => setMaTinh(e.value)}
-            disabled={loadingTinh}
-            validationMessageMode="always"
-          >
-            <Validator>
-              <RequiredRule message="Không được để trống" />
-            </Validator>
-            {loadingTinh && (
-              <LoadIndicator width={"24px"} height={"24px"} visible={true} />
-            )}
-          </SelectBox>
+
+          <div className='select-wrapper'>
+            <SelectBox
+              dataSource={dmTinh}
+              displayExpr="TEN_TINH"
+              // searchEnabled={true}
+              placeholder="Chọn Tỉnh"
+              // searchMode="contains"
+              // searchExpr="TEN"
+              // searchTimeout={200}
+              // minSearchLength={0}
+              // onValueChanged={(e) => setMaTinh(e.value)}
+              // disabled={loadingTinh}
+              // validationMessageMode="always"
+
+              inputAttr={statusLabel}
+              value={filterStatus}
+              onValueChanged={onTenTinhFilterValueChanged}
+            >
+              <Validator>
+                <RequiredRule message="Không được để trống" />
+              </Validator>
+
+              {loadingTinh && (
+                <LoadIndicator className='loading-icon' visible={true} />
+              )}
+            </SelectBox>
+          </div>
         </div>
 
         {/* Huyen */}
         <div className="item-filter">
-          <label className="items-filter-label">Mã Huyện</label>
-          <SelectBox
-            dataSource={dmHuyen}
-            displayExpr="TEN"
-            searchEnabled={true}
-            placeholder="Chọn Huyện"
-            searchMode="contains"
-            searchExpr="TEN"
-            searchTimeout={200}
-            minSearchLength={0}
-            onValueChanged={(e) => setMaHuyen(e.value)}
-            disabled={loadingHuyen}
-            validationMessagePosition="bottom"
-            validationMessageMode="always"
-          >
-            <Validator>
-              <RequiredRule message="Không được để trống" />
-            </Validator>
-            {loadingHuyen && (
-              <LoadIndicator width={"24px"} height={"24px"} visible={true} />
-            )}
-          </SelectBox>
+          <label className="items-filter-label">Huyện</label>
+
+          <div className='select-wrapper'>
+            <SelectBox
+              dataSource={dmHuyen}
+              displayExpr="TEN"
+              searchEnabled={true}
+              placeholder="Chọn Huyện"
+              searchMode="contains"
+              searchExpr="TEN"
+              searchTimeout={200}
+              minSearchLength={0}
+              onValueChanged={(e) => setMaHuyen(e.value)}
+              disabled={loadingHuyen}
+              validationMessagePosition="bottom"
+              validationMessageMode="always"
+            >
+              <Validator>
+                <RequiredRule message="Không được để trống" />
+              </Validator>
+              {loadingHuyen && (
+                <LoadIndicator className='loading-icon' visible={true} />
+              )}
+            </SelectBox>
+          </div>
         </div>
 
+        {/* Xa */}
         <div className="item-filter">
-          <label className="items-filter-label">Mã Xã</label>
-          <SelectBox
-            dataSource={dmXa}
-            displayExpr="TEN"
-            searchEnabled={true}
-            placeholder="Chọn Xã"
-            searchMode="contains"
-            searchExpr="TEN"
-            searchTimeout={200}
-            minSearchLength={0}
-            disabled={loadingXa}
-            validationMessageMode="always"
-            value={filterCityStatus}
-            // onValueChanged={(e) => setMaXa(e.value)}
-            onValueChanged={onTenXaFilterValueChanged}
-          >
-            <Validator>
-              <RequiredRule message="Không được để trống" />
-            </Validator>
-            {loadingXa && (
-              <LoadIndicator width={"24px"} height={"24px"} visible={true} />
-            )}
-          </SelectBox>
+          <label className="items-filter-label">Xã</label>
+
+          <div className='select-wrapper'>
+            <SelectBox
+              dataSource={dmXa}
+              displayExpr="TEN"
+              placeholder="Chọn Xã"
+              searchMode="contains"
+              searchExpr="TEN"
+              searchTimeout={200}
+              minSearchLength={0}
+              // searchEnabled={true}
+              disabled={loadingXa}
+              validationMessageMode="always"
+              value={filterTenXaStatus}
+              inputAttr={statusLabel}
+              // onValueChanged={(e) => setMaXa(e.value)}
+              onValueChanged={onTenXaFilterValueChanged}
+            >
+              <Validator>
+                <RequiredRule message="Không được để trống" />
+              </Validator>
+              {loadingXa && (
+                <LoadIndicator className='loading-icon' visible={true} />
+              )}
+            </SelectBox>
+          </div>
         </div>
 
         <div className='item-filter'>
-          <label className='items-filter-label'>Tìm Xã onChange</label>
+          <label className='items-filter-label'>Tìm huyện</label>
 
           <div className='input-wrapper'>
             <input
               className='ship-country-filter search-input'
               type='text'
-              value={tenXaSearch}
-              onChange={onTenXaValueChanged}
-              placeholder='Search...'
+              value={tenHuyenSearch}
+              onChange={onTenHuyenValueChanged}
+              placeholder='Tìm huyện'
             />
           </div>
         </div>
@@ -270,13 +320,70 @@ const DanhMucHuyenPage = () => {
         <DataGrid
           id="grid-container"
           className='master-detail-grid'
-          key="ID"
+          keyExpr="ID"
+          dataSource={dataSource}
+          ref={dataGridRef}
           width="100%"
           height="100%"
-          dataSource={contentData}
-          ref={dataGridRef}
+          showBorders={true}
+          focusedRowEnabled={true}
         >
 
+          <Column caption="STT"
+            dataField="STT"
+            fixed={false}
+            fixedPosition="left"
+            alignment='center'
+            width={80}
+            allowEditing={false}
+            allowSorting={false}
+            allowReordering={false}
+            allowSearch={false}
+            allowFiltering={false}
+            allowExporting={true}
+            cellRender={rowIndexes}
+            headerCellTemplate="STT"
+          >
+          </Column>
+
+          <Column caption="Tên"
+            dataField="TEN"
+            width={180}
+            allowEditing={false}
+            allowFiltering={true}
+            fixed={false}
+            fixedPosition="left"
+            allowSearch={false}
+            filterOperations={['custom']}
+            calculateFilterExpression={() => {
+              return ['contains', 'TEN', tenXaFilter];
+            }}
+          />
+
+          <Column caption="Tên tỉnh"
+            dataField="TEN_TINH"
+            alignment='left'
+            allowSearch={false}
+            width={180}
+            hidingPriority={2}
+            filterOperations={['custom']}
+            calculateFilterExpression={() => {
+              return ['contains', 'TEN_TINH', tenTinhThanhPhoFilter];
+            }}
+          />
+
+          <Column caption="Tên huyện"
+            dataField="TEN_HUYEN"
+            alignment="left"
+            width={120}
+            hidingPriority={1}
+            allowSearch={false}
+            filterOperations={['custom']}
+            calculateFilterExpression={() => {
+              return ['contains', 'TEN_HUYEN', tenQuanHuyenFilter];
+            }}
+          >
+          </Column>
         </DataGrid>
       </div>
     </>

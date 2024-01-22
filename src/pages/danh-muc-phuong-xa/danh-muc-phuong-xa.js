@@ -42,43 +42,8 @@ const statusLabel = { 'aria-label': 'Status' };
 
 $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
 
-const renderContent = () => {
-  return (
-    <>
-      <div className='warning-icon'>
-        <img src={WarningIcon} alt='icon-canh-bao' />
-      </div>
-      <p>Bạn có chắc chắn là muốn thực hiện thao tác này!</p>
-    </>
-  )
-}
-
-function onExporting(e) {
-  if (e.format === 'xlsx') {
-    const workbook = new Workbook();
-    const worksheet = workbook.addWorksheet('Companies');
-    exportDataGridToExcel({
-      component: e.component,
-      worksheet,
-      autoFilterEnabled: true,
-    }).then(() => {
-      workbook.xlsx.writeBuffer().then((buffer) => {
-        saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Companies.xlsx');
-      });
-    });
-  }
-  else if (e.format === 'pdf') {
-    const doc = new jsPDF();
-    exportDataGridToPdf({
-      jsPDFDocument: doc,
-      component: e.component
-    }).then(() => {
-      doc.save('Companies.pdf');
-    })
-  };
-}
-
 const DanhMucPhuongXaPage = () => {
+  //#region Property
   const dataGridRef = useRef(null);
 
   const [isPopupVisible, setPopupVisibility] = useState(false);
@@ -96,7 +61,9 @@ const DanhMucPhuongXaPage = () => {
 
   const [dataSource, setDataSource] = useState([]);
   const [contentData, setContentData] = useState();
+  //#endregion
 
+  //#region Action
   useEffect(() => {
     var fetchData = async () => {
       try {
@@ -255,7 +222,6 @@ const DanhMucPhuongXaPage = () => {
   }, []);
 
   const onTenXaValueChanged = useCallback(
-    // Bật sẵn unicode dựng sẵn của unikey
     (e) => {
       const dataGrid = dataGridRef.current.instance;
       if (e.target.value === '') {
@@ -282,6 +248,43 @@ const DanhMucPhuongXaPage = () => {
     setContentData(ds);
   }, [tenXaSearch, dataSource]);
 
+  const renderContent = () => {
+    return (
+      <>
+        <div className='warning-icon'>
+          <img src={WarningIcon} alt='icon-canh-bao' />
+        </div>
+        <p>Bạn có chắc chắn là muốn thực hiện thao tác này!</p>
+      </>
+    )
+  }
+
+  function onExporting(e) {
+    if (e.format === 'xlsx') {
+      const workbook = new Workbook();
+      const worksheet = workbook.addWorksheet('Companies');
+      exportDataGridToExcel({
+        component: e.component,
+        worksheet,
+        autoFilterEnabled: true,
+      }).then(() => {
+        workbook.xlsx.writeBuffer().then((buffer) => {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Companies.xlsx');
+        });
+      });
+    }
+    else if (e.format === 'pdf') {
+      const doc = new jsPDF();
+      exportDataGridToPdf({
+        jsPDFDocument: doc,
+        component: e.component
+      }).then(() => {
+        doc.save('Companies.pdf');
+      })
+    };
+  }
+  //#endregion
+
   return (
     <>
       <div className="item-filter-wrapper responsive-paddings">
@@ -298,7 +301,8 @@ const DanhMucPhuongXaPage = () => {
         <div className='item-filter'>
           <label className='items-filter-label'>Tên huyện</label>
           <SelectBox
-            items={cityStatuses}
+            // items={cityStatuses}
+            dataSource={cityStatuses}
             inputAttr={statusLabel}
             value={filterCityStatus}
             onValueChanged={onTenHuyenFilterValueChanged}
@@ -353,26 +357,21 @@ const DanhMucPhuongXaPage = () => {
           className='master-detail-grid'
           dataSource={contentData}
           ref={dataGridRef}
-          key="ID"
+          keyExpr="ID"
           width="100%"
           height="100%"
           showBorders={true}
-          focusedRowEnabled={false}
+          focusedRowEnabled={true}
           remoteOperations={false}
           repaintChangesOnly={true}
           allowColumnReordering={false}
           onExporting={onExporting}
           onSelectionChanged={onSelectionChanged}
           onPageChanged={onPageChanged}
-          loadOptions={{
-            searchValue: tenXaSearch,
-          }}
+        // loadOptions={{
+        //   searchValue: tenXaSearch,
+        // }}
         >
-          {/* <Editing mode="popup"
-            allowAdding={true}
-            allowDeleting={false}
-            allowUpdating={false}
-          /> */}
 
           <Column caption="STT"
             dataField="STT"
@@ -389,28 +388,7 @@ const DanhMucPhuongXaPage = () => {
             cellRender={rowIndexes}
             headerCellTemplate="STT"
           >
-            <StringLengthRule max={3} message="" />
           </Column>
-
-          <Column caption="Mã"
-            dataField="MA"
-            alignment='left'
-            width={80}
-            hidingPriority={3}
-            allowEditing={false}
-            allowFiltering={false}
-            fixed={false}
-            fixedPosition="left"
-          />
-
-          {/* <Column caption="Sửa"
-            type="buttons"
-            width={80}
-            fixed={true}
-            fixedPosition="left"
-          >
-            <Button name="edit" />
-          </Column> */}
 
           <Column caption="Tên"
             dataField="TEN"
