@@ -1,378 +1,375 @@
-import { useRef, useState, useEffect, useContext } from 'react';
-import "./LoginForm.scss";
-import AuthContext from "../../contexts/authProvider";
-import { Link, useNavigate, useLocation, Routes, Route, Navigate, BrowserRouter, Redirect } from "react-router-dom";
-import { localApi, baseURL } from '../../api/api';
-import axios from 'axios';
-import $ from 'jquery';
+import React, { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import LoadIndicator from "devextreme-react/load-indicator";
+import notify from "devextreme/ui/notify";
+import { useAuth } from "../../contexts/auth";
+import { SelectBox, TextBox, CheckBox, Button } from "devextreme-react";
+
+import { fetchAllTinh } from "../../api/DmTinh";
+import { fetchHuyenByMaTinh } from "../../api/DmHuyen";
+import { fetchXaByMaHuyenByMaTinh } from "../../api/DmXa";
+import {
+  loadCaptchaEnginge,
+  LoadCanvasTemplate,
+  validateCaptcha,
+} from "react-simple-captcha";
+import {
+  Validator,
+  RequiredRule,
+  CompareRule,
+  EmailRule,
+  PatternRule,
+  StringLengthRule,
+  RangeRule,
+  AsyncRule,
+  CustomRule,
+} from "devextreme-react/validator";
 import Footer from "../footer/Footer";
+import $ from 'jquery';
+
+import "./LoginForm.scss";
 import LoginIcon from "../../asset/image/icondanhmuckhac.png";
 import LoginBackground from "../../asset/image/login-background.png";
+import CompanyLogo from "../../asset/image/company-logo.png";
 
+function alignContent() {
+  let headerHeight = $('.header').outerHeight(),
+    footerHeight = $('.copyright-section').outerHeight(),
+    windowHeight = $(window).height(),
+    contentHeight = $('.height-100').outerHeight();
 
-const LOGIN_URL = '/login';
+  let remainingHeight = windowHeight - headerHeight - footerHeight;
+  let marginTop = Math.max(0, (remainingHeight - contentHeight) / 2);
 
-const Login = () => {
-  const { setAuth } = useContext(AuthContext);
+  $('.height-100').css('margin-top', marginTop + 'px');
+}
 
-  const userRef = useRef();
-  const errRef = useRef();
+// alignContent();
+// $(window).resize(alignContent);
 
+$('.signin-btn').click(() => {
+  alignContent();
+});
+
+$(document).ready(function () {
+  $(window).resize(function () {
+    alignContent();
+  });
+
+});
+setTimeout(function () { alignContent(); }, 100);
+
+export default function LoginForm() {
+  //#region Property
   const navigate = useNavigate();
-  const prevLocation = useLocation();
-  const from = prevLocation.state?.from?.pathname || "/home";
+  const { signIn } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [loadingTinh, setLoadingTinh] = useState(false);
+  const [loadingHuyen, setLoadingHuyen] = useState(false);
+  const [loadingXa, setLoadingXa] = useState(false);
+  const [dmTinh, setDmTinh] = useState({});
+  const [dmHuyen, setDmHuyen] = useState({});
+  const [dmXa, setDmXa] = useState({});
+  const [maTinh, setMaTinh] = useState("");
+  const [maHuyen, setMaHuyen] = useState("");
+  const [userCaptcha, setUserCaptcha] = useState("");
+  const [maXa, setMaXa] = useState("");
+  //#endregion
 
-  const [user, setUser] = useState('');
-  const [password, setPwd] = useState('');
-  const [errMsg, setErrMsg] = useState('');
-
-  const [success, setSuccess] = useState(false);
-
-  const [truongData, setTruongData] = useState([]);
-  const [tinhThanhPhoData, setTinhThanhPhoData] = useState([]);
-  const [phuongXaData, setPhuongXaData] = useState([]);
-  const [capHocData, setCapHocData] = useState([]);
-
-  const [selectedXa, setSelectedXa] = useState('-1');
-  const [selectedTruong, setSelectedTruong] = useState('-1');
-  const [selectedTinh, setSelectedTinh] = useState('-1');
-  const [selectedCapHoc, setSelectedCapHoc] = useState('-1');
+  //#region Action
+  const formData = useRef({
+    userName: "",
+    password: "",
+    rememberMe: false,
+  });
 
   useEffect(() => {
-    setErrMsg('');
-  }, [user, password])
-
-  // useEffect(() => {
-  //   userRef.current.focus();
-  // }, [])
-
-  // Tỉnh/Thành phố
-  useEffect(() => {
-    console.log('Fetching TinhThanhPhoData');
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${baseURL}/DanhMuc/GetDMTinhThanhPho`);
-        setTinhThanhPhoData(response.data);
-
-      } catch (error) {
-        console.error('Đã xảy ra lỗi khi lấy dữ liệu tỉnh/thành phố: ', error);
-      }
-    };
-    // Fetch TinhThanhPho data when component mounts
-    fetchData();
+    getDmTinh();
   }, []);
 
-  // Cấp học
   useEffect(() => {
-    console.log('Fetching CapHoc');
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${baseURL}/DanhMuc/GetDMCapHoc`);
-        setCapHocData(response.data);
-
-      } catch (error) {
-        console.error('Đã xảy ra lỗi khi lấy dữ liệu cấp học: ', error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  // Phường/Xã
-  useEffect(() => {
-    console.log('Fetching PhuongXa');
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${baseURL}/DanhMuc/GetDMPhuongXa`);
-        setPhuongXaData(response.data);
-
-      } catch (error) {
-        console.error('Đã xảy ra lỗi khi lấy dữ liệu phường xã: ', error);
-      }
-    };
-    fetchData();
-  }, []);
-
-  // Trường
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const response = await axios.get('https://localhost:7223/api/DanhMuc/GetDMTruong');
-  //       setPhuongXaData(response.data);
-
-  //     } catch (error) {
-  //       console.error('Đã xảy ra lỗi khi lấy dữ liệu phường xã: ', error);
-  //     }
-  //   };
-  //   fetchData();
-  // }, []);
-
-  // function componentDidMount() {
-  //   loadCaptchaEnginge(6);
-  // };
-
-
-  // Old captcha
-  // useEffect(() => {
-  //   loadCaptchaEnginge(6);
-  //   loadCaptchaEnginge(5, "gray");
-  // }, []);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    let user_captcha_value = $("#user_captcha_input").val();
-
-    // if (validateCaptcha(user_captcha_value) === true) {
-
-    // } else if (user_captcha_value === "") {
-    //   setErrMsg('Vui lòng nhập mã xác nhận');
-    // } else {
-    //   setErrMsg('Mã xác nhận không chính xác');
-    //   $("#user_captcha_input").val("")
-    // }
-
-    try {
-      const response = await localApi.post(LOGIN_URL,
-        JSON.stringify({
-          username: user,
-          password: password,
-          ma_tinh: "01",
-          ma_huyen: "001",
-          ma_xa: "00001"
-        }),
-        {
-          headers: { 'Content-Type': 'application/json' },
-          withCredentials: true
-        }
-      );
-      console.log("JSON respone data" + JSON.stringify(response?.data));
-      //console.log(JSON.stringify(response));
-
-      const accessToken = response?.data?.accessToken;
-      const roles = response?.data?.roles;
-
-      setAuth({ user, password, roles, accessToken });
-      setUser('');
-      setPwd('');
-
-      const from = prevLocation.state?.from?.pathname || "/#/home";
-      navigate(from, { replace: true });
-      setSuccess(true);
-      console.log("navigated")
-      navigate("/#/home")
-
-    } catch (err) {
-      if (!err?.response) {
-        setErrMsg('No Server Response');
-      } else if (err.response?.status === 400) {
-        setErrMsg('Missing Username or Password');
-      } else if (err.response?.status === 401) {
-        setErrMsg('Unauthorized');
-      } else {
-        setErrMsg('Login Failed');
-      }
-      errRef.current.focus();
+    let arr = [];
+    maTinh.MA && arr.push(maTinh.MA);
+    if (arr && arr.length) {
+      setLoadingHuyen(true);
+      setLoadingXa(true);
+      getDmHuyen(arr);
+      setTimeout(() => {
+        setLoadingHuyen(false);
+        setLoadingXa(false);
+      }, 500);
     }
-  }
+  }, [maTinh]);
+
+  useEffect(() => {
+    let arrMaTinh = [];
+    let arrMaHuyen = [];
+    maTinh.MA && arrMaTinh.push(maTinh.MA);
+    maHuyen.MA && arrMaHuyen.push(maHuyen.MA);
+    if (arrMaTinh && arrMaTinh.length && arrMaHuyen && arrMaHuyen.length) {
+      setLoadingXa(true);
+      getDmXa(arrMaTinh, arrMaHuyen);
+      setTimeout(() => {
+        setLoadingXa(false);
+      }, 500);
+    }
+  }, [maTinh, maHuyen]);
+
+  const getDmTinh = async () => {
+    let res = await fetchAllTinh();
+    if (res && res.Data) {
+      setDmTinh(res.Data);
+    }
+  };
+
+  const getDmHuyen = async (arr) => {
+    let res = await fetchHuyenByMaTinh(0, 0, arr, "");
+    if (res && res.Data && res.Data.Data) {
+      setDmHuyen(res.Data.Data);
+    }
+  };
+
+  const getDmXa = async (arrMaTinh, arrMaHuyen) => {
+    let res = await fetchXaByMaHuyenByMaTinh(
+      0,
+      0,
+      arrMaTinh,
+      arrMaHuyen,
+      "",
+      ""
+    );
+    if (res && res.Data && res.Data.Data) {
+      setDmXa(res.Data.Data);
+    }
+  };
+
+  const onSubmit = async (e) => {
+    if (validateCaptcha(userCaptcha)) {
+      const { userName, password } = formData.current;
+      const res = await signIn(
+        userName,
+        password,
+        maTinh.MA,
+        maHuyen.MA,
+        maXa.MA
+      );
+      if (res.isOk) {
+        // notify(res.message, "success", 2000);
+        setTimeout(() => {
+          navigate("/Home");
+        }, 1000);
+      } else {
+        setLoading(false);
+        notify(res.message, "error", 2000);
+        loadCaptchaEnginge(5);
+      }
+    } else {
+      notify("Không đúng captcha", "error", 2000);
+    }
+  };
+
+  useEffect(() => {
+    loadCaptchaEnginge(5);
+  }, []);
+  //#endregion
 
   return (
-    <>
-      {success ? (
-        // <Routes>
-        //   <Route
-        //     index
-        //     element={<Navigate to="/home" />}
-        //   />
-        // </Routes>
-        <p>Logged in</p>
-      ) : (
-        <section>
-          <form onSubmit={handleSubmit}>
-            {/* <form> */}
-            <div className="container-fluid">
-              <div className="height-100">
-                <div className="login-section">
-                  <div className="login-left" style={{ backgroundImage: `url(${LoginBackground})` }} ></div>
+    <div className="container-fluid">
+      <div class="header">
+        <div class="logo-and-title">
+          <div class="company-logo">
+            <a href="/">
+              <img src={CompanyLogo} alt="Quảng Ích" />
+            </a>
+          </div>
 
-                  <div className="login-right">
-                    <div className="login-section-title">
-                      <div className="login-icon">
-                        <img src={LoginIcon} alt='login-icon' />
-                      </div>
-                      <div className="login-text">
-                        <p className="login-top-text">Đăng nhập hệ thống</p>
-                        <p className="login-bottom-text">Quản lý cấp trường</p>
-                      </div>
-                    </div>
+          <div class="login-title">
+            <p class="so-title"></p>
+            <p class="phan-mem-title">Hệ thống quản lý thu phí</p>
+          </div>
+        </div>
+      </div>
 
-                    <div className="account-title">
-                      <p>Thông tin tài khoản</p>
-                    </div>
+      <div className="login-form-wrapper height-100">
 
-                    <div className="margin_top_line">
-                      <div className="input-group md-form form-sm form-2 pl-0"
-                      >
-                        {/* <input name="tbUserName" type="text" id="tbUserName" className="form-control my-0 py-1 red-border input-left-textbox box-shadow-bt" placeholder="Tài khoản đăng nhập" wfd-id="id6" /> */}
-                        <input
-                          type="text"
-                          id="username"
-                          ref={userRef}
-                          autoComplete="off"
-                          placeholder="Mật khẩu"
-                          onChange={(e) => setUser(e.target.value)} value={user} required
-                        />
-                        <div className="input-group-append">
-                          <span className="input-group-text red lighten-3 button-right-textbox box-shadow-bt">
-                            <i className="fas fa-user text-grey qi-color" aria-hidden="true"></i>
-                          </span>
-                        </div>
+        <form className="login-form" onSubmit={onSubmit}>
+          <div className="login-section">
+            <div className="login-left" style={{ backgroundImage: `url(${LoginBackground})` }} ></div>
 
-                      </div>
-                    </div>
+            <div className="login-right">
+              <div className="login-section-title">
+                <div className="login-icon">
+                  <img src={LoginIcon} alt='login-icon' />
+                </div>
 
-                    <div className="margin_top_line">
-                      <div className="input-group md-form form-sm form-2 pl-0">
-                        <input
-                          id="password"
-                          type="password"
-                          name="tbPassword"
-                          placeholder="Mật khẩu"
-                          onChange={(e) => setPwd(e.target.value)}
-                          value={password}
-                          required
-                        />
-
-                        <div className="input-group-append">
-                          <span className="input-group-text red lighten-3 button-right-textbox box-shadow-bt">
-                            <i className="fas fa-lock text-grey qi-color"
-                              aria-hidden="true"></i>
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="account-title">
-                      <p>Thông tin đơn vị</p>
-                    </div>
-
-                    {/* Thanh Pho */}
-                    <div className="margin_top_line required rcbTruong-wrapper">
-                      <select
-                        placeholder='Chọn Sở'
-                        value={selectedTinh}
-                        onChange={(e) => setSelectedTinh(e.target.value)}
-                      >
-                        {Array.isArray(tinhThanhPhoData.Data) &&
-                          tinhThanhPhoData.Data.map((value) => (
-                            <option key={value.MA} value={value.MA}>
-                              {value.TEN}
-                            </option>
-                          ))
-                        }
-                      </select>
-                    </div>
-
-                    {/* Cap Hoc */}
-                    <div className="margin_top_line required rcbTruong-wrapper">
-                      <select
-                        placeholder='Chọn cấp học'
-                        value={selectedCapHoc}
-                        onChange={(e) => setSelectedCapHoc(e.target.value)}
-                      >
-                        {Array.isArray(capHocData.Data) &&
-                          capHocData.Data.map((value) => (
-                            <option key={value.MA} value={value.MA}>
-                              {value.TEN}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-
-                    {/* Phường xã */}
-                    <div className="margin_top_line required rcbTruong-wrapper">
-                      <select
-                        placeholder='Chọn xã'
-                        value={selectedXa}
-                        onChange={(e) => setSelectedXa(e.target.value)}
-                      >
-                        {Array.isArray(phuongXaData.Data) &&
-                          phuongXaData.Data.map((value) => (
-                            <option key={value.MA} value={value.MA}>
-                              {value.TEN}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-
-                    <div className="margin_top_line rcbPhongGD-wrapper">
-                      <select>
-                        <option value="someOption">Chọn phòng</option>
-                        <option value="otherOption">Phong.TEN</option>
-                      </select>
-                    </div>
-
-                    <div className="margin_top_line rcbPhongGD-wrapper">
-                      <select>
-                        <option value="someOption">Chọn trường</option>
-                        <option value="otherOption">Truong.TEN</option>
-                      </select>
-                    </div>
-
-                    <div className="margin_top_line captcha-section required">
-                      <div className="captcha-wrapper">
-                        <div className="captcha-input input-group">
-                          <input id="user_captcha_input"
-                            className="form-control input-captcha"
-                            name="tbCapcha"
-                            type="text"
-                            nulltext="Mã xác nhận"
-                            placeholder="Nhập mã xác nhận"
-                            autoComplete="off"
-                            wfd-id="id16"
-                          />
-                        </div>
-
-                        <div className="captcha-text captcha">
-                          {/* <LoadCanvasTemplate reloadText="Reload" /> */}
-
-                          <label>
-                            <span>Retype the characters from the picture:</span>
-                            {/* captcha code: user-input textbox */}
-                            <input id="yourFirstCaptchaUserInput" type="text" />
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="remember">
-                      <input type='checkbox'></input>
-                      <label>Ghi nhớ tài khoản</label>
-                    </div>
-
-                    <div className="signin-btn">
-                      <input type="submit"
-                        name="btSignin"
-                        value="Đăng nhập"
-                        id="btSignin"
-                        className="btn btn-default btn-qi"
-                        wfd-id="id18"
-                      // onClick={doSubmit}
-                      >
-                      </input>
-                    </div>
-
-                    <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
-                  </div>
+                <div className="login-text">
+                  <p className="login-top-text">Đăng nhập hệ thống</p>
+                  <p className="login-bottom-text">Quản lý cấp trường</p>
                 </div>
               </div>
 
-              <Footer />
+              <div className="account-title">
+                <p>Thông tin tài khoản</p>
+              </div>
+
+              <div className="margin_top_line">
+                <TextBox
+                  value={formData.current.userName}
+                  onValueChanged={(e) => (formData.current.userName = e.value)}
+                  placeholder={"Tài khoản đăng nhập"}
+                  mode={"text"}
+                  disabled={loading}
+                  validationMessageMode="always"
+                >
+                  <Validator>
+                    <RequiredRule message="Tên đăng nhập không được để trống" />
+                    <StringLengthRule
+                      message="Tên đăng nhập từ 2 ký tự trở lên"
+                      min={2}
+                    />
+                  </Validator>
+                </TextBox>
+              </div>
+
+              {/* MK */}
+              <div className="margin_top_line">
+                <TextBox
+                  value={formData.current.password}
+                  onValueChanged={(e) => (formData.current.password = e.value)}
+                  placeholder="Mật khẩu"
+                  mode={"password"}
+                  disabled={loading}
+                  validationMessageMode="always"
+                >
+                  <Validator>
+                    <RequiredRule message="Mật khẩu không được để trống" />
+                    <StringLengthRule message="Mật khẩu từ 6 ký tự trở lên" min={6} />
+                  </Validator>
+                </TextBox>
+              </div>
+
+              <div className="account-title">
+                <p>Thông tin đơn vị</p>
+              </div>
+
+              {/* TP */}
+              <div className="margin_top_line">
+                <SelectBox
+                  dataSource={dmTinh}
+                  displayExpr="TEN"
+                  searchEnabled={true}
+                  placeholder="Chọn Tỉnh"
+                  searchMode="contains"
+                  searchExpr="TEN"
+                  searchTimeout={200}
+                  minSearchLength={0}
+                  onValueChanged={(e) => setMaTinh(e.value)}
+                  disabled={loadingTinh}
+                  validationMessageMode="always"
+                >
+                  <Validator>
+                    <RequiredRule message="Không được để trống" />
+                  </Validator>
+                  {loadingTinh && (
+                    <LoadIndicator width={"24px"} height={"24px"} visible={true} />
+                  )}
+                </SelectBox>
+              </div>
+
+              {/* Huyen */}
+              <div className="margin_top_line">
+                <SelectBox
+                  dataSource={dmHuyen}
+                  displayExpr="TEN"
+                  searchEnabled={true}
+                  placeholder="Chọn Huyện"
+                  searchMode="contains"
+                  searchExpr="TEN"
+                  searchTimeout={200}
+                  minSearchLength={0}
+                  onValueChanged={(e) => setMaHuyen(e.value)}
+                  disabled={loadingHuyen}
+                  validationMessagePosition="bottom"
+                  validationMessageMode="always"
+                >
+                  <Validator>
+                    <RequiredRule message="Không được để trống" />
+                  </Validator>
+                  {loadingHuyen && (
+                    <LoadIndicator width={"24px"} height={"24px"} visible={true} />
+                  )}
+                </SelectBox>
+              </div>
+
+              {/* Xa */}
+              <div className="margin_top_line">
+                <SelectBox
+                  dataSource={dmXa}
+                  displayExpr="TEN"
+                  searchEnabled={true}
+                  placeholder="Chọn Xã"
+                  searchMode="contains"
+                  searchExpr="TEN"
+                  searchTimeout={200}
+                  minSearchLength={0}
+                  onValueChanged={(e) => setMaXa(e.value)}
+                  disabled={loadingXa}
+                  validationMessageMode="always"
+                >
+                  <Validator>
+                    <RequiredRule message="Không được để trống" />
+                  </Validator>
+                  {loadingXa && (
+                    <LoadIndicator width={"24px"} height={"24px"} visible={true} />
+                  )}
+                </SelectBox>
+              </div>
+
+              {/* Captcha */}
+              <div className="margin_top_line">
+                <LoadCanvasTemplate />
+                <label className="dx-field-label"> </label>
+                <div className="dx-field">
+                  <TextBox
+                    value={userCaptcha}
+                    onValueChanged={(e) => setUserCaptcha(e.value)}
+                    placeholder={"Captcha"}
+                    disabled={loading}
+                    validationMessageMode="always"
+                  >
+                    <Validator>
+                      <RequiredRule message="Không được để trống" />
+                    </Validator>
+                  </TextBox>
+                </div>
+              </div>
+
+              {/* Remember */}
+              <div className="captcha-wrapper">
+                <CheckBox
+                  value={formData.current.rememberMe}
+                  onValueChanged={(e) => (formData.current.rememberMe = e.value)}
+                  text={"Ghi nhớ tài khoản"}
+                  elementAttr={{ class: "form-text" }}
+                  disabled={loading}
+                />
+              </div>
+
+              <Button
+                width={"100%"}
+                type={"default"}
+                text={loading ? "" : "Đăng nhập"}
+                disabled={loading}
+                useSubmitBehavior={true}
+                accessKey=""
+              />
             </div>
+          </div>
+        </form >
 
-          </form>
-        </section >
-      )}
-    </>
-  )
+      </div>
+
+      <Footer />
+    </div>
+  );
 }
-
-export default Login
