@@ -175,17 +175,17 @@ export default function LoginForm() {
 
   return (
     <div className="container-fluid">
-      <div class="header">
-        <div class="logo-and-title">
-          <div class="company-logo">
+      <div className="header">
+        <div className="logo-and-title">
+          <div className="company-logo">
             <a href="/">
               <img src={CompanyLogo} alt="Quảng Ích" />
             </a>
           </div>
 
-          <div class="login-title">
-            <p class="so-title"></p>
-            <p class="phan-mem-title">Hệ thống quản lý thu phí</p>
+          <div className="login-title">
+            <p className="so-title"></p>
+            <p className="phan-mem-title">Hệ thống quản lý thu phí</p>
           </div>
         </div>
       </div>
@@ -326,7 +326,7 @@ export default function LoginForm() {
               </div>
 
               {/* Captcha */}
-              <div className="margin_top_line">
+              <div className="captcha-wrapper">
                 <LoadCanvasTemplate />
                 <label className="dx-field-label"> </label>
                 <div className="dx-field">
@@ -345,7 +345,7 @@ export default function LoginForm() {
               </div>
 
               {/* Remember */}
-              <div className="captcha-wrapper">
+              <div className="margin_top_line">
                 <CheckBox
                   value={formData.current.rememberMe}
                   onValueChanged={(e) => (formData.current.rememberMe = e.value)}
@@ -356,6 +356,7 @@ export default function LoginForm() {
               </div>
 
               <Button
+                className="signin-btn"
                 width={"100%"}
                 type={"default"}
                 text={loading ? "" : "Đăng nhập"}

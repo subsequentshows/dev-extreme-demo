@@ -3,20 +3,6 @@
 $color_1: #FDD835;
 $color_2: white;
 
-.with-footer {
-  >.dx-scrollable-wrapper {
-    >.dx-scrollable-container {
-      >.dx-scrollable-content {
-        >.dx-scrollview-content {
-          min-height: 100vh;
-          padding-bottom: 90px;
-          position: relative;
-        }
-      }
-    }
-  }
-}
-
 .copyright-section {
   background: -o-linear-gradient(192.3deg, #0096DB 0%, #0063C6 41.37%);
   background: linear-gradient(257.7deg, #0096DB 0%, #0063C6 41.37%);
@@ -74,7 +60,6 @@ $color_2: white;
   p {
     color: $color_2;
     font-size: 15px;
-    height: 18px;
     line-height: 18px;
   }
 
