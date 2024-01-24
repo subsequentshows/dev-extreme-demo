@@ -348,8 +348,7 @@ export default function LoginForm() {
                 />
               </div>
 
-              <Button
-                className="signin-btn"
+              <Button className="signin-btn"
                 width={"100%"}
                 type={"default"}
                 text={loading ? "" : "Đăng nhập"}
@@ -361,9 +360,7 @@ export default function LoginForm() {
             </div>
           </div>
         </form >
-
       </div>
-
       <Footer />
     </div>
   );

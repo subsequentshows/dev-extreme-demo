@@ -325,7 +325,7 @@ const DanhMucHuyenPage = () => {
           ref={dataGridRef}
           width="100%"
           height="100%"
-          showBorders={true}
+          showBorders={false}
           focusedRowEnabled={true}
         >
 

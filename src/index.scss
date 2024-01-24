@@ -56,6 +56,20 @@ body {
   transform: translateX(-3px);
 }
 
+.dx-datagrid .dx-row-lines {
+  &>td {
+    border-right: 1px solid #ccc;
+  }
+
+  td:first-child {
+    border-left: 1px solid #ccc !important;
+  }
+}
+
+.dx-datagrid-headers+.dx-datagrid-rowsview {
+  border-bottom: 1px solid #ccc !important;
+}
+
 .dx-dropdownbutton.dx-dropdownbutton-has-arrow .dx-button-has-icon.dx-buttongroup-last-item .dx-button-content {
   background-color: #0071a6;
   padding: 7px;

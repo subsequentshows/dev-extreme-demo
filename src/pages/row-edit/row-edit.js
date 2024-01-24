@@ -22,10 +22,12 @@ import {
   Selection,
   Toolbar,
   Item,
-  RemoteOperations
+  RemoteOperations,
+  KeyboardNavigation,
 } from 'devextreme-react/data-grid';
 import { Popup, Position, ToolbarItem } from 'devextreme-react/popup';
 import FileUploader, { FileUploaderTypes } from 'devextreme-react/file-uploader';
+import CheckBox, { CheckBoxTypes } from 'devextreme-react/check-box';
 import { Button } from "devextreme-react/button";
 import { SelectBox, SelectBoxTypes } from "devextreme-react/select-box";
 import CustomStore from "devextreme/data/custom_store";
@@ -112,6 +114,28 @@ const RowEdit = () => {
 
   const formElement = useRef(null);
   //#endregion
+
+  const [editOnKeyPress, setEditOnKeyPress] = useState(true);
+  const [enterKeyAction, setEnterKeyAction] = useState('moveFocus');
+  const [enterKeyDirection, setEnterKeyDirection] = useState('column');
+
+  const editOnKeyPressChanged = useCallback((e) => {
+    setEditOnKeyPress(e.value);
+  }, []);
+
+  const enterKeyActionChanged = useCallback((e) => {
+    setEnterKeyAction(e.value);
+  }, []);
+
+  const enterKeyDirectionChanged = useCallback((e) => {
+    setEnterKeyDirection(e.value);
+  }, []);
+
+  const enterKeyActions = ['startEdit', 'moveFocus'];
+  const enterKeyDirections = ['none', 'column', 'row'];
+
+  const keyActionLabel = { 'aria-label': 'Key Action' };
+  const keyDirectionLabel = { 'aria-label': 'Key Direction' };
 
   //#region Action
   const logEvent = useCallback((e) => {
@@ -800,6 +824,10 @@ const RowEdit = () => {
   }, [dataSource]);
   //#endregion
 
+  const onFocusedCellChanging = (e) => {
+    e.isHighlighted = true;
+  };
+
   return (
     <>
       <div className="responsive-paddings">
@@ -822,7 +850,14 @@ const RowEdit = () => {
           onPageChanged={onPageChanged}
           onEditValueChanged={onEditValueChanged}
           onSaving={onSaving}
+          onFocusedCellChanging={onFocusedCellChanging}
         >
+          <KeyboardNavigation
+            editOnKeyPress={editOnKeyPress}
+            enterKeyAction={enterKeyAction}
+            enterKeyDirection={enterKeyDirection}
+          />
+
           <Editing mode="batch"
             allowAdding={true}
             allowDeleting={false}
@@ -1117,6 +1152,38 @@ const RowEdit = () => {
           </div>
         </Popup>
 
+        <div className="options">
+          <div className="caption">Options</div>
+          <div className="option-container">
+            <div className="option check-box">
+              <CheckBox
+                text="Edit On Key Press"
+                value={editOnKeyPress}
+                onValueChanged={editOnKeyPressChanged}
+              />
+            </div>
+            <div className="option">
+              <span className="option-caption">Enter Key Action</span>
+              <SelectBox
+                className="select"
+                items={enterKeyActions}
+                inputAttr={keyActionLabel}
+                value={enterKeyAction}
+                onValueChanged={enterKeyActionChanged}
+              />
+            </div>
+            <div className="option">
+              <span className="option-caption">Enter Key Direction</span>
+              <SelectBox
+                className="select"
+                items={enterKeyDirections}
+                inputAttr={keyDirectionLabel}
+                value={enterKeyDirection}
+                onValueChanged={enterKeyDirectionChanged}
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );
