@@ -32,33 +32,6 @@ import LoginIcon from "../../asset/image/icondanhmuckhac.png";
 import LoginBackground from "../../asset/image/login-background.png";
 import CompanyLogo from "../../asset/image/company-logo.png";
 
-function alignContent() {
-  let headerHeight = $('.header').outerHeight(),
-    footerHeight = $('.copyright-section').outerHeight(),
-    windowHeight = $(window).height(),
-    contentHeight = $('.height-100').outerHeight();
-
-  let remainingHeight = windowHeight - headerHeight - footerHeight;
-  let marginTop = Math.max(0, (remainingHeight - contentHeight) / 2);
-
-  $('.height-100').css('margin-top', marginTop + 'px');
-}
-
-// alignContent();
-// $(window).resize(alignContent);
-
-$('.signin-btn').click(() => {
-  alignContent();
-});
-
-$(document).ready(function () {
-  $(window).resize(function () {
-    alignContent();
-  });
-
-});
-setTimeout(function () { alignContent(); }, 100);
-
 export default function LoginForm() {
   //#region Property
   const navigate = useNavigate();
@@ -77,6 +50,26 @@ export default function LoginForm() {
   //#endregion
 
   //#region Action
+  const alignContent = useEffect(() => {
+    let headerHeight = $('.header').outerHeight(),
+      footerHeight = $('.copyright-section').outerHeight(),
+      windowHeight = $(window).height(),
+      contentHeight = $('.height-100').outerHeight();
+
+    let remainingHeight = windowHeight - headerHeight - footerHeight;
+    let marginTop = Math.max(0, (remainingHeight - contentHeight) / 2);
+
+    $('.height-100').css('margin-top', marginTop + 'px');
+  }, [])
+
+  useEffect(() => {
+    window.addEventListener('resize', alignContent);
+
+    return () => {
+      window.removeEventListener('resize', alignContent);
+    };
+  }, [alignContent]);
+
   const formData = useRef({
     userName: "",
     password: "",
@@ -174,7 +167,7 @@ export default function LoginForm() {
   //#endregion
 
   return (
-    <div className="container-fluid">
+    <div className="container-fluid has-footer">
       <div className="header">
         <div className="logo-and-title">
           <div className="company-logo">
@@ -363,6 +356,7 @@ export default function LoginForm() {
                 disabled={loading}
                 useSubmitBehavior={true}
                 accessKey=""
+                onClick={alignContent}
               />
             </div>
           </div>
