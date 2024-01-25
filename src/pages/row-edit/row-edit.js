@@ -116,26 +116,8 @@ const RowEdit = () => {
   //#endregion
 
   const [editOnKeyPress, setEditOnKeyPress] = useState(true);
-  const [enterKeyAction, setEnterKeyAction] = useState('moveFocus');
-  const [enterKeyDirection, setEnterKeyDirection] = useState('column');
-
-  const editOnKeyPressChanged = useCallback((e) => {
-    setEditOnKeyPress(e.value);
-  }, []);
-
-  const enterKeyActionChanged = useCallback((e) => {
-    setEnterKeyAction(e.value);
-  }, []);
-
-  const enterKeyDirectionChanged = useCallback((e) => {
-    setEnterKeyDirection(e.value);
-  }, []);
-
-  const enterKeyActions = ['startEdit', 'moveFocus'];
-  const enterKeyDirections = ['none', 'column', 'row'];
-
-  const keyActionLabel = { 'aria-label': 'Key Action' };
-  const keyDirectionLabel = { 'aria-label': 'Key Direction' };
+  const [enterKeyAction, setEnterKeyAction] = useState('startEdit');
+  const [enterKeyDirection, setEnterKeyDirection] = useState('row');
 
   //#region Action
   const logEvent = useCallback((e) => {
@@ -828,6 +810,73 @@ const RowEdit = () => {
     e.isHighlighted = true;
   };
 
+  const onKeyDown = (e) => {
+    if (e.event.keyCode === 37 || e.event.keyCode === 38 || e.event.keyCode === 39 || e.event.keyCode === 40) {
+      e.event.preventDefault();
+      e.event.stopImmediatePropagation()();
+    }
+  }
+
+  const onFocusedRowChanging = (e) => {
+    var rowsCount = e.component.getVisibleRows().length,
+      pageCount = e.component.pageCount(),
+      pageIndex = e.component.pageIndex(),
+      key = e.event && e.event.key;
+
+    if (key && e.prevRowIndex === e.newRowIndex) {
+      if (e.newRowIndex === rowsCount - 1 && pageIndex < pageCount - 1) {
+        e.component.pageIndex(pageIndex + 1).done(function () {
+          e.component.option("focusedRowIndex", 0);
+        });
+      } else if (e.newRowIndex === 0 && pageIndex > 0) {
+        e.component.pageIndex(pageIndex - 1).done(function () {
+          e.component.option("focusedRowIndex", rowsCount - 1);
+        });
+      }
+    }
+  }
+
+  const editOnKeyPressChanged = useCallback((e) => {
+    setEditOnKeyPress();
+  }, []);
+
+  const enterKeyActionChanged = useCallback((e) => {
+    setEnterKeyAction();
+  }, []);
+
+  const enterKeyDirectionChanged = useCallback((e) => {
+    setEnterKeyDirection();
+  }, []);
+
+
+  // function ProcessCellValue(cell) {
+  //   try {
+  //     if (cell != null) {
+  //       var cval = NgayChan31(cell.value);
+  //       if (cval != cell.value || NeedJump == true) { cell.value = cval; NeedJump = true; }
+  //       if (cval == '') NeedJump = false;
+  //       var cellIndex = $(cell).closest('td').index()
+  //       if (NeedJump) {
+  //         if (is_jump_col === "1" || is_jump_col === 1) { // 1: nhap ngang - 0: nhap doc
+  //           nextRow(cell);
+  //         }
+  //         else {
+  //           nextCol(cell, cellIndex);
+  //         }
+  //       }
+  //     }
+  //     NeedJump = false;
+  //   }
+  //   catch (ex) { }
+  // }
+  // $(document).on("keyup", ".text-grid", function (event) {
+  //     if (event.which !== 37 && event.which !== 38 && event.which !== 39 && event.which !== 40) {
+  //         ProcessCellValue(this);
+  //     } else {
+  //         JumCellInput(this, event.which);
+  //     }
+  // });
+
   return (
     <>
       <div className="responsive-paddings">
@@ -851,11 +900,18 @@ const RowEdit = () => {
           onEditValueChanged={onEditValueChanged}
           onSaving={onSaving}
           onFocusedCellChanging={onFocusedCellChanging}
+          onFocusedRowChanging={onFocusedRowChanging}
+          focusedRowIndex={0} //{/* focus the first row */}
+          focusedColumnIndex={0} //{/* focus the first cell */}
         >
           <KeyboardNavigation
             editOnKeyPress={editOnKeyPress}
+            editOnKeyPressChanged={editOnKeyPressChanged}
             enterKeyAction={enterKeyAction}
+            enterKeyActionChanged={enterKeyActionChanged}
             enterKeyDirection={enterKeyDirection}
+            enterKeyDirectionChanged={enterKeyDirectionChanged}
+            onKeyDown={onKeyDown}
           />
 
           <Editing mode="batch"
@@ -878,6 +934,7 @@ const RowEdit = () => {
             allowExporting={true}
             cellRender={rowIndexes}
             headerCellTemplate="STT"
+            all
           >
           </Column>
 
@@ -898,15 +955,6 @@ const RowEdit = () => {
           >
             <StringLengthRule min={1} max={6} message="" />
           </Column>
-
-          {/* <Column caption="Sửa"
-            type="buttons"
-            width={80}
-            fixed={true}
-            fixedPosition="left"
-          >
-            <Button name="edit" />
-          </Column> */}
 
           <Column caption="Tên"
             dataField="MenuName"
@@ -949,7 +997,6 @@ const RowEdit = () => {
             allowFiltering={false}
             allowExporting={true}
             headerCellTemplate="Đường dẫn"
-            // onEditorPreparing={(e) => e.editorOptions.onValueChanged = onEditValueChanged}
             onEditorPreparing={(e) => {
               e.editorOptions.onValueChanged = (args) => {
                 onEditValueChanged({
@@ -959,7 +1006,6 @@ const RowEdit = () => {
               };
             }}
           >
-            <StringLengthRule message="Tên đường dẫn phải chứa tối thiểu 2 ký tự" min={2} max={50} />
           </Column>
 
           <Toolbar>
@@ -1041,8 +1087,7 @@ const RowEdit = () => {
           <GroupPanel visible={false} />
           <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
           <Paging enabled={true} defaultPageSize={20} defaultPageIndex={0} />
-          <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} />
-
+          <Pager allowedPageSizes={allowedPageSizes} showPageSizeSelector={true} showNavigationButtons={true} displayMode="compact" />
         </DataGrid>
 
         {/* Update all confirm popup */}
@@ -1151,39 +1196,6 @@ const RowEdit = () => {
             </form>
           </div>
         </Popup>
-
-        <div className="options">
-          <div className="caption">Options</div>
-          <div className="option-container">
-            <div className="option check-box">
-              <CheckBox
-                text="Edit On Key Press"
-                value={editOnKeyPress}
-                onValueChanged={editOnKeyPressChanged}
-              />
-            </div>
-            <div className="option">
-              <span className="option-caption">Enter Key Action</span>
-              <SelectBox
-                className="select"
-                items={enterKeyActions}
-                inputAttr={keyActionLabel}
-                value={enterKeyAction}
-                onValueChanged={enterKeyActionChanged}
-              />
-            </div>
-            <div className="option">
-              <span className="option-caption">Enter Key Direction</span>
-              <SelectBox
-                className="select"
-                items={enterKeyDirections}
-                inputAttr={keyDirectionLabel}
-                value={enterKeyDirection}
-                onValueChanged={enterKeyDirectionChanged}
-              />
-            </div>
-          </div>
-        </div>
       </div>
     </>
   );
