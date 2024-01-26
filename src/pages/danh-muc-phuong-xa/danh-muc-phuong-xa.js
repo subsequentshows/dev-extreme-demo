@@ -262,14 +262,14 @@ const DanhMucPhuongXaPage = () => {
   function onExporting(e) {
     if (e.format === 'xlsx') {
       const workbook = new Workbook();
-      const worksheet = workbook.addWorksheet('Companies');
+      const worksheet = workbook.addWorksheet('Danh mục');
       exportDataGridToExcel({
         component: e.component,
         worksheet,
         autoFilterEnabled: true,
       }).then(() => {
         workbook.xlsx.writeBuffer().then((buffer) => {
-          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Companies.xlsx');
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
         });
       });
     }
@@ -279,7 +279,7 @@ const DanhMucPhuongXaPage = () => {
         jsPDFDocument: doc,
         component: e.component
       }).then(() => {
-        doc.save('Companies.pdf');
+        doc.save('Danh mục.pdf');
       })
     };
   }
@@ -354,7 +354,7 @@ const DanhMucPhuongXaPage = () => {
       <div className="responsive-paddings">
         <DataGrid
           id="grid-container"
-          className='master-detail-grid'
+          className='data-grid'
           dataSource={contentData}
           ref={dataGridRef}
           keyExpr="ID"
@@ -392,7 +392,7 @@ const DanhMucPhuongXaPage = () => {
 
           <Column caption="Tên"
             dataField="TEN"
-            width={180}
+            width={200}
             allowEditing={false}
             allowFiltering={true}
             fixed={false}
@@ -403,7 +403,7 @@ const DanhMucPhuongXaPage = () => {
             dataField="TEN_TINH"
             alignment='left'
             allowSearch={false}
-            width={180}
+            width={200}
             hidingPriority={2}
             filterOperations={['custom']}
             calculateFilterExpression={() => {
@@ -415,7 +415,7 @@ const DanhMucPhuongXaPage = () => {
             caption="Tên huyện"
             dataField="TEN_HUYEN"
             alignment="left"
-            width={120}
+            width={200}
             hidingPriority={1}
             allowSearch={false}
             filterOperations={['custom']}
@@ -428,6 +428,12 @@ const DanhMucPhuongXaPage = () => {
           // calculateFilterExpression={() => ['contains', 'ShipCountry', tenQuanHuyenFilter]}
           >
           </Column>
+
+          <Column caption=""
+            hidingPriority={1}
+            allowSearch={false}
+            allowExporting={false}
+          />
 
           <Toolbar>
             <Item location="left" locateInMenu="never" render={renderLabel} />
@@ -446,7 +452,7 @@ const DanhMucPhuongXaPage = () => {
           <GroupPanel visible={false} />
           <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
           <Paging enabled={true} defaultPageSize={50} defaultPageIndex={0} />
-          <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} displayMode="compact" />
+          <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} displayMode="full" />
         </DataGrid>
 
         {/* Delete confirm popup */}

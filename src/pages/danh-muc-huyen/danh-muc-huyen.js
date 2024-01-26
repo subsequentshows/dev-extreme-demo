@@ -11,6 +11,7 @@ import {
   ColumnFixing,
   Export,
   Toolbar,
+  Selection,
   Item
 } from 'devextreme-react/data-grid';
 import './danh-muc-huyen.scss';
@@ -32,11 +33,27 @@ import {
   AsyncRule,
   CustomRule,
 } from "devextreme-react/validator";
+import { Button } from "devextreme-react/button";
+
+// Export to excel library
+import { exportDataGrid as exportDataGridToExcel } from 'devextreme/excel_exporter';
+import { exportDataGrid } from 'devextreme/excel_exporter';
+import { Workbook } from 'exceljs';
+import { saveAs } from 'file-saver';
+
+// Export to pdf library
+import { exportDataGrid as exportDataGridToPdf } from 'devextreme/pdf_exporter';
+import { jsPDF } from "jspdf";
+// Default export is a4 paper, portrait, using millimeters for units
+
 import { fetchAllTinh } from "../../api/DmTinh";
 import { fetchHuyenByMaTinh } from "../../api/DmHuyen";
 import { fetchXaByMaHuyenByMaTinh } from "../../api/DmXa";
 
 const statusLabel = { 'aria-label': 'Status' };
+const allowedPageSizes = [50, 100, 150, 200];
+const exportFormats = ['xlsx', 'pdf'];
+const renderLabel = () => <div className="toolbar-label">Danh mục huyện</div>;
 
 const DanhMucHuyenPage = () => {
   //#region Property
@@ -65,6 +82,7 @@ const DanhMucHuyenPage = () => {
   const [maXa, setMaXa] = useState("");
 
   const [filterStatus, setFilterStatus] = useState(dmTinh);
+  const [selectedItemKeys, setSelectedItemKeys] = useState([]);
   //#endregion
 
   //#region Action
@@ -203,6 +221,62 @@ const DanhMucHuyenPage = () => {
 
     setFilterStatus(value);
   }, []);
+
+  const onSelectionChanged = useCallback((data) => {
+    setSelectedItemKeys(data.selectedRowKeys);
+  }, []);
+
+  const selectedAndDeletedItems = selectedItemKeys.length;
+
+  function onExporting(e) {
+    // if (e.format === 'xlsx') {
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Danh mục');
+
+    if (selectedAndDeletedItems === 0) {
+      exportDataGridToExcel({
+        component: dataGridRef.current.instance,
+        worksheet,
+        autoFilterEnabled: true,
+      }).then(() => {
+        workbook.xlsx.writeBuffer().then((buffer) => {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
+        });
+      });
+    } else {
+      exportDataGridToExcel({
+        component: dataGridRef.current.instance,
+        selectedRowsOnly: true,
+        worksheet,
+        autoFilterEnabled: true,
+      }).then(() => {
+        workbook.xlsx.writeBuffer().then((buffer) => {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
+        });
+      });
+    }
+  }
+
+  function onPdfExporting(e) {
+    const doc = new jsPDF();
+
+    if (selectedAndDeletedItems === 0) {
+      exportDataGridToPdf({
+        jsPDFDocument: doc,
+        component: dataGridRef.current.instance
+      }).then(() => {
+        doc.save('Danh mục.pdf');
+      })
+    } else {
+      exportDataGridToPdf({
+        jsPDFDocument: doc,
+        selectedRowsOnly: true,
+        component: dataGridRef.current.instance
+      }).then(() => {
+        doc.save('Danh mục.pdf');
+      })
+    }
+  }
   //#endregion
 
   return (
@@ -212,93 +286,87 @@ const DanhMucHuyenPage = () => {
         <div className="item-filter">
           <label className="items-filter-label">Tỉnh/ Thành phố</label>
 
-          <div className='select-wrapper'>
-            <SelectBox
-              dataSource={dmTinh}
-              displayExpr="TEN_TINH"
-              // searchEnabled={true}
-              placeholder="Chọn Tỉnh"
-              // searchMode="contains"
-              // searchExpr="TEN"
-              // searchTimeout={200}
-              // minSearchLength={0}
-              // onValueChanged={(e) => setMaTinh(e.value)}
-              // disabled={loadingTinh}
-              // validationMessageMode="always"
+          <SelectBox
+            dataSource={dmTinh}
+            displayExpr="TEN_TINH"
+            // searchEnabled={true}
+            placeholder="Chọn Tỉnh"
+            // searchMode="contains"
+            // searchExpr="TEN"
+            // searchTimeout={200}
+            // minSearchLength={0}
+            // onValueChanged={(e) => setMaTinh(e.value)}
+            // disabled={loadingTinh}
+            // validationMessageMode="always"
 
-              inputAttr={statusLabel}
-              value={filterStatus}
-              onValueChanged={onTenTinhFilterValueChanged}
-            >
-              <Validator>
-                <RequiredRule message="Không được để trống" />
-              </Validator>
+            inputAttr={statusLabel}
+            value={filterStatus}
+            onValueChanged={onTenTinhFilterValueChanged}
+          >
+            <Validator>
+              <RequiredRule message="Không được để trống" />
+            </Validator>
 
-              {loadingTinh && (
-                <LoadIndicator className='loading-icon' visible={true} />
-              )}
-            </SelectBox>
-          </div>
+            {loadingTinh && (
+              <LoadIndicator className='loading-icon' visible={true} />
+            )}
+          </SelectBox>
         </div>
 
         {/* Huyen */}
         <div className="item-filter">
           <label className="items-filter-label">Huyện</label>
 
-          <div className='select-wrapper'>
-            <SelectBox
-              dataSource={dmHuyen}
-              displayExpr="TEN"
-              searchEnabled={true}
-              placeholder="Chọn Huyện"
-              searchMode="contains"
-              searchExpr="TEN"
-              searchTimeout={200}
-              minSearchLength={0}
-              onValueChanged={(e) => setMaHuyen(e.value)}
-              disabled={loadingHuyen}
-              validationMessagePosition="bottom"
-              validationMessageMode="always"
-            >
-              <Validator>
-                <RequiredRule message="Không được để trống" />
-              </Validator>
-              {loadingHuyen && (
-                <LoadIndicator className='loading-icon' visible={true} />
-              )}
-            </SelectBox>
-          </div>
+          <SelectBox
+            dataSource={dmHuyen}
+            displayExpr="TEN"
+            searchEnabled={true}
+            placeholder="Chọn Huyện"
+            searchMode="contains"
+            searchExpr="TEN"
+            searchTimeout={200}
+            minSearchLength={0}
+            onValueChanged={(e) => setMaHuyen(e.value)}
+            disabled={loadingHuyen}
+            validationMessagePosition="bottom"
+            validationMessageMode="always"
+          >
+            <Validator>
+              <RequiredRule message="Không được để trống" />
+            </Validator>
+            {loadingHuyen && (
+              <LoadIndicator className='loading-icon' visible={true} />
+            )}
+          </SelectBox>
         </div>
 
         {/* Xa */}
         <div className="item-filter">
           <label className="items-filter-label">Xã</label>
 
-          <div className='select-wrapper'>
-            <SelectBox
-              dataSource={dmXa}
-              displayExpr="TEN"
-              placeholder="Chọn Xã"
-              searchMode="contains"
-              searchExpr="TEN"
-              searchTimeout={200}
-              minSearchLength={0}
-              // searchEnabled={true}
-              disabled={loadingXa}
-              validationMessageMode="always"
-              value={filterTenXaStatus}
-              inputAttr={statusLabel}
-              // onValueChanged={(e) => setMaXa(e.value)}
-              onValueChanged={onTenXaFilterValueChanged}
-            >
-              <Validator>
-                <RequiredRule message="Không được để trống" />
-              </Validator>
-              {loadingXa && (
-                <LoadIndicator className='loading-icon' visible={true} />
-              )}
-            </SelectBox>
-          </div>
+          <SelectBox
+            dataSource={dmXa}
+            displayExpr="TEN"
+            placeholder="Chọn Xã"
+            searchMode="contains"
+            searchExpr="TEN"
+            searchTimeout={200}
+            minSearchLength={0}
+            // searchEnabled={true}
+            disabled={loadingXa}
+            validationMessageMode="always"
+            value={filterTenXaStatus}
+            inputAttr={statusLabel}
+            // onValueChanged={(e) => setMaXa(e.value)}
+            onValueChanged={onTenXaFilterValueChanged}
+          >
+            <Validator>
+              <RequiredRule message="Không được để trống" />
+            </Validator>
+            {loadingXa && (
+              <LoadIndicator className='loading-icon' visible={true} />
+            )}
+          </SelectBox>
         </div>
 
         <div className='item-filter'>
@@ -319,7 +387,7 @@ const DanhMucHuyenPage = () => {
       <div className='responsive-paddings'>
         <DataGrid
           id="grid-container"
-          className='master-detail-grid'
+          className='data-grid'
           keyExpr="ID"
           dataSource={dataSource}
           ref={dataGridRef}
@@ -327,6 +395,9 @@ const DanhMucHuyenPage = () => {
           height="100%"
           showBorders={false}
           focusedRowEnabled={true}
+          onExporting={onExporting}
+          selectedRowKeys={selectedItemKeys}
+          onSelectionChanged={onSelectionChanged}
         >
 
           <Column caption="STT"
@@ -348,12 +419,13 @@ const DanhMucHuyenPage = () => {
 
           <Column caption="Tên"
             dataField="TEN"
-            width={180}
+            width={200}
             allowEditing={false}
             allowFiltering={true}
             fixed={false}
             fixedPosition="left"
             allowSearch={false}
+            allowExporting={true}
             filterOperations={['custom']}
             calculateFilterExpression={() => {
               return ['contains', 'TEN', tenXaFilter];
@@ -364,8 +436,9 @@ const DanhMucHuyenPage = () => {
             dataField="TEN_TINH"
             alignment='left'
             allowSearch={false}
-            width={180}
+            width={200}
             hidingPriority={2}
+            allowExporting={true}
             filterOperations={['custom']}
             calculateFilterExpression={() => {
               return ['contains', 'TEN_TINH', tenTinhThanhPhoFilter];
@@ -375,15 +448,38 @@ const DanhMucHuyenPage = () => {
           <Column caption="Tên huyện"
             dataField="TEN_HUYEN"
             alignment="left"
-            width={120}
+            width={200}
             hidingPriority={1}
             allowSearch={false}
+            allowExporting={true}
             filterOperations={['custom']}
             calculateFilterExpression={() => {
               return ['contains', 'TEN_HUYEN', tenQuanHuyenFilter];
             }}
           >
           </Column>
+
+          <Column caption=""
+            hidingPriority={1}
+            allowSearch={false}
+            allowExporting={false}
+          />
+
+          <Toolbar>
+            <Item location="left" locateInMenu="never" render={renderLabel} />
+
+            <Item location='after' name='exportExcelButton' options={exportExcelButtonOptions}>
+              <Button className="export-excel-button" tabIndex={0} onClick={onExporting}>Xuất Excel</Button>
+            </Item>
+            <Item location='after' name='exportPdfButton' formats="pdf" options={exportPdfButtonOptions}>
+              <Button className="export-pdf-button" tabIndex={1} onClick={onPdfExporting}>Xuất Pdf</Button>
+            </Item>
+          </Toolbar>
+
+          <Selection mode="multiple" />
+          <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
+          <Paging enabled={true} defaultPageSize={50} defaultPageIndex={0} />
+          <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} displayMode="full" />
         </DataGrid>
       </div>
     </>
@@ -393,3 +489,11 @@ const DanhMucHuyenPage = () => {
 
 
 export default DanhMucHuyenPage;
+
+const exportExcelButtonOptions = {
+  text: 'Xuất excel'
+};
+
+const exportPdfButtonOptions = {
+  text: 'Xuất excel'
+};

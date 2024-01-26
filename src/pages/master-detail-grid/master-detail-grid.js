@@ -27,7 +27,7 @@ import {
 import { Popup, Position, ToolbarItem } from 'devextreme-react/popup';
 import SelectBox from 'devextreme-react/select-box';
 import { Button } from "devextreme-react/button";
-import "./master-detail-grid.scss";
+// import "./master-detail-grid.scss";
 import notify from 'devextreme/ui/notify';
 import { baseURL } from '../../api/api';
 import WarningIcon from "../../asset/image/confirm.png";

@@ -811,11 +811,26 @@ const RowEdit = () => {
   };
 
   const onKeyDown = (e) => {
-    if (e.event.keyCode === 37 || e.event.keyCode === 38 || e.event.keyCode === 39 || e.event.keyCode === 40) {
+    if (e.event.keyCode === 37 || e.event.keyCode === 39) {
       e.event.preventDefault();
-      e.event.stopImmediatePropagation()();
+      e.event.stopImmediatePropagation();
+      console.log("pressed")
+    } else {
+      console.log("not-pressed")
     }
   }
+
+  const editOnKeyPressChanged = useCallback((e) => {
+    setEditOnKeyPress();
+  }, []);
+
+  const enterKeyActionChanged = useCallback((e) => {
+    setEnterKeyAction();
+  }, []);
+
+  const enterKeyDirectionChanged = useCallback((e) => {
+    setEnterKeyDirection();
+  }, []);
 
   const onFocusedRowChanging = (e) => {
     var rowsCount = e.component.getVisibleRows().length,
@@ -835,47 +850,6 @@ const RowEdit = () => {
       }
     }
   }
-
-  const editOnKeyPressChanged = useCallback((e) => {
-    setEditOnKeyPress();
-  }, []);
-
-  const enterKeyActionChanged = useCallback((e) => {
-    setEnterKeyAction();
-  }, []);
-
-  const enterKeyDirectionChanged = useCallback((e) => {
-    setEnterKeyDirection();
-  }, []);
-
-
-  // function ProcessCellValue(cell) {
-  //   try {
-  //     if (cell != null) {
-  //       var cval = NgayChan31(cell.value);
-  //       if (cval != cell.value || NeedJump == true) { cell.value = cval; NeedJump = true; }
-  //       if (cval == '') NeedJump = false;
-  //       var cellIndex = $(cell).closest('td').index()
-  //       if (NeedJump) {
-  //         if (is_jump_col === "1" || is_jump_col === 1) { // 1: nhap ngang - 0: nhap doc
-  //           nextRow(cell);
-  //         }
-  //         else {
-  //           nextCol(cell, cellIndex);
-  //         }
-  //       }
-  //     }
-  //     NeedJump = false;
-  //   }
-  //   catch (ex) { }
-  // }
-  // $(document).on("keyup", ".text-grid", function (event) {
-  //     if (event.which !== 37 && event.which !== 38 && event.which !== 39 && event.which !== 40) {
-  //         ProcessCellValue(this);
-  //     } else {
-  //         JumCellInput(this, event.which);
-  //     }
-  // });
 
   return (
     <>
@@ -903,6 +877,7 @@ const RowEdit = () => {
           onFocusedRowChanging={onFocusedRowChanging}
           focusedRowIndex={0} //{/* focus the first row */}
           focusedColumnIndex={0} //{/* focus the first cell */}
+          onKeyDown={onKeyDown}
         >
           <KeyboardNavigation
             editOnKeyPress={editOnKeyPress}
@@ -953,7 +928,6 @@ const RowEdit = () => {
             allowExporting={true}
             headerCellTemplate="MenuID"
           >
-            <StringLengthRule min={1} max={6} message="" />
           </Column>
 
           <Column caption="Tên"
