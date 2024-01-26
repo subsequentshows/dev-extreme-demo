@@ -180,17 +180,17 @@ const DanhMucHuyenPage = () => {
     }
   };
 
-  const onTenXaFilterValueChanged = useCallback(({ value }) => {
+  const onTenTinhFilterValueChanged = useCallback(({ value }) => {
     const dataGrid = dataGridRef.current.instance;
 
     if (value === 'Chọn') {
       dataGrid.clearFilter();
     } else {
       dataGrid.clearFilter();
-      dataGrid.filter(['TEN', '=', value]);
+      dataGrid.filter(['TEN_TINH', '=', value]);
     }
 
-    setFilterTenXaStatus(value);
+    setFilterStatus(value);
   }, []);
 
   const onTenHuyenValueChanged = useCallback(
@@ -209,17 +209,17 @@ const DanhMucHuyenPage = () => {
       }
     }, [setTenHuyenSearch]);
 
-  const onTenTinhFilterValueChanged = useCallback(({ value }) => {
+  const onTenXaFilterValueChanged = useCallback(({ value }) => {
     const dataGrid = dataGridRef.current.instance;
 
     if (value === 'Chọn') {
       dataGrid.clearFilter();
     } else {
       dataGrid.clearFilter();
-      dataGrid.filter(['TEN_TINH', '=', value]);
+      dataGrid.filter(['TEN', '=', value]);
     }
 
-    setFilterStatus(value);
+    setFilterTenXaStatus(value);
   }, []);
 
   const onSelectionChanged = useCallback((data) => {
@@ -287,21 +287,21 @@ const DanhMucHuyenPage = () => {
           <label className="items-filter-label">Tỉnh/ Thành phố</label>
 
           <SelectBox
+            className='select-wrapper'
             dataSource={dmTinh}
-            displayExpr="TEN_TINH"
-            // searchEnabled={true}
+            displayExpr="TEN"
             placeholder="Chọn Tỉnh"
-            // searchMode="contains"
-            // searchExpr="TEN"
-            // searchTimeout={200}
-            // minSearchLength={0}
-            // onValueChanged={(e) => setMaTinh(e.value)}
-            // disabled={loadingTinh}
-            // validationMessageMode="always"
+            searchMode="contains"
+            searchExpr="TEN"
+            searchTimeout={200}
+            minSearchLength={0}
+            onValueChanged={(e) => setMaTinh(e.value)}
+            disabled={loadingTinh}
+            validationMessageMode="always"
 
-            inputAttr={statusLabel}
-            value={filterStatus}
-            onValueChanged={onTenTinhFilterValueChanged}
+          // inputAttr={statusLabel}
+          // value={filterStatus}
+          // onValueChanged={onTenTinhFilterValueChanged}
           >
             <Validator>
               <RequiredRule message="Không được để trống" />
@@ -318,6 +318,7 @@ const DanhMucHuyenPage = () => {
           <label className="items-filter-label">Huyện</label>
 
           <SelectBox
+            className='select-wrapper'
             dataSource={dmHuyen}
             displayExpr="TEN"
             searchEnabled={true}
@@ -345,6 +346,7 @@ const DanhMucHuyenPage = () => {
           <label className="items-filter-label">Xã</label>
 
           <SelectBox
+            className='select-wrapper'
             dataSource={dmXa}
             displayExpr="TEN"
             placeholder="Chọn Xã"
@@ -352,13 +354,13 @@ const DanhMucHuyenPage = () => {
             searchExpr="TEN"
             searchTimeout={200}
             minSearchLength={0}
-            // searchEnabled={true}
+            searchEnabled={true}
             disabled={loadingXa}
             validationMessageMode="always"
             value={filterTenXaStatus}
             inputAttr={statusLabel}
-            // onValueChanged={(e) => setMaXa(e.value)}
-            onValueChanged={onTenXaFilterValueChanged}
+            onValueChanged={(e) => setMaXa(e.value)}
+          // onValueChanged={onTenXaFilterValueChanged}
           >
             <Validator>
               <RequiredRule message="Không được để trống" />
@@ -469,10 +471,10 @@ const DanhMucHuyenPage = () => {
             <Item location="left" locateInMenu="never" render={renderLabel} />
 
             <Item location='after' name='exportExcelButton' options={exportExcelButtonOptions}>
-              <Button className="export-excel-button" tabIndex={0} onClick={onExporting}>Xuất Excel</Button>
+              <Button className="export-excel-button" onClick={onExporting}>Xuất Excel</Button>
             </Item>
             <Item location='after' name='exportPdfButton' formats="pdf" options={exportPdfButtonOptions}>
-              <Button className="export-pdf-button" tabIndex={1} onClick={onPdfExporting}>Xuất Pdf</Button>
+              <Button className="export-pdf-button" onClick={onPdfExporting}>Xuất Pdf</Button>
             </Item>
           </Toolbar>
 

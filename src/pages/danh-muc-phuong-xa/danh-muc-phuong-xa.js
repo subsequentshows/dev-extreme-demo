@@ -291,6 +291,7 @@ const DanhMucPhuongXaPage = () => {
         <div className='item-filter'>
           <label className='items-filter-label'>Tên tỉnh</label>
           <SelectBox
+            className='select-wrapper'
             items={statuses}
             inputAttr={statusLabel}
             value={filterStatus}
@@ -301,6 +302,7 @@ const DanhMucPhuongXaPage = () => {
         <div className='item-filter'>
           <label className='items-filter-label'>Tên huyện</label>
           <SelectBox
+            className='select-wrapper'
             // items={cityStatuses}
             dataSource={cityStatuses}
             inputAttr={statusLabel}

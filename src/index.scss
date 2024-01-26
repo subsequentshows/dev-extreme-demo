@@ -19,6 +19,10 @@ body {
   }
 }
 
+.dx-dropdowneditor-overlay.dx-popup-wrapper .dx-overlay-content {
+  overflow-y: auto;
+}
+
 .dx-row .dx-header-row,
 .dx-datagrid-headers .dx-datagrid-nowrap {
   background-color: #0071a6;
@@ -47,6 +51,10 @@ body {
         align-items: center;
         width: calc(100% / 3);
 
+        .dx-texteditor.dx-editor-filled::after {
+          border-bottom: 0;
+        }
+
         .select-wrapper {
           padding-left: 10px;
           width: calc(100% - 120px);
@@ -73,6 +81,10 @@ body {
           .dx-texteditor-container {
             height: 100%;
             min-height: 36px;
+
+            .dx-widget {
+              margin-left: 7px;
+            }
 
             .dx-texteditor-input-container {
               border-right: 1px solid #ccc;
@@ -152,10 +164,10 @@ body {
       .dx-selectbox.dx-textbox {
         width: calc(100% - 130px);
         margin-left: auto;
-
-        .dx-dropdowneditor-input-wrapper {
-          padding-left: 10px;
-        }
+        padding-left: 0;
+        background-color: transparent;
+        border: 1px solid #ccc;
+        border-radius: 4px;
 
       }
     }
@@ -165,6 +177,8 @@ body {
     padding: 0;
   }
 }
+
+
 
 .toolbar-label {
   font-size: 26px;
