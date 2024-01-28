@@ -516,7 +516,7 @@ const RowEdit = () => {
 
   const onSaving = useCallback(
     (e) => {
-      e.cancel = true;
+      // e.cancel = true;
 
       if (e.changes.length) {
         const addedRows = e.changes.filter(change => change.type === 'insert');
@@ -574,45 +574,6 @@ const RowEdit = () => {
         }
       }
     }, [processBatchRequest]);
-
-  // const onSaving = useCallback(async (e) => {
-  //   // e.cancel = true;
-
-  //   if (e.changes && e.changes.length) {
-  //     const addedRows = e.changes.filter(change => change.type === 'insert');
-  //     const updatedRows = e.changes.filter(change => change.type === 'update');
-
-  //     // Process added rows
-  //     if (addedRows.length) {
-  //       const changesWithData = addedRows.map(change => {
-  //         return {
-  //           ...change.data,
-  //           MenuId: 0,
-  //           order: "",
-  //           status: 0,
-  //           IsView: 0,
-  //           MenuNameEg: ""
-  //         };
-  //       });
-
-  //       // Send the changes to the server
-  //       await processBatchRequest(`${baseURL}/Manager/Menu/AddMenu`, changesWithData, e.component);
-  //     }
-
-  //     // Process updated rows
-  //     if (updatedRows.length) {
-  //       const changesWithData = updatedRows.map(change => {
-  //         return {
-  //           ...change.data,
-  //           MenuId: change.key,
-  //         };
-  //       });
-
-  //       // Send the changes to the server
-  //       await processBatchRequest(`${baseURL}/Manager/Menu/UpdateMenu`, changesWithData, e.component);
-  //     }
-  //   }
-  // }, [processBatchRequest]);
 
   const getEditAllButtonOptions = useCallback(() => ({
     text: 'Đồng ý',
@@ -674,45 +635,6 @@ const RowEdit = () => {
     }
   }, [toggleEditAllPopup, refreshDataGrid]);
 
-  // const handleConfirmation = useCallback(() => {
-  //   confirm(
-  //     'Xác nhận',
-  //     'Bạn có chắc chắn muốn thực hiện thao tác này?',
-  //     'warning'
-  //   ).then((result) => {
-  //     if (result) {
-  //       // Handle updating changed and current values
-  //       const updatedData = dataSource.load().then((data) => {
-  //         return data.map((item) => {
-  //           const changedData = item.data;
-
-  //           if (changedData) {
-  //             // Convert data to the desired format
-  //             return {
-  //               menuId: item.MenuId,
-  //               parentId: item.ParentId,
-  //               menuCode: changedData.menuCode || item.MenuCode,
-  //               levelItem: changedData.levelItem || item.LevelItem,
-  //               MenuName: changedData.MenuName || item.MenuName,
-  //               icon: changedData.icon || item.Icon,
-  //               link: changedData.link || item.Link,
-  //               typeHelp: changedData.typeHelp || item.TypeHelp,
-  //               desHelp: changedData.desHelp || item.DesHelp,
-  //               linkYoutube: changedData.linkYoutube || item.LinkYoutube,
-  //               order: changedData.order || item.Order,
-  //               isView: changedData.isView || item.IsView,
-  //               status: changedData.status || item.Status,
-  //               menuNameEg: changedData.menuNameEg || item.MenuNameEg,
-  //             };
-  //           }
-
-  //           return item;
-  //         });
-  //       });
-
-  //       // await this if it's asynchronous
-  //       handleUpdate(updatedData);
-
   const handleConfirmation = useCallback(() => {
     confirm(
       'Xác nhận',
@@ -721,72 +643,8 @@ const RowEdit = () => {
     ).then(async (result) => {
       if (result) {
         try {
-          // const updatedData = dataSource.load().then((data) => {
-          //   return data.map((item) => {
-          //     const changedData = item.data;
-          //     console.log(item.MenuName + "c")
 
-          //     if (changedData) {
-          //     Convert data to the desired format
-          //     return {
-          //       menuId: item.MenuId,
-          //       parentId: item.ParentId,
-          //       MenuName: changedData.MenuName || item.menuName,
-          //       menuCode: changedData.menuCode || item.MenuCode,
-          //       levelItem: changedData.levelItem || item.LevelItem,
 
-          //       icon: changedData.icon || item.Icon,
-          //       link: changedData.link || item.Link,
-          //       typeHelp: changedData.typeHelp || item.TypeHelp,
-          //       desHelp: changedData.desHelp || item.DesHelp,
-          //       linkYoutube: changedData.linkYoutube || item.LinkYoutube,
-          //       order: changedData.order || item.Order,
-          //       isView: changedData.isView || item.IsView,
-          //       status: changedData.status || item.Status,
-          //       menuNameEg: changedData.menuNameEg || item.MenuNameEg,
-          //     };
-          //     }
-
-          //     return item;
-          //   });
-          // });
-
-          // Handle updating changed and current values
-          const data = await dataSource.load();
-          const updatedData = data.map((item) => {
-
-            // const changedData = item.data || {};
-            const changedData = {
-              ...item.data,
-              MenuId: item.key,
-            };
-
-            // console.log(changedData.Data.menuName + "c")
-            console.log(changedData)
-            console.log(item.MenuId)
-
-            // return {
-            //   menuId: item.MenuId,
-            //   parentId: item.ParentId,
-            //   menuCode: changedData.menuCode || item.MenuCode,
-            //   levelItem: changedData.levelItem || item.LevelItem,
-            //   MenuName: changedData.MenuName || item.MenuName,
-            //   icon: changedData.icon || item.Icon,
-            //   link: changedData.link || item.Link,
-            //   typeHelp: changedData.typeHelp || item.TypeHelp,
-            //   desHelp: changedData.desHelp || item.DesHelp,
-            //   linkYoutube: changedData.linkYoutube || item.LinkYoutube,
-            //   order: changedData.order || item.Order,
-            //   isView: changedData.isView || item.IsView,
-            //   status: changedData.status || item.Status,
-            //   menuNameEg: changedData.menuNameEg || item.MenuNameEg,
-            // };
-          });
-
-          console.log(updatedData + "updateData")
-
-          // Call your custom update function or modify as needed
-          // await handleUpdate(updatedData);
         } catch (error) {
           console.error("Xảy ra lỗi khi cập nhật dữ liệu: - ", error);
           notify(
@@ -803,7 +661,7 @@ const RowEdit = () => {
         }
       }
     });
-  }, [dataSource]);
+  }, []);
   //#endregion
 
   const onFocusedCellChanging = (e) => {
@@ -962,7 +820,7 @@ const RowEdit = () => {
             fixed={false}
             fixedPosition="left"
             alignment='left'
-            width={80}
+            width={300}
             hidingPriority={1}
             allowEditing={true}
             allowSorting={true}
@@ -982,6 +840,20 @@ const RowEdit = () => {
           >
           </Column>
 
+          <Column caption=""
+            fixed={false}
+            fixedPosition="left"
+            alignment='left'
+            hidingPriority={1}
+            allowEditing={false}
+            allowSorting={false}
+            allowReordering={false}
+            allowSearch={false}
+            allowFiltering={false}
+            allowExporting={false}
+          >
+          </Column>
+
           <Toolbar>
             <Item
               location="left"
@@ -996,39 +868,30 @@ const RowEdit = () => {
               locateInMenu="auto"
             />
 
-            <Item
+            {/* <Item
               location="after"
               name="saveButton"
               showText="always"
               widget="dxButton"
               options={saveButtonOptions}
               locateInMenu="never"
-            />
+            /> */}
 
-            {/* <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions} locateInMenu="never">
+            <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions} locateInMenu="never">
               <Button
                 onClick={toggleEditAllPopup}
                 widget="dxButton"
                 text="Ghi"
               />
-            </Item> */}
+            </Item>
 
-            {/* <Item
+            <Item
               widget="dxButton"
               location="after"
               options={{
-                text: 'Xác nhận',
+                text: 'Xác nhận 222',
                 onClick: () => handleConfirmation(),
               }}
-            /> */}
-
-            <Item
-              location="after"
-              name="revertButton"
-              showText="always"
-              widget="dxButton"
-              options={cancelButtonOptions}
-              locateInMenu="never"
             />
 
             <Item

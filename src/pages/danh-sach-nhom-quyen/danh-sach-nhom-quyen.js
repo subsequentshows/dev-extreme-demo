@@ -508,7 +508,7 @@ const DanhSachNhomQuyenPage = () => {
             fixed={false}
             fixedPosition="left"
             alignment='left'
-            width={80}
+            width={300}
             hidingPriority={1}
             allowEditing={true}
             allowSorting={true}
@@ -519,6 +519,20 @@ const DanhSachNhomQuyenPage = () => {
             headerCellTemplate="Đường dẫn"
           >
             <StringLengthRule message="Tên đường dẫn phải chứa tối thiểu 2 ký tự" min={2} max={50} />
+          </Column>
+
+          <Column caption=""
+            fixed={false}
+            fixedPosition="left"
+            alignment='left'
+            hidingPriority={1}
+            allowEditing={false}
+            allowSorting={false}
+            allowReordering={false}
+            allowSearch={false}
+            allowFiltering={false}
+            allowExporting={false}
+          >
           </Column>
 
           <Toolbar>

@@ -20,11 +20,11 @@ export const navigation = [
   //   path: "/phan-quyen",
   //   icon: "folder",
   // },
-  {
-    text: "Master Detail Grid",
-    path: "/master-detail-grid",
-    icon: "folder",
-  },
+  // {
+  //   text: "Master Detail Grid",
+  //   path: "/master-detail-grid",
+  //   icon: "folder",
+  // },
   // {
   //   text: "Users Page",
   //   path: "/users",

@@ -18,10 +18,10 @@ const routes = [
     path: "/home",
     element: HomePage,
   },
-  {
-    path: "/master-detail-grid",
-    element: MasterDetailGridPage,
-  },
+  // {
+  //   path: "/master-detail-grid",
+  //   element: MasterDetailGridPage,
+  // },
   {
     path: "/access-denied",
     element: AccessDeniedPage,
