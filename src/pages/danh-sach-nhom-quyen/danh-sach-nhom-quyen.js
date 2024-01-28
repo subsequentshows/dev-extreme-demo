@@ -457,23 +457,6 @@ const DanhSachNhomQuyenPage = () => {
             <StringLengthRule max={3} message="" />
           </Column>
 
-          <Column caption="MenuID"
-            dataField="MenuId"
-            fixed={true}
-            fixedPosition="left"
-            alignment='center'
-            width={100}
-            allowEditing={false}
-            allowSorting={true}
-            allowReordering={false}
-            allowSearch={false}
-            allowFiltering={false}
-            allowExporting={true}
-            headerCellTemplate="MenuID"
-          >
-            <StringLengthRule max={3} message="" />
-          </Column>
-
           <Column caption="Sửa"
             type="buttons"
             width={80}

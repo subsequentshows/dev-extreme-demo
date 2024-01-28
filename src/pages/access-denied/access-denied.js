@@ -7,6 +7,7 @@ import {
   StringLengthRule,
   Toolbar,
   Item,
+  KeyboardNavigation
 } from 'devextreme-react/data-grid';
 import { Popup, ToolbarItem } from 'devextreme-react/popup';
 
@@ -45,6 +46,10 @@ const AccessDenied = () => {
 
   const [editedValues, setEditedValues] = useState({});
   const [isEditAllPopupVisible, setEditAllPopupVisibility] = useState(false);
+
+  const [editOnKeyPress, setEditOnKeyPress] = useState(true);
+  const [enterKeyAction, setEnterKeyAction] = useState('startEdit');
+  const [enterKeyDirection, setEnterKeyDirection] = useState('row');
 
   const [dataSource] = useState(
     new CustomStore({
@@ -163,6 +168,122 @@ const AccessDenied = () => {
     onClick: toggleEditAllPopup,
   }), [toggleEditAllPopup]);
 
+  const editOnKeyPressChanged = useCallback((e) => {
+    setEditOnKeyPress();
+  }, []);
+
+  const enterKeyActionChanged = useCallback((e) => {
+    setEnterKeyAction();
+  }, []);
+
+  const enterKeyDirectionChanged = useCallback((e) => {
+    setEnterKeyDirection();
+  }, []);
+
+  const onFocusedRowChanging = (e) => {
+    var rowsCount = e.component.getVisibleRows().length,
+      pageCount = e.component.pageCount(),
+      pageIndex = e.component.pageIndex(),
+      key = e.event && e.event.key;
+
+    if (key && e.prevRowIndex === e.newRowIndex) {
+      if (e.newRowIndex === rowsCount - 1 && pageIndex < pageCount - 1) {
+        e.component.pageIndex(pageIndex + 1).done(function () {
+          e.component.option("focusedRowIndex", 0);
+        });
+      } else if (e.newRowIndex === 0 && pageIndex > 0) {
+        e.component.pageIndex(pageIndex - 1).done(function () {
+          e.component.option("focusedRowIndex", rowsCount - 1);
+        });
+      }
+    }
+  }
+
+  const onKeyDown = useCallback((e) => {
+    const isUpArrow = e.event.keyCode === 38;
+    const isDownArrow = e.event.keyCode === 40;
+
+    if (isUpArrow || isDownArrow) {
+      e.event.preventDefault();
+      e.event.stopImmediatePropagation();
+
+      const dataGridInstance = dataGridRef.current.instance;
+      const currentRowIndex = dataGridInstance.option('focusedRowIndex');
+      const visibleRows = dataGridInstance.getVisibleRows();
+      const currentRow = visibleRows.find(row => row.rowIndex === currentRowIndex);
+      const currentColumnIndex = dataGridInstance.option('focusedColumnIndex');
+      const columns = dataGridInstance.getVisibleColumns();
+
+      if (currentRow) {
+        let nextColumnIndex = currentColumnIndex;
+        if (isUpArrow) {
+          nextColumnIndex = currentColumnIndex - 1;
+        } else {
+          nextColumnIndex = currentColumnIndex + 1;
+        }
+
+        // Find the previous editable cell in the current row
+        while (
+          nextColumnIndex >= 0 &&
+          nextColumnIndex < columns.length &&
+          !columns[nextColumnIndex].allowEditing
+        ) {
+          if (isUpArrow) {
+            nextColumnIndex--;
+          } else {
+            nextColumnIndex++;
+          }
+        }
+
+        if (nextColumnIndex >= 0 && nextColumnIndex < columns.length) {
+          // Edit the previous editable cell in the current row
+          dataGridInstance.option('focusedColumnIndex', nextColumnIndex);
+          dataGridInstance.editCell(currentRowIndex, nextColumnIndex);
+          return;
+        } else if (isUpArrow && currentRowIndex > 0) {
+          // Move to the previous row
+          const previousRowIndex = currentRowIndex - 1;
+          dataGridInstance.option('focusedRowIndex', previousRowIndex);
+          const newCurrentRow = visibleRows.find(row => row.rowIndex === previousRowIndex);
+
+          // Find the last editable cell in the previous row
+          if (newCurrentRow) {
+            for (let i = columns.length - 1; i >= 0; i--) {
+              if (columns[i].allowEditing) {
+                dataGridInstance.option('focusedColumnIndex', i);
+                dataGridInstance.editCell(previousRowIndex, i);
+                break;
+              }
+            }
+          }
+          return;
+        }
+      }
+
+      // If no editable cell is found in the current row, proceed to the next or previous row
+      const nextRowIndex = isUpArrow ? currentRowIndex - 1 : isDownArrow ? currentRowIndex + 1 : currentRowIndex;
+
+      if (nextRowIndex >= 0 && nextRowIndex < visibleRows.length) {
+        dataGridInstance.option('focusedRowIndex', nextRowIndex);
+        const newCurrentRow = visibleRows.find(row => row.rowIndex === nextRowIndex);
+
+        // Find the first editable cell in the next row
+        if (newCurrentRow) {
+          for (let i = 0; i < columns.length; i++) {
+            if (columns[i].allowEditing) {
+              dataGridInstance.option('focusedColumnIndex', i);
+              dataGridInstance.editCell(nextRowIndex, i);
+              break;
+            }
+          }
+        }
+      }
+    } else if (e.event.keyCode === 37 || e.event.keyCode === 39) {
+      e.event.preventDefault();
+      e.event.stopImmediatePropagation();
+    }
+  }, []);
+
   return (
     <>
       <DataGrid
@@ -178,6 +299,8 @@ const AccessDenied = () => {
         repaintChangesOnly={true}
         allowColumnReordering={false}
         remoteOperations={false}
+        onKeyDown={onKeyDown}
+        onFocusedRowChanging={onFocusedRowChanging}
         onEditValueChanged={onEditValueChanged}
       >
         <Editing mode="batch"
@@ -185,7 +308,15 @@ const AccessDenied = () => {
           allowDeleting={false}
           allowUpdating={true}
         />
-
+        <KeyboardNavigation
+          editOnKeyPress={editOnKeyPress}
+          editOnKeyPressChanged={editOnKeyPressChanged}
+          enterKeyAction={enterKeyAction}
+          enterKeyActionChanged={enterKeyActionChanged}
+          enterKeyDirection={enterKeyDirection}
+          enterKeyDirectionChanged={enterKeyDirectionChanged}
+          onKeyDown={onKeyDown}
+        />
         <Column caption="STT"
           dataField="STT"
           fixed={true}
