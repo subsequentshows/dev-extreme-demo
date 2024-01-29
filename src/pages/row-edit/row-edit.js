@@ -668,15 +668,97 @@ const RowEdit = () => {
     e.isHighlighted = true;
   };
 
-  const onKeyDown = (e) => {
-    if (e.event.keyCode === 37 || e.event.keyCode === 39) {
+  // Handle when pressing up and down arrow to move between editable row that have allowEditing == true
+  const onKeyDown = useCallback((e) => {
+    const isUpArrow = e.event.keyCode === 38;
+    const isDownArrow = e.event.keyCode === 40;
+
+    // if (e.event.keyCode === 37 || e.event.keyCode === 39) {
+    //   e.event.preventDefault();
+    //   e.event.stopImmediatePropagation();
+    // }
+    // else 
+    if (isUpArrow || isDownArrow) {
       e.event.preventDefault();
       e.event.stopImmediatePropagation();
-      console.log("pressed")
-    } else {
-      console.log("not-pressed")
+
+      const dataGridInstance = dataGridRef.current.instance;
+      const columns = dataGridInstance.getVisibleColumns();
+
+      const currentRowIndex = dataGridInstance.option('focusedRowIndex');
+      const visibleRows = dataGridInstance.getVisibleRows();
+
+      const currentRow = visibleRows.find(row => row.rowIndex === currentRowIndex);
+      const currentColumnIndex = dataGridInstance.option('focusedColumnIndex');
+
+      if (currentRow) {
+        let nextColumnIndex = currentColumnIndex;
+
+        if (isUpArrow) {
+          nextColumnIndex = currentColumnIndex - 1;
+        } else {
+          nextColumnIndex = currentColumnIndex + 1;
+        }
+
+        // Find the previous editable cell in the current row
+        while (
+          nextColumnIndex >= 0 &&
+          nextColumnIndex < columns.length &&
+          !columns[nextColumnIndex].allowEditing
+        ) {
+          if (isUpArrow) {
+            nextColumnIndex--;
+          } else {
+            nextColumnIndex++;
+          }
+        }
+
+        if (nextColumnIndex >= 0 && nextColumnIndex < columns.length) {
+          // Edit the previous editable cell in the current row
+          dataGridInstance.option('focusedColumnIndex', nextColumnIndex);
+          dataGridInstance.editCell(currentRowIndex, nextColumnIndex);
+
+          return;
+        } else if (isUpArrow && currentRowIndex > 0) {
+          // Move to the previous row
+          const previousRowIndex = currentRowIndex - 1;
+          dataGridInstance.option('focusedRowIndex', previousRowIndex);
+          const newCurrentRow = visibleRows.find(row => row.rowIndex === previousRowIndex);
+
+          // Find the last editable cell in the previous row
+          if (newCurrentRow) {
+            for (let i = columns.length - 1; i >= 0; i--) {
+              if (columns[i].allowEditing) {
+                dataGridInstance.option('focusedColumnIndex', i);
+                dataGridInstance.editCell(previousRowIndex, i);
+                break;
+              }
+            }
+          }
+          return;
+        }
+      }
+
+      // If no editable cell is found in the current row, proceed to the next or previous row
+      const nextRowIndex = isUpArrow ? currentRowIndex - 1 : isDownArrow ? currentRowIndex + 1 : currentRowIndex;
+
+      if (nextRowIndex >= 0 && nextRowIndex < visibleRows.length) {
+        dataGridInstance.option('focusedRowIndex', nextRowIndex);
+        const newCurrentRow = visibleRows.find(row => row.rowIndex === nextRowIndex);
+
+        // Find the first editable cell in the next row
+        if (newCurrentRow) {
+          for (let i = 0; i < columns.length; i++) {
+            if (columns[i].allowEditing) {
+              dataGridInstance.option('focusedColumnIndex', i);
+              dataGridInstance.editCell(nextRowIndex, i);
+              break;
+            }
+          }
+        }
+      }
     }
-  }
+  }, []);
 
   const editOnKeyPressChanged = useCallback((e) => {
     setEditOnKeyPress();
@@ -767,7 +849,6 @@ const RowEdit = () => {
             allowExporting={true}
             cellRender={rowIndexes}
             headerCellTemplate="STT"
-            all
           >
           </Column>
 

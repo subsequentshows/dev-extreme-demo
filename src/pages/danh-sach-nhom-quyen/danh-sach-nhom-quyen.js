@@ -288,29 +288,55 @@ const DanhSachNhomQuyenPage = () => {
     return <span> {rowIndex} </span>;
   }
 
+  const selectedRows = selectedItemKeys.length;
   function onExporting(e) {
-    if (e.format === 'xlsx') {
-      const workbook = new Workbook();
-      const worksheet = workbook.addWorksheet('Companies');
+    // if (e.format === 'xlsx') {
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Danh mục');
+
+    if (selectedRows === 0) {
       exportDataGridToExcel({
-        component: e.component,
+        component: dataGridRef.current.instance,
         worksheet,
         autoFilterEnabled: true,
       }).then(() => {
         workbook.xlsx.writeBuffer().then((buffer) => {
-          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Companies.xlsx');
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
+        });
+      });
+    } else {
+      exportDataGridToExcel({
+        component: dataGridRef.current.instance,
+        selectedRowsOnly: true,
+        worksheet,
+        autoFilterEnabled: true,
+      }).then(() => {
+        workbook.xlsx.writeBuffer().then((buffer) => {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
         });
       });
     }
-    else if (e.format === 'pdf') {
-      const doc = new jsPDF();
+  }
+
+  function onPdfExporting(e) {
+    const doc = new jsPDF();
+
+    if (selectedRows === 0) {
       exportDataGridToPdf({
         jsPDFDocument: doc,
-        component: e.component
+        component: dataGridRef.current.instance
       }).then(() => {
-        doc.save('Companies.pdf');
+        doc.save('Danh mục.pdf');
       })
-    };
+    } else {
+      exportDataGridToPdf({
+        jsPDFDocument: doc,
+        selectedRowsOnly: true,
+        component: dataGridRef.current.instance
+      }).then(() => {
+        doc.save('Danh mục.pdf');
+      })
+    }
   }
 
   const togglePopup = useCallback(() => {
@@ -504,10 +530,8 @@ const DanhSachNhomQuyenPage = () => {
             <StringLengthRule message="Tên đường dẫn phải chứa tối thiểu 2 ký tự" min={2} max={50} />
           </Column>
 
-          <Column caption=""
+          <Column
             fixed={false}
-            fixedPosition="left"
-            alignment='left'
             hidingPriority={1}
             allowEditing={false}
             allowSorting={false}
@@ -522,6 +546,7 @@ const DanhSachNhomQuyenPage = () => {
             <Item location="left" locateInMenu="never" render={renderLabel} />
 
             <Item location="after" name="addRowButton" caption="Thêm" options={addButtonOptions} />
+
             <Item location="after" showText="always" name='mutiple-delete' widget="dxButton" >
               <Button
                 text="Xóa mục đã chọn"
@@ -536,7 +561,13 @@ const DanhSachNhomQuyenPage = () => {
               <Button text="Nhập từ excel" onClick={toggleImportExcelPopup} />
             </Item>
 
-            <Item location='after' name='exportButton' options={exportButtonOptions} />
+            <Item location='after' name='exportExcelButton' options={exportExcelButtonOptions}>
+              <Button className="export-excel-button" onClick={onExporting}>Xuất Excel</Button>
+            </Item>
+
+            <Item location='after' name='exportPdfButton' formats="pdf" options={exportPdfButtonOptions}>
+              <Button className="export-pdf-button" onClick={onPdfExporting}>Xuất Pdf</Button>
+            </Item>
           </Toolbar>
 
           <Grouping autoExpandAll={false} />
@@ -634,7 +665,11 @@ const addButtonOptions = {
   text: 'Thêm'
 };
 
-const exportButtonOptions = {
-  text: 'Xuất file'
+const exportExcelButtonOptions = {
+  text: 'Xuất excel'
+};
+
+const exportPdfButtonOptions = {
+  text: 'Xuất pdf'
 };
 

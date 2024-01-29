@@ -226,14 +226,14 @@ const DanhMucHuyenPage = () => {
     setSelectedItemKeys(data.selectedRowKeys);
   }, []);
 
-  const selectedAndDeletedItems = selectedItemKeys.length;
+  const selectedRows = selectedItemKeys.length;
 
   function onExporting(e) {
     // if (e.format === 'xlsx') {
     const workbook = new Workbook();
     const worksheet = workbook.addWorksheet('Danh mục');
 
-    if (selectedAndDeletedItems === 0) {
+    if (selectedRows === 0) {
       exportDataGridToExcel({
         component: dataGridRef.current.instance,
         worksheet,
@@ -260,7 +260,7 @@ const DanhMucHuyenPage = () => {
   function onPdfExporting(e) {
     const doc = new jsPDF();
 
-    if (selectedAndDeletedItems === 0) {
+    if (selectedRows === 0) {
       exportDataGridToPdf({
         jsPDFDocument: doc,
         component: dataGridRef.current.instance
@@ -473,6 +473,7 @@ const DanhMucHuyenPage = () => {
             <Item location='after' name='exportExcelButton' options={exportExcelButtonOptions}>
               <Button className="export-excel-button" onClick={onExporting}>Xuất Excel</Button>
             </Item>
+
             <Item location='after' name='exportPdfButton' formats="pdf" options={exportPdfButtonOptions}>
               <Button className="export-pdf-button" onClick={onPdfExporting}>Xuất Pdf</Button>
             </Item>
@@ -497,5 +498,5 @@ const exportExcelButtonOptions = {
 };
 
 const exportPdfButtonOptions = {
-  text: 'Xuất excel'
+  text: 'Xuất pdf'
 };

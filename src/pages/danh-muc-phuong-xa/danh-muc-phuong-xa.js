@@ -22,6 +22,7 @@ import "whatwg-fetch";
 import { baseURL } from "../../api/api";
 import WarningIcon from "../../asset/image/confirm.png";
 import notify from 'devextreme/ui/notify';
+import { Button } from "devextreme-react/button";
 
 // Export to excel library
 import { exportDataGrid as exportDataGridToExcel } from 'devextreme/excel_exporter';
@@ -36,8 +37,8 @@ import { jsPDF } from "jspdf";
 const renderLabel = () => <div className="toolbar-label">Danh mục phường xã</div>;
 const exportFormats = ['xlsx', 'pdf'];
 
-const statuses = ['Chọn', 'Tỉnh Sóc Trăng', 'Thành phố Hà Nội', 'Tỉnh Kiên Giang', 'Thành phố Hồ Chí Minh'];
-const cityStatuses = ['Chọn', 'Huyện Gò Quao', 'Huyện Sóc Sơn', 'Quận Bắc Từ Liêm', 'Huyện Đồng Văn'];
+const statuses = ['Chọn', 'Tỉnh Sóc Trăng', 'Thành phố Hà Nội', 'Tỉnh Kiên Giang', 'Thành phố Hồ Chí Minh'];
+const cityStatuses = ['Chọn', 'Huyện Gò Quao', 'Huyện Sóc Sơn', 'Quận Bắc Từ Liêm', 'Huyện Đồng Văn'];
 const statusLabel = { 'aria-label': 'Status' };
 
 $('.dx-datagrid-addrow-button .dx-button-text').text('Thêm');
@@ -48,16 +49,17 @@ const DanhMucPhuongXaPage = () => {
 
   const [isPopupVisible, setPopupVisibility] = useState(false);
   const [selectedItemKeys, setSelectedItemKeys] = useState([]);
-  const allowedPageSizes = [50, 100, 150, 200];
 
+  const allowedPageSizes = [50, 100, 150, 200];
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
+
   const [tenQuanHuyenFilter, setTenQuanHuyenFilter] = useState('');
   const [tenTinhThanhPhoFilter, setTenTinhThanhPhoFilter] = useState("");
 
   const [tenXaSearch, setTenXaSearch] = useState("");
 
   const [filterStatus, setFilterStatus] = useState(statuses[0]);
-  const [filterCityStatus, setFilterCityStatus] = useState(statuses[0]);
+  const [filterHuyenStatus, setFilterHuyenStatus] = useState(statuses[0]);
 
   const [dataSource, setDataSource] = useState([]);
   const [contentData, setContentData] = useState();
@@ -87,7 +89,7 @@ const DanhMucPhuongXaPage = () => {
   }, []);
 
   function removeVietNameseAccents(str) {
-    var AccentsMap = [
+    let accentsMap = [
       "aàảãáạăằẳẵắặâầẩẫấậ",
       "AÀẢÃÁẠĂẰẲẴẮẶÂẦẨẪẤẬ",
       "dđ", "DĐ",
@@ -102,9 +104,10 @@ const DanhMucPhuongXaPage = () => {
       "yỳỷỹýỵ",
       "YỲỶỸÝỴ"
     ];
-    for (let i = 0; i < AccentsMap.length; i++) {
-      let re = new RegExp('[' + AccentsMap[i].substr(1) + ']', 'g');
-      let char = AccentsMap[i][0];
+
+    for (let i = 0; i < accentsMap.length; i++) {
+      let re = new RegExp('[' + accentsMap[i].substr(1) + ']', 'g');
+      let char = accentsMap[i][0];
       str = str.replace(re, char);
     }
     return str;
@@ -138,10 +141,10 @@ const DanhMucPhuongXaPage = () => {
       togglePopup();
       refreshDataGrid();
 
-      let selectedAndDeletedItems = selectedItemKeys.length;
+      let selectedRows = selectedItemKeys.length;
       const customText = `Xóa thành công `;
       const customText2 = ` mục`;
-      const message = customText + selectedAndDeletedItems + customText2;
+      const message = customText + selectedRows + customText2;
 
       notify(
         {
@@ -198,7 +201,7 @@ const DanhMucPhuongXaPage = () => {
   const onTenTinhFilterValueChanged = useCallback(({ value }) => {
     const dataGrid = dataGridRef.current.instance;
 
-    if (value === 'Chọn') {
+    if (value === 'Chọn') {
       dataGrid.clearFilter();
     } else {
       dataGrid.clearFilter();
@@ -211,14 +214,15 @@ const DanhMucPhuongXaPage = () => {
   const onTenHuyenFilterValueChanged = useCallback(({ value }) => {
     const dataGrid = dataGridRef.current.instance;
 
-    if (value === 'Chọn') {
+    if (value === 'Chọn') {
       dataGrid.clearFilter();
     } else {
       dataGrid.clearFilter();
       dataGrid.filter(['TEN_HUYEN', '=', value]);
     }
 
-    setFilterCityStatus(value);
+    setFilterHuyenStatus(value);
+    console.log(value)
   }, []);
 
   const onTenXaValueChanged = useCallback(
@@ -233,7 +237,6 @@ const DanhMucPhuongXaPage = () => {
 
         // Load data after filtering
         setTenXaSearch(filter);
-
       }
     }, [setTenXaSearch]);
 
@@ -259,12 +262,26 @@ const DanhMucPhuongXaPage = () => {
     )
   }
 
+  const selectedRows = selectedItemKeys.length;
   function onExporting(e) {
-    if (e.format === 'xlsx') {
-      const workbook = new Workbook();
-      const worksheet = workbook.addWorksheet('Danh mục');
+    // if (e.format === 'xlsx') {
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Danh mục');
+
+    if (selectedRows === 0) {
       exportDataGridToExcel({
-        component: e.component,
+        component: dataGridRef.current.instance,
+        worksheet,
+        autoFilterEnabled: true,
+      }).then(() => {
+        workbook.xlsx.writeBuffer().then((buffer) => {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
+        });
+      });
+    } else {
+      exportDataGridToExcel({
+        component: dataGridRef.current.instance,
+        selectedRowsOnly: true,
         worksheet,
         autoFilterEnabled: true,
       }).then(() => {
@@ -273,15 +290,27 @@ const DanhMucPhuongXaPage = () => {
         });
       });
     }
-    else if (e.format === 'pdf') {
-      const doc = new jsPDF();
+  }
+
+  function onPdfExporting(e) {
+    const doc = new jsPDF();
+
+    if (selectedRows === 0) {
       exportDataGridToPdf({
         jsPDFDocument: doc,
-        component: e.component
+        component: dataGridRef.current.instance
       }).then(() => {
         doc.save('Danh mục.pdf');
       })
-    };
+    } else {
+      exportDataGridToPdf({
+        jsPDFDocument: doc,
+        selectedRowsOnly: true,
+        component: dataGridRef.current.instance
+      }).then(() => {
+        doc.save('Danh mục.pdf');
+      })
+    }
   }
   //#endregion
 
@@ -306,7 +335,7 @@ const DanhMucPhuongXaPage = () => {
             // items={cityStatuses}
             dataSource={cityStatuses}
             inputAttr={statusLabel}
-            value={filterCityStatus}
+            value={filterHuyenStatus}
             onValueChanged={onTenHuyenFilterValueChanged}
           />
         </div>
@@ -431,10 +460,13 @@ const DanhMucPhuongXaPage = () => {
           >
           </Column>
 
-          <Column caption=""
+          <Column
             hidingPriority={1}
             allowSearch={false}
             allowExporting={false}
+            allowEditing={false}
+            allowReordering={false}
+            allowFiltering={false}
           />
 
           <Toolbar>
@@ -444,7 +476,13 @@ const DanhMucPhuongXaPage = () => {
               <Button widget="dxButton" onClick={handleSearchButtonClick} text="Tìm kiếm"></Button>
             </Item> */}
 
-            <Item location='after' name='exportButton' options={exportButtonOptions} />
+            <Item location='after' name='exportExcelButton' options={exportExcelButtonOptions}>
+              <Button className="export-excel-button" onClick={onExporting}>Xuất Excel</Button>
+            </Item>
+
+            <Item location='after' name='exportPdfButton' formats="pdf" options={exportPdfButtonOptions}>
+              <Button className="export-pdf-button" onClick={onPdfExporting}>Xuất Pdf</Button>
+            </Item>
           </Toolbar>
 
           <Grouping autoExpandAll={false} />
@@ -454,7 +492,7 @@ const DanhMucPhuongXaPage = () => {
           <GroupPanel visible={false} />
           <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
           <Paging enabled={true} defaultPageSize={50} defaultPageIndex={0} />
-          <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} displayMode="full" />
+          <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} showNavigationButtons={true} displayMode="full" />
         </DataGrid>
 
         {/* Delete confirm popup */}
@@ -492,6 +530,10 @@ const DanhMucPhuongXaPage = () => {
 
 export default DanhMucPhuongXaPage;
 
-const exportButtonOptions = {
-  text: 'Xuất file'
+const exportExcelButtonOptions = {
+  text: 'Xuất excel'
+};
+
+const exportPdfButtonOptions = {
+  text: 'Xuất pdf'
 };
