@@ -10,6 +10,8 @@ import {
   DanhSachNhomQuyenPage,
   RowEditPage,
   DanhMucHuyenPage,
+  BaoCao1Page,
+  BaoCao2Page,
 } from "./pages";
 import { withNavigationWatcher } from "./contexts/navigation";
 
@@ -57,6 +59,14 @@ const routes = [
   {
     path: "/danh-muc-huyen",
     element: DanhMucHuyenPage,
+  },
+  {
+    path: "/bao-cao-1",
+    element: BaoCao1Page,
+  },
+  {
+    path: "/bao-cao-2",
+    element: BaoCao2Page,
   },
 ];
 

@@ -56,4 +56,17 @@ export const navigation = [
       },
     ],
   },
+  {
+    text: "Báo cáo",
+    items: [
+      {
+        text: "Báo cáo 1",
+        path: "/bao-cao-1",
+      },
+      {
+        text: "Báo cáo 2",
+        path: "/bao-cao-2",
+      },
+    ],
+  },
 ];

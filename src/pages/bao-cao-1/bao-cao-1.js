@@ -1,21 +1,16 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import CustomStore from "devextreme/data/custom_store";
+import React, { useEffect, useState } from 'react';
 import { baseURL } from '../../api/api';
 import $ from 'jquery';
 import { formatDate, formatNumber } from 'devextreme/localization';
 
 import DataGrid, {
   Paging,
-  Pager, Column, Summary, ValueFormat, GroupItem,
+  Pager, Column, Summary,
   TotalItem,
 } from 'devextreme-react/data-grid';
 
 const App = () => {
-  const [dmTinh, setDmTinh] = useState({});
   const [dataSource, setDataSource] = useState([]);
-  const dataGridRef = useRef(null);
-  const [pageSize, setPageSize] = useState();
-  const [pageIndex, setPageIndex] = useState();
 
   const customizeDate = (itemInfo) => {
     return `First: ${formatDate(itemInfo.value, "MMM dd, yyyy")}`;
@@ -61,9 +56,6 @@ const App = () => {
           remoteOperations={false}
           keyExpr="ID"
           focusedRowEnabled={true}
-        // width="100%"
-        // height="100%"
-        // onOptionChanged={handleOptionChange}
         >
           <Column dataField="ID" width={50} hidingPriority={0} alignment='center' allowResizing={false}></Column>
           <Column dataField="MA" width={80} hidingPriority={1} format={"currency"}></Column>
@@ -95,7 +87,7 @@ const App = () => {
 
           <Pager visible={true} defaultPageSize={10} showInfo={true} showPageSizeSelector={false} showNavigationButtons={true} displayMode='full' />
 
-          <Paging pageIndex={pageIndex} defaultPageSize={10} />
+          <Paging defaultPageSize={10} />
         </DataGrid >
       </div>
     </>

@@ -426,6 +426,7 @@ const DanhMucHuyenPage = () => {
             allowFiltering={true}
             fixed={false}
             fixedPosition="left"
+            hidingPriority={3}
             allowSearch={false}
             allowExporting={true}
             filterOperations={['custom']}
@@ -439,7 +440,7 @@ const DanhMucHuyenPage = () => {
             alignment='left'
             allowSearch={false}
             width={200}
-            hidingPriority={2}
+            hidingPriority={1}
             allowExporting={true}
             filterOperations={['custom']}
             calculateFilterExpression={() => {
@@ -451,7 +452,7 @@ const DanhMucHuyenPage = () => {
             dataField="TEN_HUYEN"
             alignment="left"
             width={200}
-            hidingPriority={1}
+            hidingPriority={0}
             allowSearch={false}
             allowExporting={true}
             filterOperations={['custom']}
@@ -461,8 +462,8 @@ const DanhMucHuyenPage = () => {
           >
           </Column>
 
-          <Column caption=""
-            hidingPriority={1}
+          <Column
+            hidingPriority={0}
             allowSearch={false}
             allowExporting={false}
           />
