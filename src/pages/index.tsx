@@ -7,7 +7,7 @@ export { default as UsersPage } from "./users/users";
 export { default as HoSoXaDetailPage } from "./ho-so-xa-detail/ho-so-xa-detail";
 export { default as DanhMucPhuongXaPage } from "./danh-muc-phuong-xa/danh-muc-phuong-xa";
 export { default as ErrorPagePage } from "./error-page/error-page";
-export { default as RowEditPage } from "./row-edit/row-edit";
+export { default as DanhSachNhomQuyen2Page } from "./danh-sach-nhom-quyen-2/danh-sach-nhom-quyen-2";
 export { default as DanhMucHuyenPage } from "./danh-muc-huyen/danh-muc-huyen";
 export { default as BaoCao1Page } from "./bao-cao-1/bao-cao-1";
 export { default as BaoCao2Page } from "./bao-cao-2/bao-cao-2";

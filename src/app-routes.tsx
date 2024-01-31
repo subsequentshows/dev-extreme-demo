@@ -8,7 +8,7 @@ import {
   DanhMucPhuongXaPage,
   ErrorPagePage,
   DanhSachNhomQuyenPage,
-  RowEditPage,
+  DanhSachNhomQuyen2Page,
   DanhMucHuyenPage,
   BaoCao1Page,
   BaoCao2Page,
@@ -53,8 +53,8 @@ const routes = [
     element: ErrorPagePage,
   },
   {
-    path: "/row-edit",
-    element: RowEditPage,
+    path: "/danh-sach-nhom-quyen-2",
+    element: DanhSachNhomQuyen2Page,
   },
   {
     path: "/danh-muc-huyen",

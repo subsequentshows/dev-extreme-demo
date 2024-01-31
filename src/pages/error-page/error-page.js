@@ -61,8 +61,8 @@ const App = () => {
           remoteOperations={false}
           keyExpr="ID"
           focusedRowEnabled={true}
-        // width="100%"
-        // height="100%"
+          width="100%"
+          height="100%"
         // onOptionChanged={handleOptionChange}
         >
           <Column dataField="ID" width={50} hidingPriority={0} alignment='center' allowResizing={false}></Column>
@@ -78,12 +78,6 @@ const App = () => {
             <Column dataField="TEN_TINH" caption="Ten tinh" width={180} hidingPriority={5} />
             <Column dataField="MA_TINH" width={160} alignment="right" format="currency" />
           </Column>
-
-          <Column dataField="MA_HUYEN" alignment='right' caption="Ma huyen" format="currency" width={50} hidingPriority={2}></Column>
-          <Column dataField="MA_HUYEN" alignment='right' caption="Ma huyen" format="currency" width={50} hidingPriority={2}></Column>
-          <Column dataField="MA_HUYEN" alignment='right' caption="Ma huyen" format="currency" width={50} hidingPriority={2}></Column>
-          <Column dataField="MA_HUYEN" alignment='right' caption="Ma huyen" format="currency" width={50} hidingPriority={2}></Column>
-          <Column dataField="MA_HUYEN" alignment='right' caption="Ma huyen" format="currency" width={50} hidingPriority={2}></Column>
 
           <Column className="text" allowHiding={false} hidingPriority={0} />
 

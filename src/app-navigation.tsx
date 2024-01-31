@@ -11,8 +11,8 @@ export const navigation = [
     // icon: "folder",
   },
   {
-    text: "Row Edit",
-    path: "/row-edit",
+    text: "Danh sách nhóm quyền 2",
+    path: "/danh-sach-nhom-quyen-2",
   },
 
   // {

@@ -34,6 +34,7 @@ import CustomStore from "devextreme/data/custom_store";
 import notify from 'devextreme/ui/notify';
 import WarningIcon from "../../asset/image/confirm.png";
 import axios, { isCancel, AxiosError } from 'axios';
+import "./danh-sach-nhom-quyen-2.scss";
 
 import { baseURL, localApi } from "../../api/api";
 import { confirm } from 'devextreme/ui/dialog';
@@ -947,6 +948,7 @@ const RowEdit = () => {
               caption="Thêm"
               options={addButtonOptions}
               locateInMenu="auto"
+              disabled={selectedItemKeys.length}
             />
 
             {/* <Item
@@ -1005,7 +1007,7 @@ const RowEdit = () => {
           <GroupPanel visible={false} />
           <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
           <Paging enabled={true} defaultPageSize={20} defaultPageIndex={0} />
-          <Pager allowedPageSizes={allowedPageSizes} showPageSizeSelector={true} showNavigationButtons={true} displayMode="compact" />
+          <Pager allowedPageSizes={allowedPageSizes} showPageSizeSelector={false} showNavigationButtons={true} displayMode="full" />
         </DataGrid>
 
         {/* Update all confirm popup */}

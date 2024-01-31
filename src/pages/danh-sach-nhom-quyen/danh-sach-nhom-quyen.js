@@ -440,7 +440,7 @@ const DanhSachNhomQuyenPage = () => {
 
   return (
     <>
-      <div className="responsive-paddings">
+      <div className="responsive-paddings pop-up-edit">
         <DataGrid
           id="grid-container"
           className='master-detail-grid'
@@ -450,7 +450,7 @@ const DanhSachNhomQuyenPage = () => {
           height="100%"
           showBorders={true}
           focusedRowEnabled={true}
-          repaintChangesOnly={true}
+          // repaintChangesOnly={true}
           allowColumnReordering={false}
           remoteOperations={false}
           onExporting={onExporting}
@@ -531,7 +531,6 @@ const DanhSachNhomQuyenPage = () => {
           </Column>
 
           <Column
-            fixed={false}
             hidingPriority={1}
             allowEditing={false}
             allowSorting={false}
@@ -539,13 +538,12 @@ const DanhSachNhomQuyenPage = () => {
             allowSearch={false}
             allowFiltering={false}
             allowExporting={false}
-          >
-          </Column>
+          />
 
           <Toolbar>
             <Item location="left" locateInMenu="never" render={renderLabel} />
 
-            <Item location="after" name="addRowButton" caption="Thêm" options={addButtonOptions} />
+            <Item location="after" name="addRowButton" caption="Thêm" options={addButtonOptions} disabled={selectedItemKeys.length} />
 
             <Item location="after" showText="always" name='mutiple-delete' widget="dxButton" >
               <Button
@@ -578,7 +576,7 @@ const DanhSachNhomQuyenPage = () => {
           <GroupPanel visible={false} />
           <Export enabled={true} formats={exportFormats} allowExportSelectedData={true} />
           <Paging enabled={true} defaultPageSize={20} defaultPageIndex={0} />
-          <Pager showPageSizeSelector={true} allowedPageSizes={allowedPageSizes} />
+          <Pager showNavigationButtons={true} showInfo={true} showPageSizeSelector={false} allowedPageSizes={allowedPageSizes} />
         </DataGrid>
 
         {/* Delete confirm popup */}
