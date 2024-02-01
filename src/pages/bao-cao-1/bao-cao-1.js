@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { baseURL } from '../../api/api';
 import $ from 'jquery';
 import { formatDate, formatNumber } from 'devextreme/localization';
@@ -11,6 +11,13 @@ import DataGrid, {
 
 const BaoCao1 = () => {
   const [dataSource, setDataSource] = useState([]);
+  const dataGridRef = useRef(null);
+
+  const allowedPageSizes = [50, 100, 150, 200];
+
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(5);
+  const [pageSizes] = useState([5, 10, 15]);
 
   const customizeDate = (itemInfo) => {
     return `First: ${formatDate(itemInfo.value, "MMM dd, yyyy")}`;
@@ -52,8 +59,10 @@ const BaoCao1 = () => {
     <>
       <div className='responsive-paddings'>
         <DataGrid
+          id='gridContainer'
           dataSource={dataSource}
           remoteOperations={false}
+          ref={dataGridRef}
           keyExpr="ID"
           focusedRowEnabled={true}
         >
@@ -78,7 +87,7 @@ const BaoCao1 = () => {
             <TotalItem column="MA_TINH" summaryType="sum" customizeText={customizeText} />
           </Summary>
 
-          <Pager visible={true} defaultPageSize={10} showInfo={true} showPageSizeSelector={false} showNavigationButtons={true} displayMode='full' />
+          <Pager visible={true} defaultPageSize={10} showInfo={true} showPageSizeSelector={false} showNavigationButtons={true} displayMode='full' allowedPageSizes={allowedPageSizes} />
 
           <Paging defaultPageSize={10} />
         </DataGrid >

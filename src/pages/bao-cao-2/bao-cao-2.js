@@ -70,9 +70,10 @@ const BaoCao2 = () => {
           focusedRowEnabled={true}
           allowColumnReordering={true}
         >
+          <Column dataField="NOI_DUNG_CHA" caption="Nội dung cha" width={180}></Column>
           <Column dataField="NOI_DUNG" caption="Nội dung" alignment='right' format="currency" width={300} hidingPriority={2}></Column>
           <Column dataField="DON_VI" caption="Đơn vị" width={180} hidingPriority={4}></Column>
-          <Column dataField="NOI_DUNG_CHA" caption="Nội dung cha" width={180}></Column>
+
           <Column dataField="NOI_DUNG_CHA_1" width={100} hidingPriority={1} format={"currency"}></Column>
           <Column dataField="NOI_DUNG_CHA_2" width={150} hidingPriority={0} alignment='center' allowResizing={false}></Column>
           <Column dataField="GHI_CHU" width={160} alignment="right" format="currency" />

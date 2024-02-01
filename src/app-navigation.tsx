@@ -67,6 +67,10 @@ export const navigation = [
         text: "Báo cáo 2",
         path: "/bao-cao-2",
       },
+      {
+        text: "Báo cáo 3",
+        path: "/bao-cao-3",
+      },
     ],
   },
 ];
