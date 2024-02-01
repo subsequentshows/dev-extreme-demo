@@ -54,9 +54,9 @@ const DanhMucPhuongXaPage = () => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
 
   const [tenQuanHuyenFilter, setTenQuanHuyenFilter] = useState('');
-  const [tenTinhThanhPhoFilter, setTenTinhThanhPhoFilter] = useState("");
+  const [tenTinhThanhPhoFilter, setTenTinhThanhPhoFilter] = useState('');
 
-  const [tenXaSearch, setTenXaSearch] = useState("");
+  const [tenXaSearch, setTenXaSearch] = useState('');
 
   const [filterStatus, setFilterStatus] = useState(statuses[0]);
   const [filterHuyenStatus, setFilterHuyenStatus] = useState(statuses[0]);
@@ -203,12 +203,14 @@ const DanhMucPhuongXaPage = () => {
 
     if (value === 'Chọn') {
       dataGrid.clearFilter();
+      // setFilterHuyenStatus('Chọn');
+      setFilterStatus('Chọn');
+      setTenQuanHuyenFilter('Chọn');
     } else {
       dataGrid.clearFilter();
       dataGrid.filter(['TEN_TINH', '=', value]);
+      setFilterStatus(value);
     }
-
-    setFilterStatus(value);
   }, []);
 
   const onTenHuyenFilterValueChanged = useCallback(({ value }) => {
@@ -216,12 +218,14 @@ const DanhMucPhuongXaPage = () => {
 
     if (value === 'Chọn') {
       dataGrid.clearFilter();
+      setFilterStatus('Chọn');
+      setTenTinhThanhPhoFilter('Chọn');
     } else {
       dataGrid.clearFilter();
       dataGrid.filter(['TEN_HUYEN', '=', value]);
+      setFilterHuyenStatus(value);
     }
 
-    setFilterHuyenStatus(value);
     console.log(value)
   }, []);
 

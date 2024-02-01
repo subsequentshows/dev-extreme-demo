@@ -951,16 +951,16 @@ const RowEdit = () => {
               disabled={selectedItemKeys.length}
             />
 
-            {/* <Item
+            <Item
               location="after"
               name="saveButton"
               showText="always"
               widget="dxButton"
               options={saveButtonOptions}
               locateInMenu="never"
-            /> */}
+            />
 
-            <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions} locateInMenu="never">
+            {/* <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions} locateInMenu="never">
               <Button
                 onClick={toggleEditAllPopup}
                 widget="dxButton"
@@ -975,7 +975,7 @@ const RowEdit = () => {
                 text: 'Xác nhận 222',
                 onClick: () => handleConfirmation(),
               }}
-            />
+            /> */}
 
             <Item
               location="after"

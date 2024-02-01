@@ -78,8 +78,6 @@ const BaoCao2 = () => {
           <Column dataField="GHI_CHU" width={160} alignment="right" format="currency" />
 
           <Column caption='Năm học'>
-
-            <Column dataField='CHI_TIET'></Column>
             <Column dataField='CHI_TIET'></Column>
           </Column>
           <Column className="text" allowHiding={false} hidingPriority={0} />

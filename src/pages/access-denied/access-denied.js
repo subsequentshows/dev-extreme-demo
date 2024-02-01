@@ -214,6 +214,15 @@ const AccessDenied = () => {
       const currentColumnIndex = dataGridInstance.option('focusedColumnIndex');
       const columns = dataGridInstance.getVisibleColumns();
 
+      if (currentColumnIndex >= 0 && currentRowIndex >= 0) {
+        const cellElement = dataGridInstance.getCellElement(currentRowIndex, currentColumnIndex);
+
+        if (cellElement) {
+          // Select all text in the cell
+          cellElement.select();
+        }
+      }
+
       if (currentRow) {
         let nextColumnIndex = currentColumnIndex;
         if (isUpArrow) {
