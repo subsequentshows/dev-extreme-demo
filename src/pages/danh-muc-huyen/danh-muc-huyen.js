@@ -56,7 +56,7 @@ const exportFormats = ['xlsx', 'pdf'];
 const renderLabel = () => <div className="toolbar-label">Danh mục huyện</div>;
 
 const DanhMucHuyenPage = () => {
-  //#region Property
+  //#region Properties
   const [dataSource, setDataSource] = useState([]);
   const [contentData, setContentData] = useState();
   const dataGridRef = useRef(null);

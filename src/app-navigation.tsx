@@ -64,8 +64,8 @@ export const navigation = [
         path: "/bao-cao-1",
       },
       {
-        text: "Báo cáo 2",
-        path: "/bao-cao-2",
+        text: "Báo cáo tài chính",
+        path: "/bao-cao-tai-chinh",
       },
       {
         text: "Báo cáo 3",

@@ -216,9 +216,24 @@ body {
   transform: translateX(-3px);
 }
 
-.dx-datagrid-headers .dx-datagrid-table .dx-row>td {
-  border-right: 1px solid #e0e0e0;
+.dx-datagrid-headers .dx-datagrid-table .dx-row {
+  &>td {
+    border-right: 1px solid #e0e0e0;
+  }
+}
 
+.dx-datagrid-rowsview .dx-row-focused.dx-data-row>td {
+  border-bottom: 0px solid green;
+}
+
+.dx-datagrid-focus-overlay:after {
+  background-color: #0071a6;
+  height: 1px;
+}
+
+.editable-data {
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .dx-datagrid .dx-row-lines {

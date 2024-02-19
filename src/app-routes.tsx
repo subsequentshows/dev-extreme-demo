@@ -11,7 +11,7 @@ import {
   DanhSachNhomQuyen2Page,
   DanhMucHuyenPage,
   BaoCao1Page,
-  BaoCao2Page,
+  BaoCaoTaiChinhPage,
   BaoCao3Page,
 } from "./pages";
 import { withNavigationWatcher } from "./contexts/navigation";
@@ -66,8 +66,8 @@ const routes = [
     element: BaoCao1Page,
   },
   {
-    path: "/bao-cao-2",
-    element: BaoCao2Page,
+    path: "/bao-cao-tai-chinh",
+    element: BaoCaoTaiChinhPage,
   },
   {
     path: "/bao-cao-3",

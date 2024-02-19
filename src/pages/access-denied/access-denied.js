@@ -295,140 +295,142 @@ const AccessDenied = () => {
 
   return (
     <>
-      <DataGrid
-        id="grid-container"
-        className='master-detail-grid'
-        dataSource={dataSource}
-        ref={dataGridRef}
-        width="100%"
-        height="100%"
-        key="ID"
-        showBorders={true}
-        focusedRowEnabled={true}
-        repaintChangesOnly={true}
-        allowColumnReordering={false}
-        remoteOperations={false}
-        onKeyDown={onKeyDown}
-        onFocusedRowChanging={onFocusedRowChanging}
-        onEditValueChanged={onEditValueChanged}
-      >
-        <Editing mode="batch"
-          allowAdding={true}
-          allowDeleting={false}
-          allowUpdating={true}
-        />
-        <KeyboardNavigation
-          editOnKeyPress={editOnKeyPress}
-          editOnKeyPressChanged={editOnKeyPressChanged}
-          enterKeyAction={enterKeyAction}
-          enterKeyActionChanged={enterKeyActionChanged}
-          enterKeyDirection={enterKeyDirection}
-          enterKeyDirectionChanged={enterKeyDirectionChanged}
+      <div className="responsive-paddings">
+        <DataGrid
+          id="grid-container"
+          className='master-detail-grid'
+          dataSource={dataSource}
+          ref={dataGridRef}
+          width="100%"
+          height="100%"
+          key="ID"
+          showBorders={true}
+          focusedRowEnabled={true}
+          repaintChangesOnly={true}
+          allowColumnReordering={false}
+          remoteOperations={false}
           onKeyDown={onKeyDown}
-        />
-        <Column caption="STT"
-          dataField="STT"
-          fixed={true}
-          fixedPosition="left"
-          alignment='center'
-          width={80}
-          allowEditing={false}
-          allowSorting={true}
-          allowReordering={false}
-          allowSearch={false}
-          allowFiltering={false}
-          allowExporting={true}
-          cellRender={rowIndexes}
-          headerCellTemplate="STT"
-          all
+          onFocusedRowChanging={onFocusedRowChanging}
+          onEditValueChanged={onEditValueChanged}
         >
-        </Column>
-
-        <Column caption="MenuID"
-          dataField="MenuId"
-          fixed={true}
-          fixedPosition="left"
-          alignment='center'
-          width={100}
-          hidingPriority={2}
-          allowEditing={false}
-          allowSorting={true}
-          allowReordering={false}
-          allowSearch={false}
-          allowFiltering={false}
-          allowExporting={true}
-          headerCellTemplate="MenuID"
-        >
-        </Column>
-
-        <Column caption="Tên"
-          dataField="MenuName"
-          fixed={true}
-          fixedPosition="left"
-          alignment='left'
-          width={300}
-          allowEditing={true}
-          allowSorting={true}
-          allowReordering={false}
-          allowSearch={false}
-          allowFiltering={false}
-          allowExporting={true}
-          headerCellTemplate="Tên"
-        >
-          <RequiredRule message="Bạn chưa nhập vào tên" />
-          <StringLengthRule message="Tên thư mục phải chứa tối thiểu 2 ký tự" min={2} max={50} />
-        </Column>
-
-        <Column caption="Đường dẫn"
-          dataField="Link"
-          fixed={false}
-          fixedPosition="left"
-          alignment='left'
-          width={300}
-          hidingPriority={1}
-          allowEditing={true}
-          allowSorting={true}
-          allowReordering={false}
-          allowSearch={false}
-          allowFiltering={false}
-          allowExporting={true}
-          headerCellTemplate="Đường dẫn"
-        >
-        </Column>
-
-        <Column caption=""
-          fixed={false}
-          fixedPosition="left"
-          alignment='left'
-          hidingPriority={1}
-          allowEditing={false}
-          allowSorting={false}
-          allowReordering={false}
-          allowSearch={false}
-          allowFiltering={false}
-          allowExporting={false}
-        >
-        </Column>
-
-        <Toolbar>
-          <Item location="after"
-            name="addRowButton"
-            caption="Thêm"
-            options={addButtonOptions}
-            locateInMenu="auto"
+          <Editing mode="batch"
+            allowAdding={true}
+            allowDeleting={false}
+            allowUpdating={true}
           />
-
-          <Item
-            widget="dxButton"
-            location="after"
-            options={{
-              text: 'Ghi',
-              onClick: toggleEditAllPopup
-            }}
+          <KeyboardNavigation
+            editOnKeyPress={editOnKeyPress}
+            editOnKeyPressChanged={editOnKeyPressChanged}
+            enterKeyAction={enterKeyAction}
+            enterKeyActionChanged={enterKeyActionChanged}
+            enterKeyDirection={enterKeyDirection}
+            enterKeyDirectionChanged={enterKeyDirectionChanged}
+            onKeyDown={onKeyDown}
           />
-        </Toolbar>
+          <Column caption="STT"
+            dataField="STT"
+            fixed={true}
+            fixedPosition="left"
+            alignment='center'
+            width={80}
+            allowEditing={false}
+            allowSorting={true}
+            allowReordering={false}
+            allowSearch={false}
+            allowFiltering={false}
+            allowExporting={true}
+            cellRender={rowIndexes}
+            headerCellTemplate="STT"
+            all
+          >
+          </Column>
 
-      </DataGrid>
+          <Column caption="MenuID"
+            dataField="MenuId"
+            fixed={true}
+            fixedPosition="left"
+            alignment='center'
+            width={100}
+            hidingPriority={2}
+            allowEditing={false}
+            allowSorting={true}
+            allowReordering={false}
+            allowSearch={false}
+            allowFiltering={false}
+            allowExporting={true}
+            headerCellTemplate="MenuID"
+          >
+          </Column>
+
+          <Column caption="Tên"
+            dataField="MenuName"
+            fixed={true}
+            fixedPosition="left"
+            alignment='left'
+            width={300}
+            allowEditing={true}
+            allowSorting={true}
+            allowReordering={false}
+            allowSearch={false}
+            allowFiltering={false}
+            allowExporting={true}
+            headerCellTemplate="Tên"
+          >
+            <RequiredRule message="Bạn chưa nhập vào tên" />
+            <StringLengthRule message="Tên thư mục phải chứa tối thiểu 2 ký tự" min={2} max={50} />
+          </Column>
+
+          <Column caption="Đường dẫn"
+            dataField="Link"
+            fixed={false}
+            fixedPosition="left"
+            alignment='left'
+            width={300}
+            hidingPriority={1}
+            allowEditing={true}
+            allowSorting={true}
+            allowReordering={false}
+            allowSearch={false}
+            allowFiltering={false}
+            allowExporting={true}
+            headerCellTemplate="Đường dẫn"
+          >
+          </Column>
+
+          <Column caption=""
+            fixed={false}
+            fixedPosition="left"
+            alignment='left'
+            hidingPriority={1}
+            allowEditing={false}
+            allowSorting={false}
+            allowReordering={false}
+            allowSearch={false}
+            allowFiltering={false}
+            allowExporting={false}
+          >
+          </Column>
+
+          <Toolbar>
+            <Item location="after"
+              name="addRowButton"
+              caption="Thêm"
+              options={addButtonOptions}
+              locateInMenu="auto"
+            />
+
+            <Item
+              widget="dxButton"
+              location="after"
+              options={{
+                text: 'Ghi',
+                onClick: toggleEditAllPopup
+              }}
+            />
+          </Toolbar>
+
+        </DataGrid>
+      </div>
 
       {/* Update all confirm popup */}
       <Popup
