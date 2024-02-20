@@ -264,12 +264,12 @@ const BaoCaoTaiChinh = () => {
           <Column cssClass='editable-data' dataField="" caption='Tổng số' width={100} format={"currency"} alignment='right'></Column>
 
           <Column caption='Chia ra theo các năm' alignment='center'>
-            <Column cssClass='editable-data 2019-data' dataField='2019' alignment='right' width={100} ></Column>
-            <Column cssClass='editable-data 2020-data' dataField='2020' alignment='right' width={100}></Column>
-            <Column cssClass='editable-data 2021-data' dataField='2021' alignment='right' width={100}></Column>
-            <Column cssClass='editable-data 2022-data' dataField='2022' alignment='right' width={100}></Column>
-            <Column cssClass='editable-data 2023-data' dataField='2023' alignment='right' width={100}></Column>
-            <Column dataField="GHI_CHU" width={400} alignment="left" format="currency" allowSorting={false} />
+            <Column cssClass='editable-data' dataField='2019' alignment='right' width={100} ></Column>
+            <Column cssClass='editable-data' dataField='2020' alignment='right' width={100}></Column>
+            <Column cssClass='editable-data' dataField='2021' alignment='right' width={100}></Column>
+            <Column cssClass='editable-data' dataField='2022' alignment='right' width={100}></Column>
+            <Column cssClass='editable-data' dataField='2023' alignment='right' width={100}></Column>
+            <Column cssClass='editable-data' dataField="GHI_CHU" caption='Ghi chú' width={400} alignment="left" allowSorting={false} />
           </Column>
 
           <Summary>

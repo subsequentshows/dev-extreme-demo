@@ -12,3 +12,4 @@ export { default as DanhMucHuyenPage } from "./danh-muc-huyen/danh-muc-huyen";
 export { default as BaoCao1Page } from "./bao-cao-1/bao-cao-1";
 export { default as BaoCaoTaiChinhPage } from "./bao-cao-tai-chinh/bao-cao-tai-chinh";
 export { default as BaoCao3Page } from "./bao-cao-3/bao-cao-3";
+export { default as BaoCao4Page } from "./bao-cao-4/bao-cao-4.js";

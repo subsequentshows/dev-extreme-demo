@@ -13,6 +13,7 @@ import {
   BaoCao1Page,
   BaoCaoTaiChinhPage,
   BaoCao3Page,
+  BaoCao4Page,
 } from "./pages";
 import { withNavigationWatcher } from "./contexts/navigation";
 
@@ -72,6 +73,10 @@ const routes = [
   {
     path: "/bao-cao-3",
     element: BaoCao3Page,
+  },
+  {
+    path: "/bao-cao-4",
+    element: BaoCao4Page,
   },
 ];
 
