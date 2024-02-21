@@ -48,7 +48,6 @@ const HoSoXaDetailPage = () => {
 
   const refreshDataGrid = useCallback(() => {
     dataGridRef.current.instance.refresh();
-    console.log("Reloaded")
   }, []);
 
   const updateRecord = useCallback(

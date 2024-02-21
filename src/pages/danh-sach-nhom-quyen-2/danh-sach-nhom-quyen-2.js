@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef } from "react";
+import React, { useCallback, useState, useEffect, useRef } from "react";
 import {
   Column,
   DataGrid,
@@ -84,7 +84,8 @@ const renderContent = () => {
 }
 
 const RowEdit = () => {
-  //#region Property
+  //#region Properties
+  const [dataSource, setDataSource] = useState([]);
   const dataGridRef = useRef(null);
   const allowedPageSizes = [20, 50, 100, 150, 200];
 
@@ -114,52 +115,17 @@ const RowEdit = () => {
   const [editedColumns, setEditedColumns] = useState([]);
 
   const formElement = useRef(null);
-  //#endregion
 
   const [editOnKeyPress, setEditOnKeyPress] = useState(true);
   const [enterKeyAction, setEnterKeyAction] = useState('startEdit');
   const [enterKeyDirection, setEnterKeyDirection] = useState('row');
+  //#endregion
 
-  //#region Action
+  //#region Events
   const logEvent = useCallback((e) => {
     console.log(e);
     // setEvents((previousEvents) => [e, ...previousEvents]);
   }, []);
-
-  const [dataSource, setDataSource] = useState(
-    new CustomStore({
-      key: "MenuId",
-      load: async () => {
-        try {
-          const response = await fetch(
-            `${baseURL}/Manager/Menu`,
-            config
-          );
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-
-          const data = await response.json();
-          return data.Data;
-        } catch (error) {
-          const ErrorMessage = `Đã xảy ra lỗi khi tải dữ liệu: `;
-          notify(
-            {
-              ErrorMessage,
-              position: {
-                my: 'bottom right',
-                at: 'bottom right',
-              },
-            },
-            `error: ${error.message}`,
-            5000,
-          );
-          return [];
-        }
-      },
-    })
-  );
 
   const onSelectionChanged = useCallback((data) => {
     setSelectedItemKeys(data.selectedRowKeys);
@@ -283,7 +249,6 @@ const RowEdit = () => {
 
   const toggleEditAllPopup = useCallback(() => {
     setEditAllPopupVisibility(!isEditAllPopupVisible);
-
   }, [isEditAllPopupVisible]);
 
   const toggleDeletePopup = useCallback(() => {
@@ -663,7 +628,6 @@ const RowEdit = () => {
       }
     });
   }, []);
-  //#endregion
 
   const onFocusedCellChanging = (e) => {
     e.isHighlighted = true;
@@ -791,18 +755,50 @@ const RowEdit = () => {
       }
     }
   }
+  //#endregion
+
+  //#region Method
+  useEffect(() => {
+    var fetchData = async () => {
+      try {
+        const response = await fetch(
+          `${baseURL}/Manager/Menu`,
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${api_token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.Data;
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        return [];
+      }
+    }
+
+    fetchData().then(data => {
+      setDataSource(data)
+    })
+  }, []);
+  //#endregion
 
   return (
     <>
       <div className="responsive-paddings">
-        <DataGrid
-          id="grid-container"
+        <DataGrid id="grid-container"
           className='master-detail-grid'
           dataSource={dataSource}
           ref={dataGridRef}
           width="100%"
           height="100%"
-          key="ID"
+          keyExpr="MenuId"
           showBorders={true}
           focusedRowEnabled={true}
           repaintChangesOnly={true}
@@ -960,7 +956,12 @@ const RowEdit = () => {
               locateInMenu="never"
             />
 
-            {/* <Item location="after" name="saveButton" showText="always" widget="dxButton" options={saveButtonOptions} locateInMenu="never">
+            {/* <Item location="after"
+              name="saveButton"
+              showText="always"
+              widget="dxButton"
+              options={saveButtonOptions}
+              locateInMenu="never">
               <Button
                 onClick={toggleEditAllPopup}
                 widget="dxButton"

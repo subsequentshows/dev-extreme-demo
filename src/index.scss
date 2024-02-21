@@ -175,6 +175,26 @@ body {
 
   .dx-datagrid {
     padding: 0;
+
+    .dx-link {
+      color: #0071a6;
+    }
+
+    .export-excel-button,
+    .export-pdf-button {
+      background-color: #0071a6;
+      color: #fff;
+    }
+
+    .dx-row-lines {
+      &>td {
+        border-right: 1px solid #ccc;
+      }
+
+      td:first-child {
+        border-left: 1px solid #ccc !important;
+      }
+    }
   }
 }
 
@@ -211,7 +231,6 @@ body {
   margin-bottom: 15px;
 }
 
-
 .dx-button-has-icon {
   transform: translateX(-3px);
 }
@@ -234,16 +253,6 @@ body {
 .editable-data {
   border: 1px solid #ccc;
   border-radius: 4px;
-}
-
-.dx-datagrid .dx-row-lines {
-  &>td {
-    border-right: 1px solid #ccc;
-  }
-
-  td:first-child {
-    border-left: 1px solid #ccc !important;
-  }
 }
 
 .dx-datagrid-headers+.dx-datagrid-rowsview {
@@ -455,16 +464,6 @@ body {
 
   p {
     text-align: center;
-  }
-}
-
-.dx-datagrid {
-  padding: 15px;
-
-  .export-excel-button,
-  .export-pdf-button {
-    background-color: #0071a6;
-    color: #fff;
   }
 }
 

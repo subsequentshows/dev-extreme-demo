@@ -41,8 +41,6 @@ const dataSource = new PivotGridDataSource({
   store: Data,
 });
 
-console.log(Data)
-
 const App = () => (
   <div className='responsive-paddings'>
     <PivotGrid

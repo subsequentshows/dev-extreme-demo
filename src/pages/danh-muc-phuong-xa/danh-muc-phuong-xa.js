@@ -115,7 +115,6 @@ const DanhMucPhuongXaPage = () => {
 
   const refreshDataGrid = useCallback(() => {
     dataGridRef.current.instance.refresh();
-    console.log("Reloaded")
   }, []);
 
   const clearFilter = useCallback(() => {

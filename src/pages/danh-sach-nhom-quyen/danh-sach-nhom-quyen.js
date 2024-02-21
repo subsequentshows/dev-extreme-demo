@@ -289,32 +289,46 @@ const DanhSachNhomQuyenPage = () => {
   }
 
   const selectedRows = selectedItemKeys.length;
-  function onExporting(e) {
-    // if (e.format === 'xlsx') {
+  const onExporting = (e) => {
     const workbook = new Workbook();
     const worksheet = workbook.addWorksheet('Danh mục');
 
-    if (selectedRows === 0) {
-      exportDataGridToExcel({
-        component: dataGridRef.current.instance,
-        worksheet,
-        autoFilterEnabled: true,
-      }).then(() => {
-        workbook.xlsx.writeBuffer().then((buffer) => {
-          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
+    try {
+      if (selectedRows === 0) {
+        exportDataGridToExcel({
+          component: dataGridRef.current.instance,
+          worksheet,
+          autoFilterEnabled: true,
+        }).then(() => {
+          workbook.xlsx.writeBuffer().then((buffer) => {
+            saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
+          });
         });
-      });
-    } else {
-      exportDataGridToExcel({
-        component: dataGridRef.current.instance,
-        selectedRowsOnly: true,
-        worksheet,
-        autoFilterEnabled: true,
-      }).then(() => {
-        workbook.xlsx.writeBuffer().then((buffer) => {
-          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
+      } else {
+        exportDataGridToExcel({
+          component: dataGridRef.current.instance,
+          selectedRowsOnly: true,
+          worksheet,
+          autoFilterEnabled: true,
+        }).then(() => {
+          workbook.xlsx.writeBuffer().then((buffer) => {
+            saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
+          });
         });
-      });
+      }
+    } catch {
+      const message = `Đã xảy ra lỗi khi xuất file`;
+      notify(
+        {
+          message,
+          position: {
+            my: 'bottom right',
+            at: 'bottom right',
+          },
+        },
+        'success',
+        3000,
+      );
     }
   }
 
@@ -349,7 +363,6 @@ const DanhSachNhomQuyenPage = () => {
 
   const refreshDataGrid = useCallback(() => {
     dataGridRef.current.instance.refresh();
-    console.log("Reloaded")
   }, []);
 
   const deleteRecords = useCallback(async () => {

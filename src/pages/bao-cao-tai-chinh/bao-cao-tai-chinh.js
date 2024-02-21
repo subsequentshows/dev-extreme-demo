@@ -40,9 +40,9 @@ const BaoCaoTaiChinh = () => {
   // const calculateCellValue = (data) => [data.NOI_DUNG_CHA, data.NOI_DUNG].join(' ');
 
   const calculateCellValue = (rowData) => {
-    return rowData.CHI_TIET[0] * rowData.CHI_TIET[1];
+    let sumValues = ((rowData.CHI_TIET[0] + rowData.CHI_TIET[1] + rowData.CHI_TIET[2] + rowData.CHI_TIET[3]).toString());
+    return `${formatNumber(sumValues, "#,###,##0,000")}`;
   }
-
 
   const mergedColumns = (data) => {
     if (data.values[1] === "") {
@@ -70,12 +70,6 @@ const BaoCaoTaiChinh = () => {
         </div>
       )
     }
-  }
-
-  const sumRow = (data) => {
-    return (
-      <></>
-    )
   }
 
   function priceColumn_customizeText(cellInfo) {
@@ -112,32 +106,47 @@ const BaoCaoTaiChinh = () => {
   }, []);
 
   const selectedRows = selectedItemKeys.length;
-  function onExporting(e) {
-    // if (e.format === 'xlsx') {
+  const onExporting = (e) => {
     const workbook = new Workbook();
     const worksheet = workbook.addWorksheet('Danh mục');
 
-    if (selectedRows === 0) {
-      exportDataGridToExcel({
-        component: dataGridRef.current.instance,
-        worksheet,
-        autoFilterEnabled: true,
-      }).then(() => {
-        workbook.xlsx.writeBuffer().then((buffer) => {
-          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
+    try {
+      if (selectedRows === 0) {
+        exportDataGridToExcel({
+          component: dataGridRef.current.instance,
+          worksheet,
+          autoFilterEnabled: true,
+        }).then(() => {
+          workbook.xlsx.writeBuffer().then((buffer) => {
+            saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
+          });
         });
-      });
-    } else {
-      exportDataGridToExcel({
-        component: dataGridRef.current.instance,
-        selectedRowsOnly: true,
-        worksheet,
-        autoFilterEnabled: true,
-      }).then(() => {
-        workbook.xlsx.writeBuffer().then((buffer) => {
-          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
+      } else {
+        exportDataGridToExcel({
+          component: dataGridRef.current.instance,
+          selectedRowsOnly: true,
+          worksheet,
+          autoFilterEnabled: true,
+        }).then(() => {
+          workbook.xlsx.writeBuffer().then((buffer) => {
+            saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
+          });
         });
-      });
+      }
+    } catch (e) {
+      console.log(e)
+      const message = `Đã xảy ra lỗi khi xuất file`;
+      notify(
+        {
+          message,
+          position: {
+            my: 'bottom right',
+            at: 'bottom right',
+          },
+        },
+        'error',
+        3000,
+      );
     }
   }
 
@@ -263,6 +272,10 @@ const BaoCaoTaiChinh = () => {
       }
     }
   }
+
+  const customizeCurrencyText = (itemInfo) => {
+    return `${formatNumber(itemInfo.value, "#,###,##0,000")}`;
+  }
   // #endregion
 
   // #region Method
@@ -304,6 +317,7 @@ const BaoCaoTaiChinh = () => {
           dataSource={dataSource}
           remoteOperations={false}
           showBorders={true}
+          ref={dataGridRef}
           keyExpr="ID"
           height="100%"
           width="100%"
@@ -361,12 +375,12 @@ const BaoCaoTaiChinh = () => {
           <Column dataField="NOI_DUNG_CHA_2" width={150} alignment='center' allowResizing={false}></Column> */}
 
           <Column cssClass='editable-data'
-            dataField=""
             caption='Tổng số'
             width={100}
             format={"currency"}
             alignment='right'
-            cellRender={sumRow}
+            // cellRender={sumRow}
+            // customizeText={customizeCurrencyText}
             calculateCellValue={calculateCellValue}
           />
 
