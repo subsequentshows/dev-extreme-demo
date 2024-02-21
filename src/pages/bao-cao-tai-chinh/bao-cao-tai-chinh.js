@@ -367,9 +367,15 @@ const BaoCaoTaiChinh = () => {
             width={600}
             allowEditing={false}
             cellRender={mergedColumns}
-            customizeText={priceColumn_customizeText}
+          // customizeText={priceColumn_customizeText}
           />
-          <Column dataField="DON_VI" caption="Đơn vị" width={100} allowEditing={false} alignment='center' customizeText={priceColumn_customizeText}></Column>
+          <Column caption="Đơn vị"
+            dataField="DON_VI"
+            width={100}
+            allowEditing={false}
+            alignment='center'
+          // customizeText={priceColumn_customizeText}
+          />
 
           {/* <Column dataField="NOI_DUNG_CHA_1" width={100} format={"currency"}></Column>
           <Column dataField="NOI_DUNG_CHA_2" width={150} alignment='center' allowResizing={false}></Column> */}
