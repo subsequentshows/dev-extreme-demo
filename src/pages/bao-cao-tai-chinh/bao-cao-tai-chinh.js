@@ -3,18 +3,25 @@ import { baseURL } from '../../api/api';
 import $ from 'jquery';
 import { formatDate, formatNumber } from 'devextreme/localization';
 import notify from 'devextreme/ui/notify';
-import parse from 'html-react-parser';
 import './bao-cao-tai-chinh.scss';
-
 import DataGrid, {
   Paging,
   Pager, Column, Summary,
   TotalItem,
   KeyboardNavigation,
-  Editing
+  Editing,
+  Toolbar,
+  Item,
 } from 'devextreme-react/data-grid';
-
 import CustomStore from "devextreme/data/custom_store";
+import { Button } from "devextreme-react/button";
+// Export to excel library
+import { exportDataGrid as exportDataGridToExcel } from 'devextreme/excel_exporter';
+import { Workbook } from 'exceljs';
+import { saveAs } from 'file-saver';
+
+// Read excel file library
+import readXlsxFile from 'read-excel-file';
 
 let api_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJOZ3VvaUR1bmdJZCI6IjEiLCJNQV9IVVlFTiI6IjAwMSIsIk1BX1RJTkgiOiIwMSIsIk1BX1hBIjoiMDAwMDciLCJuYmYiOjE3MDM4MjA5NDksImV4cCI6MTc2MzgyMDg4OSwiaWF0IjoxNzAzODIwOTQ5LCJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjQ0MzAwIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo0NDMwMCJ9.m-PSJWciAyy9VwezqvX6A2RFqe9WiEiST8htiMeTHYQ";
 
@@ -26,7 +33,54 @@ const BaoCaoTaiChinh = () => {
   const [editOnKeyPress, setEditOnKeyPress] = useState(true);
   const [enterKeyAction, setEnterKeyAction] = useState('startEdit');
   const [enterKeyDirection, setEnterKeyDirection] = useState('row');
+  const [selectedItemKeys, setSelectedItemKeys] = useState([]);
 
+  const renderLabel = () => <div className="toolbar-label">Báo cáo tài chính</div>;
+
+  // const calculateCellValue = (data) => [data.NOI_DUNG_CHA, data.NOI_DUNG].join(' ');
+
+  const calculateCellValue = (rowData) => {
+    return rowData.CHI_TIET[0] * rowData.CHI_TIET[1];
+  }
+
+
+  const mergedColumns = (data) => {
+    if (data.values[1] === "") {
+      return (
+        <div className='merged-row'>
+          <p className='merged-items'>{data.values[1]}</p>
+          <p className='merged-items'>{data.values[2]}</p>
+        </div>
+      )
+    }
+
+    if (data.values[1] === null) {
+      return (
+        <div className='merged-row'>
+          <p className='merged-item'>{data.values[2]}</p>
+        </div>
+      )
+    }
+
+    if (data.values[1].length > 0) {
+      return (
+        <div className='merged-row'>
+          <p className='merged-items'>{data.values[1]}</p>
+          <p className='merged-items'>{data.values[2]}</p>
+        </div>
+      )
+    }
+  }
+
+  const sumRow = (data) => {
+    return (
+      <></>
+    )
+  }
+
+  function priceColumn_customizeText(cellInfo) {
+    return '.' + cellInfo.value;
+  }
   // #endregion
 
   // #region Event
@@ -52,6 +106,40 @@ const BaoCaoTaiChinh = () => {
   const onFocusedCellChanging = (e) => {
     e.isHighlighted = true;
   };
+
+  const onSelectionChanged = useCallback((data) => {
+    setSelectedItemKeys(data.selectedRowKeys);
+  }, []);
+
+  const selectedRows = selectedItemKeys.length;
+  function onExporting(e) {
+    // if (e.format === 'xlsx') {
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Danh mục');
+
+    if (selectedRows === 0) {
+      exportDataGridToExcel({
+        component: dataGridRef.current.instance,
+        worksheet,
+        autoFilterEnabled: true,
+      }).then(() => {
+        workbook.xlsx.writeBuffer().then((buffer) => {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
+        });
+      });
+    } else {
+      exportDataGridToExcel({
+        component: dataGridRef.current.instance,
+        selectedRowsOnly: true,
+        worksheet,
+        autoFilterEnabled: true,
+      }).then(() => {
+        workbook.xlsx.writeBuffer().then((buffer) => {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'Danh mục.xlsx');
+        });
+      });
+    }
+  }
 
   // Handle when pressing up and down arrow to move between editable row that have allowEditing == true
   const onKeyDown = useCallback((e) => {
@@ -217,10 +305,13 @@ const BaoCaoTaiChinh = () => {
           remoteOperations={false}
           showBorders={true}
           keyExpr="ID"
+          height="100%"
+          width="100%"
           focusedRowEnabled={true}
           allowColumnReordering={true}
+          onExporting={onExporting}
+          onSelectionChanged={onSelectionChanged}
         >
-
           <KeyboardNavigation
             editOnKeyPress={editOnKeyPress}
             editOnKeyPressChanged={editOnKeyPressChanged}
@@ -254,23 +345,56 @@ const BaoCaoTaiChinh = () => {
           >
           </Column>
 
-          <Column dataField="NOI_DUNG_CHA" caption="Nội dung cha" width={120} allowEditing={false}></Column>
-          <Column dataField="NOI_DUNG" caption="Nội dung" alignment='left' width={600} allowEditing={false}></Column>
-          <Column dataField="DON_VI" caption="Đơn vị" width={100} allowEditing={false} alignment='center'></Column>
+          <Column dataField="NOI_DUNG_CHA" caption="Nội dung cha" width={0.1} allowEditing={false}> </Column>
+
+          <Column dataField="NOI_DUNG"
+            caption="Nội dung"
+            alignment='left'
+            width={600}
+            allowEditing={false}
+            cellRender={mergedColumns}
+            customizeText={priceColumn_customizeText}
+          />
+          <Column dataField="DON_VI" caption="Đơn vị" width={100} allowEditing={false} alignment='center' customizeText={priceColumn_customizeText}></Column>
 
           {/* <Column dataField="NOI_DUNG_CHA_1" width={100} format={"currency"}></Column>
           <Column dataField="NOI_DUNG_CHA_2" width={150} alignment='center' allowResizing={false}></Column> */}
 
-          <Column cssClass='editable-data' dataField="" caption='Tổng số' width={100} format={"currency"} alignment='right'></Column>
+          <Column cssClass='editable-data'
+            dataField=""
+            caption='Tổng số'
+            width={100}
+            format={"currency"}
+            alignment='right'
+            cellRender={sumRow}
+            calculateCellValue={calculateCellValue}
+          />
 
           <Column caption='Chia ra theo các năm' alignment='center'>
-            <Column cssClass='editable-data' dataField='2019' alignment='right' width={100} ></Column>
-            <Column cssClass='editable-data' dataField='2020' alignment='right' width={100}></Column>
-            <Column cssClass='editable-data' dataField='2021' alignment='right' width={100}></Column>
-            <Column cssClass='editable-data' dataField='2022' alignment='right' width={100}></Column>
-            <Column cssClass='editable-data' dataField='2023' alignment='right' width={100}></Column>
+            <Column cssClass='editable-data' caption='2019' dataField='CHI_TIET[0]' alignment='right' width={100} />
+            <Column cssClass='editable-data' caption='2020' dataField='CHI_TIET[1]' alignment='right' width={100} />
+            <Column cssClass='editable-data' caption='2021' dataField='CHI_TIET[2]' alignment='right' width={100} />
+            <Column cssClass='editable-data' caption='2022' dataField='CHI_TIET[3]' alignment='right' width={100} />
+            <Column cssClass='editable-data' caption='2023' dataField='CHI_TIET[4]' alignment='right' width={100} />
             <Column cssClass='editable-data' dataField="GHI_CHU" caption='Ghi chú' width={400} alignment="left" allowSorting={false} />
           </Column>
+
+          <Toolbar>
+            <Item location="left" locateInMenu="never" render={renderLabel} />
+
+            <Item
+              location="after"
+              name="saveButton"
+              showText="always"
+              widget="dxButton"
+              options={saveButtonOptions}
+              locateInMenu="never"
+            />
+
+            <Item location='after' name='exportExcelButton' options={exportExcelButtonOptions}>
+              <Button className="export-excel-button" onClick={onExporting}>Xuất Excel</Button>
+            </Item>
+          </Toolbar>
 
           <Summary>
             <TotalItem column="TEN" customizeText={sumText} />
@@ -288,3 +412,11 @@ const BaoCaoTaiChinh = () => {
 }
 
 export default BaoCaoTaiChinh;
+
+const saveButtonOptions = {
+  text: 'Ghi'
+};
+
+const exportExcelButtonOptions = {
+  text: 'Xuất excel'
+};

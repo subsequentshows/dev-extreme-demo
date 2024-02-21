@@ -324,6 +324,29 @@ body {
   }
 }
 
+.dx-scrollable-wrapper {
+  .dx-datagrid-table {
+    .merged-row {
+      display: flex;
+      flex-wrap: wrap;
+
+      .merged-items {
+        &:first-child {
+          width: 25%;
+        }
+
+        &:last-child {
+          width: 75%;
+        }
+      }
+
+      .merged-item {
+        width: 100%;
+      }
+    }
+  }
+}
+
 .dx-datagrid-action.dx-cell-focus-disabled {
   &:hover {
     .dx-datagrid-text-content {
