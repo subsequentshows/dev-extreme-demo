@@ -40,8 +40,16 @@ const BaoCaoTaiChinh = () => {
   // const calculateCellValue = (data) => [data.NOI_DUNG_CHA, data.NOI_DUNG].join(' ');
 
   const calculateCellValue = (rowData) => {
-    let sumValues = ((rowData.CHI_TIET[0] + rowData.CHI_TIET[1] + rowData.CHI_TIET[2] + rowData.CHI_TIET[3]).toString());
-    return `${formatNumber(sumValues, "#,###,##0,000")}`;
+    if (rowData.DON_VI === "Tr.dg") {
+      // let sumValues = (parseFloat(rowData.CHI_TIET[0] + rowData.CHI_TIET[1] + rowData.CHI_TIET[2] + rowData.CHI_TIET[3]).toString());
+      let sumValues = ((rowData.CHI_TIET[0] ?? 0) + (rowData.CHI_TIET[1] ?? 0) + (rowData.CHI_TIET[2] ?? 0) + (rowData.CHI_TIET[3] ?? 0));
+      // return `${formatNumber(sumValues, "#,###,##0,000")}`;
+      return sumValues;
+    }
+    if (rowData.DON_VI === "%") {
+      let percentageValues = ((rowData.CHI_TIET[0] ?? 0) + (rowData.CHI_TIET[1] ?? 0) + (rowData.CHI_TIET[2] ?? 0) + (rowData.CHI_TIET[3] ?? 0)) / 5;
+      return percentageValues;
+    }
   }
 
   const mergedColumns = (data) => {
@@ -276,6 +284,16 @@ const BaoCaoTaiChinh = () => {
   const customizeCurrencyText = (itemInfo) => {
     return `${formatNumber(itemInfo.value, "#,###,##0,000")}`;
   }
+
+  const cellPrepared = (e) => {
+    if (e.rowType === "data") {
+      if (e.column.dataField === "DON_VI") {
+        e.cellElement.style.cssText = "color: white; background-color: red";
+        // or
+        e.cellElement.classList.add("my-class");
+      }
+    }
+  }
   // #endregion
 
   // #region Method
@@ -325,6 +343,7 @@ const BaoCaoTaiChinh = () => {
           allowColumnReordering={true}
           onExporting={onExporting}
           onSelectionChanged={onSelectionChanged}
+        // onCellPrepared={cellPrepared}
         >
           <KeyboardNavigation
             editOnKeyPress={editOnKeyPress}
@@ -369,6 +388,7 @@ const BaoCaoTaiChinh = () => {
             cellRender={mergedColumns}
           // customizeText={priceColumn_customizeText}
           />
+
           <Column caption="Đơn vị"
             dataField="DON_VI"
             width={100}
@@ -383,7 +403,7 @@ const BaoCaoTaiChinh = () => {
           <Column cssClass='editable-data'
             caption='Tổng số'
             width={100}
-            format={"currency"}
+            // format={"currency"}
             alignment='right'
             // cellRender={sumRow}
             // customizeText={customizeCurrencyText}
