@@ -35,46 +35,48 @@ const BaoCaoTaiChinh = () => {
   const [enterKeyDirection, setEnterKeyDirection] = useState('row');
   const [selectedItemKeys, setSelectedItemKeys] = useState([]);
 
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+
   const renderLabel = () => <div className="toolbar-label">Báo cáo tài chính</div>;
 
   // const calculateCellValue = (data) => [data.NOI_DUNG_CHA, data.NOI_DUNG].join(' ');
 
   const calculateCellValue = (rowData) => {
-    if (rowData.DON_VI === "Tr.dg") {
+    if (rowData.MA !== "002" && rowData.MA !== "003") {
       // let sumValues = (parseFloat(rowData.CHI_TIET[0] + rowData.CHI_TIET[1] + rowData.CHI_TIET[2] + rowData.CHI_TIET[3]).toString());
-      let sumValues = ((rowData.CHI_TIET[0] ?? 0) + (rowData.CHI_TIET[1] ?? 0) + (rowData.CHI_TIET[2] ?? 0) + (rowData.CHI_TIET[3] ?? 0));
+      let sumValues = ((rowData.CHI_TIET[0] ?? 0) + (rowData.CHI_TIET[1] ?? 0) + (rowData.CHI_TIET[2] ?? 0) + (rowData.CHI_TIET[3] ?? 0) + (rowData.CHI_TIET[4] ?? 0));
       // return `${formatNumber(sumValues, "#,###,##0,000")}`;
       return sumValues;
     }
-    if (rowData.DON_VI === "%") {
-      let percentageValues = ((rowData.CHI_TIET[0] ?? 0) + (rowData.CHI_TIET[1] ?? 0) + (rowData.CHI_TIET[2] ?? 0) + (rowData.CHI_TIET[3] ?? 0)) / 5;
+    else {
+      let percentageValues = ((rowData.CHI_TIET[0] ?? 0) + (rowData.CHI_TIET[1] ?? 0) + (rowData.CHI_TIET[2] ?? 0) + (rowData.CHI_TIET[3] ?? 0) + (rowData.CHI_TIET[4] ?? 0)) / 5;
       return percentageValues;
     }
   }
 
   const mergedColumns = (data) => {
-    if (data.values[1] === "") {
+    if (data.values[2] === "") {
       return (
         <div className='merged-row'>
-          <p className='merged-items'>{data.values[1]}</p>
           <p className='merged-items'>{data.values[2]}</p>
+          <p className='merged-items'>{data.values[3]}</p>
         </div>
       )
     }
 
-    if (data.values[1] === null) {
+    if (data.values[2] === null) {
       return (
         <div className='merged-row'>
-          <p className='merged-item'>{data.values[2]}</p>
+          <p className='merged-item'>{data.values[3]}</p>
         </div>
       )
     }
 
-    if (data.values[1].length > 0) {
+    if (data.values[2].length > 0) {
       return (
         <div className='merged-row'>
-          <p className='merged-items'>{data.values[1]}</p>
           <p className='merged-items'>{data.values[2]}</p>
+          <p className='merged-items'>{data.values[3]}</p>
         </div>
       )
     }
@@ -93,6 +95,10 @@ const BaoCaoTaiChinh = () => {
   const customizeText = (itemInfo) => {
     return `${formatNumber(itemInfo.value, "#,###,##0,000")}`;
   }
+
+  const onPageChanged = (e) => {
+    setCurrentPageIndex(e.component.pageIndex());
+  };
 
   const sumText = () => {
     return `Tổng:`;
@@ -332,18 +338,25 @@ const BaoCaoTaiChinh = () => {
     <>
       <div className='responsive-paddings'>
         <DataGrid
+          className='report-form'
           dataSource={dataSource}
-          remoteOperations={false}
           showBorders={true}
           ref={dataGridRef}
-          keyExpr="ID"
           height="100%"
           width="100%"
+          keyExpr="ID"
           focusedRowEnabled={true}
           allowColumnReordering={true}
+          remoteOperations={false}
           onExporting={onExporting}
+          selectedRowKeys={selectedItemKeys}
+          onPageChanged={onPageChanged}
           onSelectionChanged={onSelectionChanged}
-        // onCellPrepared={cellPrepared}
+          onFocusedCellChanging={onFocusedCellChanging}
+          onFocusedRowChanging={onFocusedRowChanging}
+          focusedRowIndex={0} //{/* focus the first row */}
+          focusedColumnIndex={0} //{/* focus the first cell */}
+          onKeyDown={onKeyDown}
         >
           <KeyboardNavigation
             editOnKeyPress={editOnKeyPress}
@@ -378,7 +391,8 @@ const BaoCaoTaiChinh = () => {
           >
           </Column>
 
-          <Column dataField="NOI_DUNG_CHA" caption="Nội dung cha" width={0.1} allowEditing={false}> </Column>
+          <Column dataField="MA" caption="Mã" width={0.1} allowEditing={false} allowExporting={false} />
+          <Column dataField="NOI_DUNG_CHA" caption="Nội dung cha" width={0.1} allowEditing={false} allowExporting={false} />
 
           <Column dataField="NOI_DUNG"
             caption="Nội dung"
@@ -397,17 +411,15 @@ const BaoCaoTaiChinh = () => {
           // customizeText={priceColumn_customizeText}
           />
 
-          {/* <Column dataField="NOI_DUNG_CHA_1" width={100} format={"currency"}></Column>
-          <Column dataField="NOI_DUNG_CHA_2" width={150} alignment='center' allowResizing={false}></Column> */}
-
           <Column cssClass='editable-data'
             caption='Tổng số'
             width={100}
             // format={"currency"}
             alignment='right'
-            // cellRender={sumRow}
-            // customizeText={customizeCurrencyText}
-            calculateCellValue={calculateCellValue}
+            allowEditing={false}
+          // cellRender={sumRow}
+          // customizeText={customizeCurrencyText}
+          // calculateCellValue={calculateCellValue}
           />
 
           <Column caption='Chia ra theo các năm' alignment='center'>
@@ -442,9 +454,9 @@ const BaoCaoTaiChinh = () => {
             <TotalItem column="MA_TINH" summaryType="sum" customizeText={customizeText} />
           </Summary>
 
-          <Pager visible={true} defaultPageSize={10} showInfo={true} showPageSizeSelector={false} showNavigationButtons={true} displayMode='full' />
+          <Pager visible={true} showInfo={true} showPageSizeSelector={false} showNavigationButtons={true} displayMode='full' />
 
-          <Paging defaultPageSize={10} />
+          <Paging defaultPageSize={100} />
         </DataGrid >
       </div>
     </>

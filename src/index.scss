@@ -207,6 +207,31 @@ body {
 .screen-large .responsive-paddings {
   padding: 15px 15px 0 !important;
   gap: 10px 0;
+
+  .report-form {
+
+    .dx-datagrid-action {
+      text-align: center !important;
+    }
+
+    .dx-datagrid .dx-row>td {
+      padding: 7px 10px;
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    .dx-editor-cell .dx-texteditor .dx-texteditor-input {
+      min-height: 20px;
+      height: 100%;
+      padding: 0 10px;
+    }
+  }
+}
+
+.dx-header-row {
+  .editable-data {
+    text-align: center !important;
+  }
 }
 
 .screen-small,
@@ -245,12 +270,17 @@ body {
 
 .dx-datagrid-focus-overlay:after {
   background-color: #0071a6;
+  left: 8px;
+  bottom: 5px;
+  height: 1px;
+  width: 85%;
   height: 1px;
 }
 
 .editable-data {
   border: 1px solid #ccc;
   border-radius: 4px;
+  position: relative;
 }
 
 .dx-datagrid-headers+.dx-datagrid-rowsview {
@@ -353,6 +383,34 @@ body {
     }
   }
 }
+
+.dx-row.dx-data-row:hover {
+  background-color: #d0ecff;
+  cursor: pointer;
+}
+
+.dx-datagrid-rowsview {
+  .dx-datagrid-content {
+    .editable-data {
+      &::before {
+        content: "";
+        width: 90%;
+        height: 80%;
+        top: 3px;
+        right: 4px;
+        border: 1px solid #dedede;
+        border-radius: 4px;
+        position: absolute;
+        margin: auto;
+      }
+
+      &:last-child::before {
+        width: 98%;
+      }
+    }
+  }
+}
+
 
 .dx-datagrid-action.dx-cell-focus-disabled {
   &:hover {
